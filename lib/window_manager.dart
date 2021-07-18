@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class WindowManager {
@@ -12,8 +13,11 @@ class WindowManager {
   }
 
   static Future<Size> getSize() async {
+    final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
+    };
     final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('getSize');
+        await _channel.invokeMethod('getSize', arguments);
     return Size(
       resultData['width'],
       resultData['height'],
@@ -22,6 +26,7 @@ class WindowManager {
 
   static Future<void> setSize(Size size) async {
     final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
       'width': size.width,
       'height': size.height,
     };
@@ -30,6 +35,7 @@ class WindowManager {
 
   static Future<void> setMinSize(Size size) async {
     final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
       'width': size.width,
       'height': size.height,
     };
@@ -38,6 +44,7 @@ class WindowManager {
 
   static Future<void> setMaxSize(Size size) async {
     final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
       'width': size.width,
       'height': size.height,
     };

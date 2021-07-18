@@ -28,6 +28,8 @@ flutter:
     platforms:
       macos:
         pluginClass: WindowManagerPlugin
+      windows:
+        pluginClass: WindowManagerPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
