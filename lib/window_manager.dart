@@ -5,14 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class WindowManager {
-  static const MethodChannel _channel = const MethodChannel('window_manager');
+  WindowManager._();
 
-  static Future<String?> get platformVersion async {
+  /// The shared instance of [WindowManager].
+  static final WindowManager instance = WindowManager._();
+
+  final MethodChannel _channel = const MethodChannel('window_manager');
+
+  Future<String?> get platformVersion async {
     final String? version = await _channel.invokeMethod('getPlatformVersion');
     return version;
   }
 
-  static Future<Size> getSize() async {
+  Future<Size> getSize() async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
     };
@@ -24,7 +29,7 @@ class WindowManager {
     );
   }
 
-  static Future<void> setSize(Size size) async {
+  Future<void> setSize(Size size) async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
       'width': size.width,
@@ -33,7 +38,7 @@ class WindowManager {
     await _channel.invokeMethod('setSize', arguments);
   }
 
-  static Future<void> setMinSize(Size size) async {
+  Future<void> setMinSize(Size size) async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
       'width': size.width,
@@ -42,7 +47,7 @@ class WindowManager {
     await _channel.invokeMethod('setMinSize', arguments);
   }
 
-  static Future<void> setMaxSize(Size size) async {
+  Future<void> setMaxSize(Size size) async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
       'width': size.width,
@@ -51,26 +56,26 @@ class WindowManager {
     await _channel.invokeMethod('setMaxSize', arguments);
   }
 
-  static Future<bool> isUseAnimator() async {
+  Future<bool> isUseAnimator() async {
     final Map<dynamic, dynamic> resultData =
         await _channel.invokeMethod('isUseAnimator');
     return resultData['isUseAnimator'];
   }
 
-  static Future<void> setUseAnimator(bool isUseAnimator) async {
+  Future<void> setUseAnimator(bool isUseAnimator) async {
     final Map<String, dynamic> arguments = {
       'isUseAnimator': isUseAnimator,
     };
     await _channel.invokeMethod('setUseAnimator', arguments);
   }
 
-  static Future<bool> isAlwaysOnTop() async {
+  Future<bool> isAlwaysOnTop() async {
     final Map<dynamic, dynamic> resultData =
         await _channel.invokeMethod('isAlwaysOnTop');
     return resultData['isAlwaysOnTop'];
   }
 
-  static Future<void> setAlwaysOnTop(bool isAlwaysOnTop) async {
+  Future<void> setAlwaysOnTop(bool isAlwaysOnTop) async {
     final Map<String, dynamic> arguments = {
       'isAlwaysOnTop': isAlwaysOnTop,
     };

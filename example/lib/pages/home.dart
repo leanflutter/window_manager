@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -136,13 +134,13 @@ class _HomePageState extends State<HomePage> {
                       ],
                       onPressed: (int index) {
                         _size = kSizes[index];
-                        WindowManager.setSize(_size);
+                        WindowManager.instance.setSize(_size);
                         setState(() {});
                       },
                       isSelected: kSizes.map((e) => e == _size).toList(),
                     ),
                     onTap: () async {
-                      Size size = await WindowManager.getSize();
+                      Size size = await WindowManager.instance.getSize();
                       print(size);
                     },
                   ),
@@ -156,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                       ],
                       onPressed: (int index) {
                         _minSize = kSizes[index];
-                        WindowManager.setSize(_minSize);
+                        WindowManager.instance.setSize(_minSize);
                         setState(() {});
                       },
                       isSelected: kSizes.map((e) => e == _minSize).toList(),
@@ -172,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                       ],
                       onPressed: (int index) {
                         _maxSize = kSizes[index];
-                        WindowManager.setMaxSize(_maxSize);
+                        WindowManager.instance.setMaxSize(_maxSize);
                         setState(() {});
                       },
                       isSelected: kSizes.map((e) => e == _maxSize).toList(),
@@ -190,13 +188,14 @@ class _HomePageState extends State<HomePage> {
                       ],
                       onPressed: (int index) {
                         _isUseAnimator = !_isUseAnimator;
-                        WindowManager.setUseAnimator(_isUseAnimator);
+                        WindowManager.instance.setUseAnimator(_isUseAnimator);
                         setState(() {});
                       },
                       isSelected: [_isUseAnimator, !_isUseAnimator],
                     ),
                     onTap: () async {
-                      bool isUseAnimator = await WindowManager.isUseAnimator();
+                      bool isUseAnimator =
+                          await WindowManager.instance.isUseAnimator();
                       print('isUseAnimator: $isUseAnimator');
                     },
                   ),
@@ -209,13 +208,14 @@ class _HomePageState extends State<HomePage> {
                       ],
                       onPressed: (int index) {
                         _isAlwaysOnTop = !_isAlwaysOnTop;
-                        WindowManager.setAlwaysOnTop(_isAlwaysOnTop);
+                        WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
                         setState(() {});
                       },
                       isSelected: [_isAlwaysOnTop, !_isAlwaysOnTop],
                     ),
                     onTap: () async {
-                      bool isAlwaysOnTop = await WindowManager.isAlwaysOnTop();
+                      bool isAlwaysOnTop =
+                          await WindowManager.instance.isAlwaysOnTop();
                       print('isAlwaysOnTop: $isAlwaysOnTop');
                     },
                   ),
