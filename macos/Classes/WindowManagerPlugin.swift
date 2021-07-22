@@ -57,6 +57,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         switch (call.method) {
         case "getPlatformVersion":
             result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
+        case "setTitle":
+            setTitle(call, result: result)
+            break
         case "getSize":
             getSize(call, result: result)
             break
@@ -84,6 +87,12 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         default:
             result(FlutterMethodNotImplemented)
         }
+    }
+    
+    public func setTitle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let ar: ArgumentReader = _argumentReader(call.arguments);
+        mainWindow.title = ar.getString("title")
+        result(true)
     }
     
     public func getSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
