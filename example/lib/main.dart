@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bot_toast/bot_toast.dart';
 
 import './pages/home.dart';
 
@@ -17,6 +18,8 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: BotToastInit(),
+      navigatorObservers: [BotToastNavigatorObserver()],
       home: HomePage(),
     );
   }

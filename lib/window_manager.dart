@@ -17,6 +17,13 @@ class WindowManager {
     return version;
   }
 
+  Future<void> setTitle(String title) async {
+    final Map<String, dynamic> arguments = {
+      'title': title,
+    };
+    await _channel.invokeMethod('setTitle', arguments);
+  }
+
   Future<Size> getSize() async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,

@@ -1,11 +1,22 @@
+import 'package:bot_toast/bot_toast.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-const kSizes = [
-  Size(400, 500),
-  Size(500, 600),
-  Size(600, 700),
-  Size(700, 800),
+const _kSizes = [
+  Size(400, 400),
+  Size(600, 600),
+  Size(800, 800),
+];
+
+const _kMinSizes = [
+  Size(400, 400),
+  Size(600, 600),
+];
+
+const _kMaxSizes = [
+  Size(600, 600),
+  Size(800, 800),
 ];
 
 class _ListSection extends StatelessWidget {
@@ -103,11 +114,125 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Size _size = kSizes.first;
-  Size _minSize = kSizes.first;
-  Size _maxSize = kSizes.last;
+  Size _size = _kSizes.first;
+  Size? _minSize;
+  Size? _maxSize;
   bool _isUseAnimator = false;
   bool _isAlwaysOnTop = false;
+
+  Widget _buildBody(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        _ListItem(
+          title: Text('setTitle'),
+          trailing: Container(
+            width: 160,
+            height: 40,
+            child: CupertinoTextField(
+              onChanged: (newValue) async {
+                await WindowManager.instance.setTitle('$newValue');
+              },
+            ),
+          ),
+          onTap: () async {
+            await WindowManager.instance.setTitle('window manager example');
+          },
+        ),
+        _ListItem(
+          title: Text('getSize / setSize'),
+          trailing: ToggleButtons(
+            children: <Widget>[
+              for (var size in _kSizes)
+                Text(' ${size.width.toInt()}x${size.height.toInt()} '),
+            ],
+            onPressed: (int index) {
+              _size = _kSizes[index];
+              WindowManager.instance.setSize(_size);
+              setState(() {});
+            },
+            isSelected: _kSizes.map((e) => e == _size).toList(),
+          ),
+          onTap: () async {
+            Size size = await WindowManager.instance.getSize();
+            BotToast.showText(
+              text: 'size: ${size.width.toInt()}x${size.height.toInt()}',
+            );
+          },
+        ),
+        _ListItem(
+          title: Text('getMinSize / setMinSize'),
+          trailing: ToggleButtons(
+            children: <Widget>[
+              for (var size in _kMinSizes)
+                Text(' ${size.width.toInt()}x${size.height.toInt()} '),
+            ],
+            onPressed: (int index) {
+              _minSize = _kMinSizes[index];
+              WindowManager.instance.setMinSize(_minSize!);
+              setState(() {});
+            },
+            isSelected: _kMinSizes.map((e) => e == _minSize).toList(),
+          ),
+        ),
+        _ListItem(
+          title: Text('getMaxSize / setMaxSize'),
+          trailing: ToggleButtons(
+            children: <Widget>[
+              for (var size in _kMaxSizes)
+                Text(' ${size.width.toInt()}x${size.height.toInt()} '),
+            ],
+            onPressed: (int index) {
+              _maxSize = _kMaxSizes[index];
+              WindowManager.instance.setMaxSize(_maxSize!);
+              setState(() {});
+            },
+            isSelected: _kMaxSizes.map((e) => e == _maxSize).toList(),
+          ),
+        ),
+        _ListSection(
+          title: Text('Option'),
+        ),
+        _ListItem(
+          title: Text('isUseAnimator / setUseAnimator'),
+          trailing: ToggleButtons(
+            children: <Widget>[
+              Text('YES'),
+              Text('NO'),
+            ],
+            onPressed: (int index) {
+              _isUseAnimator = !_isUseAnimator;
+              WindowManager.instance.setUseAnimator(_isUseAnimator);
+              setState(() {});
+            },
+            isSelected: [_isUseAnimator, !_isUseAnimator],
+          ),
+          onTap: () async {
+            bool isUseAnimator = await WindowManager.instance.isUseAnimator();
+            BotToast.showText(text: 'isUseAnimator: $isUseAnimator');
+          },
+        ),
+        _ListItem(
+          title: Text('isAlwaysOnTop / setAlwaysOnTop'),
+          trailing: ToggleButtons(
+            children: <Widget>[
+              Text('YES'),
+              Text('NO'),
+            ],
+            onPressed: (int index) {
+              _isAlwaysOnTop = !_isAlwaysOnTop;
+              WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
+              setState(() {});
+            },
+            isSelected: [_isAlwaysOnTop, !_isAlwaysOnTop],
+          ),
+          onTap: () async {
+            bool isAlwaysOnTop = await WindowManager.instance.isAlwaysOnTop();
+            BotToast.showText(text: 'isAlwaysOnTop: $isAlwaysOnTop');
+          },
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,118 +240,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Plugin example app'),
       ),
-      body: Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              alignment: Alignment.center,
-              child: Column(
-                children: <Widget>[
-                  _ListItem(
-                    title: Text('Size'),
-                    trailing: ToggleButtons(
-                      children: <Widget>[
-                        for (var size in kSizes)
-                          Text(
-                              ' ${size.width.toInt()}x${size.height.toInt()} '),
-                      ],
-                      onPressed: (int index) {
-                        _size = kSizes[index];
-                        WindowManager.instance.setSize(_size);
-                        setState(() {});
-                      },
-                      isSelected: kSizes.map((e) => e == _size).toList(),
-                    ),
-                    onTap: () async {
-                      Size size = await WindowManager.instance.getSize();
-                      print(size);
-                    },
-                  ),
-                  _ListItem(
-                    title: Text('MinSize'),
-                    trailing: ToggleButtons(
-                      children: <Widget>[
-                        for (var size in kSizes)
-                          Text(
-                              ' ${size.width.toInt()}x${size.height.toInt()} '),
-                      ],
-                      onPressed: (int index) {
-                        _minSize = kSizes[index];
-                        WindowManager.instance.setSize(_minSize);
-                        setState(() {});
-                      },
-                      isSelected: kSizes.map((e) => e == _minSize).toList(),
-                    ),
-                  ),
-                  _ListItem(
-                    title: Text('MaxSize'),
-                    trailing: ToggleButtons(
-                      children: <Widget>[
-                        for (var size in kSizes)
-                          Text(
-                              ' ${size.width.toInt()}x${size.height.toInt()} '),
-                      ],
-                      onPressed: (int index) {
-                        _maxSize = kSizes[index];
-                        WindowManager.instance.setMaxSize(_maxSize);
-                        setState(() {});
-                      },
-                      isSelected: kSizes.map((e) => e == _maxSize).toList(),
-                    ),
-                  ),
-                  _ListSection(
-                    title: Text('Option'),
-                  ),
-                  _ListItem(
-                    title: Text('isUseAnimator'),
-                    trailing: ToggleButtons(
-                      children: <Widget>[
-                        Text('YES'),
-                        Text('NO'),
-                      ],
-                      onPressed: (int index) {
-                        _isUseAnimator = !_isUseAnimator;
-                        WindowManager.instance.setUseAnimator(_isUseAnimator);
-                        setState(() {});
-                      },
-                      isSelected: [_isUseAnimator, !_isUseAnimator],
-                    ),
-                    onTap: () async {
-                      bool isUseAnimator =
-                          await WindowManager.instance.isUseAnimator();
-                      print('isUseAnimator: $isUseAnimator');
-                    },
-                  ),
-                  _ListItem(
-                    title: Text('isAlwaysOnTop'),
-                    trailing: ToggleButtons(
-                      children: <Widget>[
-                        Text('YES'),
-                        Text('NO'),
-                      ],
-                      onPressed: (int index) {
-                        _isAlwaysOnTop = !_isAlwaysOnTop;
-                        WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
-                        setState(() {});
-                      },
-                      isSelected: [_isAlwaysOnTop, !_isAlwaysOnTop],
-                    ),
-                    onTap: () async {
-                      bool isAlwaysOnTop =
-                          await WindowManager.instance.isAlwaysOnTop();
-                      print('isAlwaysOnTop: $isAlwaysOnTop');
-                    },
-                  ),
-                  Divider(height: 0, indent: 16, endIndent: 16),
-                  SizedBox(height: 20),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: _buildBody(context),
     );
   }
 }
