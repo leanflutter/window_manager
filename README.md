@@ -7,6 +7,20 @@
 
 This plugin allows Flutter **desktop** apps to resizing and repositioning the window.
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [Platform Support](#platform-support)
+- [Quick Start](#quick-start)
+  - [Installation](#installation)
+  - [Usage](#usage)
+- [API](#api)
+  - [WindowManager](#windowmanager)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Platform Support
 
 | MacOS | Linux | Windows |
@@ -43,6 +57,22 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 ```
 
 > Please see the example app of this plugin for a full example.
+
+## API
+
+### WindowManager
+
+| Method         | Description |
+| -------------- | ----------- |
+| setTitle       |             |
+| getSize        |             |
+| setSize        |             |
+| setMinSize     |             |
+| setMaxSize     |             |
+| isUseAnimator  |             |
+| setUseAnimator |             |
+| isAlwaysOnTop  |             |
+| setAlwaysOnTop |             |
 
 ## License
 
