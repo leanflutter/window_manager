@@ -10,6 +10,7 @@
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
 
+#include <codecvt>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -53,13 +54,26 @@ namespace {
 
     WindowManagerPlugin::~WindowManagerPlugin() {}
 
+    void SetTitle(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
+
+        std::string title = std::get<std::string>(args.at(flutter::EncodableValue("title")));
+
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        HWND mainWindow = GetActiveWindow();
+        SetWindowText(mainWindow, converter.from_bytes(title).c_str());
+
+        result->Success(flutter::EncodableValue(true));
+    }
+
     void GetSize(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        const flutter::EncodableValue* args = method_call.arguments();
-        const flutter::EncodableMap& map = std::get<flutter::EncodableMap>(*args);
+        const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
 
-        double devicePixelRatio = std::get<double>(map.at(flutter::EncodableValue("devicePixelRatio")));
+        double devicePixelRatio = std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
 
         flutter::EncodableMap resultMap = flutter::EncodableMap();
         HWND mainWindow = GetActiveWindow();
@@ -78,12 +92,11 @@ namespace {
     void SetSize(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        const flutter::EncodableValue* args = method_call.arguments();
-        const flutter::EncodableMap& map = std::get<flutter::EncodableMap>(*args);
+        const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
 
-        double devicePixelRatio = std::get<double>(map.at(flutter::EncodableValue("devicePixelRatio")));
-        double width = std::get<double>(map.at(flutter::EncodableValue("width")));
-        double height = std::get<double>(map.at(flutter::EncodableValue("height")));
+        double devicePixelRatio = std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
+        double width = std::get<double>(args.at(flutter::EncodableValue("width")));
+        double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
         HWND mainWindow = GetActiveWindow();
         SetWindowPos(mainWindow, HWND_TOP, 0, 0, int(width * devicePixelRatio), int(height * devicePixelRatio), SWP_NOMOVE);
@@ -124,10 +137,9 @@ namespace {
     void SetAlwaysOnTop(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        const flutter::EncodableValue* args = method_call.arguments();
-        const flutter::EncodableMap& map = std::get<flutter::EncodableMap>(*args);
+        const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
 
-        bool isAlwaysOnTop = std::get<bool>(map.at(flutter::EncodableValue("isAlwaysOnTop")));
+        bool isAlwaysOnTop = std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnTop")));
 
         HWND mainWindow = GetActiveWindow();
         SetWindowPos(mainWindow, isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
@@ -151,6 +163,9 @@ namespace {
                 version_stream << "7";
             }
             result->Success(flutter::EncodableValue(version_stream.str()));
+        }
+        else if (method_call.method_name().compare("setTitle") == 0) {
+            SetTitle(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("getSize") == 0) {
             GetSize(method_call, std::move(result));
