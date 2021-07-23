@@ -55,8 +55,6 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         }
         
         switch (call.method) {
-        case "getPlatformVersion":
-            result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
         case "setTitle":
             setTitle(call, result: result)
             break

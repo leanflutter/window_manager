@@ -12,11 +12,6 @@ class WindowManager {
 
   final MethodChannel _channel = const MethodChannel('window_manager');
 
-  Future<String?> get platformVersion async {
-    final String? version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
-  }
-
   Future<void> setTitle(String title) async {
     final Map<String, dynamic> arguments = {
       'title': title,
