@@ -11,13 +11,14 @@ This plugin allows Flutter **desktop** apps to resizing and repositioning the wi
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Platform Support](#platform-support)
-- [Quick Start](#quick-start)
-  - [Installation](#installation)
-  - [Usage](#usage)
-- [API](#api)
-  - [WindowManager](#windowmanager)
-- [License](#license)
+- [window_manager](#window_manager)
+  - [Platform Support](#platform-support)
+  - [Quick Start](#quick-start)
+    - [Installation](#installation)
+    - [Usage](#usage)
+  - [API](#api)
+    - [WindowManager](#windowmanager)
+  - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -42,7 +43,7 @@ Or
 
 ```yaml
 dependencies:
-  flutter_flipperkit:
+  window_manager:
     git:
       url: https://github.com/leanflutter/window_manager
       ref: main
