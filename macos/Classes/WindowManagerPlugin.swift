@@ -1,43 +1,10 @@
 import Cocoa
 import FlutterMacOS
 
-public class ArgumentReader {
-    var arguments:[String: Any]
-    
-    init(_ arguments:Any?) {
-        self.arguments = (arguments as! [String: Any]);
-    }
-    
-    public func getInt(_ key: String)-> Int {
-        let intValue: Int = arguments[key] as! Int
-        return intValue
-    }
-    
-    public func getFloat(_ key: String)-> Float {
-        let floatValue: Float = arguments[key] as! Float
-        return floatValue
-    }
-    
-    public func getDouble(_ key: String)-> Double {
-        let doubleValue: Double = arguments[key] as! Double
-        return doubleValue
-    }
-    
-    public func getBool(_ key: String)-> Bool {
-        let boolValue: Bool = arguments[key] as! Bool
-        return boolValue
-    }
-    
-    public func getString(_ key: String)-> String {
-        let stringValue: String = arguments[key] as! String
-        return stringValue
-    }
-}
-
 public class WindowManagerPlugin: NSObject, FlutterPlugin {
     
     var mainWindow: NSWindow {
-        get { return NSApplication.shared.mainWindow!; }
+        get { return NSApp.windows.last!; }
     }
     
     private var _useAnimator: Bool = false
@@ -49,7 +16,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if (NSApplication.shared.mainWindow == nil) {
+        if (self.mainWindow == nil) {
             result("mainWindow not found")  // should return error or throw exception here.
             return
         }
@@ -82,14 +49,20 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         case "setAlwaysOnTop":
             setAlwaysOnTop(call, result: result)
             break
+        case "activate":
+            activate(call, result: result)
+            break
+        case "deactivate":
+            deactivate(call, result: result)
+            break
         default:
             result(FlutterMethodNotImplemented)
         }
     }
     
     public func setTitle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let ar: ArgumentReader = _argumentReader(call.arguments);
-        mainWindow.title = ar.getString("title")
+        let args:[String: Any] = call.arguments as! [String: Any]
+        mainWindow.title = args["title"] as! String
         result(true)
     }
     
@@ -103,10 +76,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     }
     
     public func setSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let ar: ArgumentReader = _argumentReader(call.arguments);
+        let args:[String: Any] = call.arguments as! [String: Any]
         let newSize: NSSize = NSSize(
-            width: CGFloat(ar.getFloat("width")),
-            height: CGFloat(ar.getFloat("height"))
+            width: CGFloat(args["width"] as! Float),
+            height: CGFloat(args["height"] as! Float)
         )
         
         var frameRect = mainWindow.frame
@@ -122,10 +95,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     }
     
     public func setMinSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let ar: ArgumentReader = _argumentReader(call.arguments);
+        let args:[String: Any] = call.arguments as! [String: Any]
         let minSize: NSSize = NSSize(
-            width: CGFloat(ar.getFloat("width")),
-            height: CGFloat(ar.getFloat("height"))
+            width: CGFloat(args["width"] as! Float),
+            height: CGFloat(args["height"] as! Float)
         )
         
         if (_useAnimator) {
@@ -137,10 +110,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     }
     
     public func setMaxSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let ar: ArgumentReader = _argumentReader(call.arguments);
+        let args:[String: Any] = call.arguments as! [String: Any]
         let maxSize: NSSize = NSSize(
-            width: CGFloat(ar.getFloat("width")),
-            height: CGFloat(ar.getFloat("height"))
+            width: CGFloat(args["width"] as! Float),
+            height: CGFloat(args["height"] as! Float)
         )
         
         if (_useAnimator) {
@@ -159,9 +132,8 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     }
     
     public func setUseAnimator(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let ar: ArgumentReader = _argumentReader(call.arguments);
-        
-        _useAnimator = ar.getBool("isUseAnimator")
+        let args:[String: Any] = call.arguments as! [String: Any]
+        _useAnimator = args["isUseAnimator"] as! Bool
         result(true)
     }
     
@@ -173,8 +145,8 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     }
     
     public func setAlwaysOnTop(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let ar: ArgumentReader = _argumentReader(call.arguments);
-        let isAlwaysOnTop: Bool = ar.getBool("isAlwaysOnTop")
+        let args:[String: Any] = call.arguments as! [String: Any]
+        let isAlwaysOnTop: Bool = args["isAlwaysOnTop"] as! Bool
         
         if (_useAnimator) {
             mainWindow.animator().level = isAlwaysOnTop ? .floating : .normal
@@ -184,7 +156,14 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         result(true)
     }
     
-    public func _argumentReader(_ arguments: Any?) -> ArgumentReader {
-        return ArgumentReader(arguments)
+    public func activate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        self.mainWindow.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        result(true)
+    }
+    
+    public func deactivate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        NSApp.deactivate()
+        result(true)
     }
 }

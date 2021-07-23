@@ -83,4 +83,12 @@ class WindowManager {
     };
     await _channel.invokeMethod('setAlwaysOnTop', arguments);
   }
+
+  Future<void> activate() async {
+    await _channel.invokeMethod('activate');
+  }
+
+  Future<void> deactivate() async {
+    await _channel.invokeMethod('deactivate');
+  }
 }

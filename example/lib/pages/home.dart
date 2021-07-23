@@ -189,6 +189,18 @@ class _HomePageState extends State<HomePage> {
             isSelected: _kMaxSizes.map((e) => e == _maxSize).toList(),
           ),
         ),
+        _ListItem(
+          title: Text('activate'),
+          onTap: () async {
+            await WindowManager.instance.activate();
+          },
+        ),
+        _ListItem(
+          title: Text('deactivate'),
+          onTap: () async {
+            await WindowManager.instance.deactivate();
+          },
+        ),
         _ListSection(
           title: Text('Option'),
         ),
