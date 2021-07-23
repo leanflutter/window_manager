@@ -4,7 +4,11 @@ import FlutterMacOS
 public class WindowManagerPlugin: NSObject, FlutterPlugin {
     
     var mainWindow: NSWindow {
-        get { return NSApp.windows.last!; }
+        get {
+            return NSApp.windows.first(where: { window in
+                return String(describing: type(of: window)) == "MainFlutterWindow"
+            })!;
+        }
     }
     
     private var _useAnimator: Bool = false
@@ -16,11 +20,6 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if (self.mainWindow == nil) {
-            result("mainWindow not found")  // should return error or throw exception here.
-            return
-        }
-        
         switch (call.method) {
         case "setTitle":
             setTitle(call, result: result)
