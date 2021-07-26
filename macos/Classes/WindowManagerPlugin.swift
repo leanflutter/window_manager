@@ -54,6 +54,12 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         case "deactivate":
             deactivate(call, result: result)
             break
+        case "miniaturize":
+            miniaturize(call, result: result)
+            break
+        case "deminiaturize":
+            deminiaturize(call, result: result)
+            break
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -163,6 +169,16 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     
     public func deactivate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         NSApp.deactivate()
+        result(true)
+    }
+    
+    public func miniaturize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        self.mainWindow.miniaturize(nil)
+        result(true)
+    }
+    
+    public func deminiaturize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        self.mainWindow.deminiaturize(nil)
         result(true)
     }
 }

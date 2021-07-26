@@ -91,4 +91,12 @@ class WindowManager {
   Future<void> deactivate() async {
     await _channel.invokeMethod('deactivate');
   }
+
+  Future<void> miniaturize() async {
+    await _channel.invokeMethod('miniaturize');
+  }
+
+  Future<void> deminiaturize() async {
+    await _channel.invokeMethod('deminiaturize');
+  }
 }

@@ -201,6 +201,18 @@ class _HomePageState extends State<HomePage> {
             await WindowManager.instance.deactivate();
           },
         ),
+        _ListItem(
+          title: Text('miniaturize'),
+          onTap: () async {
+            await WindowManager.instance.miniaturize();
+          },
+        ),
+        _ListItem(
+          title: Text('deminiaturize'),
+          onTap: () async {
+            await WindowManager.instance.deminiaturize();
+          },
+        ),
         _ListSection(
           title: Text('Option'),
         ),
