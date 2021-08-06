@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             PreferenceListItem(
-              title: Text('getSize / setSize'),
+              title: Text('getFrame / setFrame'),
               accessoryView: ToggleButtons(
                 children: <Widget>[
                   for (var size in _kSizes)
@@ -61,13 +61,14 @@ class _HomePageState extends State<HomePage> {
                 ],
                 onPressed: (int index) {
                   _size = _kSizes[index];
-                  WindowManager.instance.setSize(_size);
+                  WindowManager.instance.setFrame(size: _size);
                   setState(() {});
                 },
                 isSelected: _kSizes.map((e) => e == _size).toList(),
               ),
               onTap: () async {
-                Size size = await WindowManager.instance.getSize();
+                Rect frame = await WindowManager.instance.getFrame();
+                Size size = frame.size;
                 BotToast.showText(
                   text: 'size: ${size.width.toInt()}x${size.height.toInt()}',
                 );
@@ -125,6 +126,12 @@ class _HomePageState extends State<HomePage> {
               title: Text('deminiaturize'),
               onTap: () async {
                 await WindowManager.instance.deminiaturize();
+              },
+            ),
+            PreferenceListItem(
+              title: Text('terminate'),
+              onTap: () async {
+                await WindowManager.instance.terminate();
               },
             ),
           ],

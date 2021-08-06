@@ -24,11 +24,11 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         case "setTitle":
             setTitle(call, result: result)
             break
-        case "getSize":
-            getSize(call, result: result)
+        case "getFrame":
+            getFrame(call, result: result)
             break
-        case "setSize":
-            setSize(call, result: result)
+        case "setFrame":
+            setFrame(call, result: result)
             break
         case "setMinSize":
             setMinSize(call, result: result)
@@ -60,6 +60,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         case "deminiaturize":
             deminiaturize(call, result: result)
             break
+        case "terminate":
+            terminate(call, result: result)
+            break
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -71,26 +74,46 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         result(true)
     }
     
-    public func getSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func getFrame(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let origin: CGPoint = mainWindow.frame.origin;
         let size: CGSize = mainWindow.frame.size;
+        
         let resultData: NSDictionary = [
-            "width": size.width,
-            "height": size.height,
+            "origin_x": origin.x,
+            "origin_y": origin.y,
+            "size_width": size.width,
+            "size_height": size.height,
         ]
         result(resultData)
     }
     
-    public func setSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func setFrame(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args:[String: Any] = call.arguments as! [String: Any]
-        let newSize: NSSize = NSSize(
-            width: CGFloat(args["width"] as! Float),
-            height: CGFloat(args["height"] as! Float)
-        )
+        var newOrigin: NSPoint?
+        var newSize: NSSize?
         
+        if (args["origin_x"] != nil && args["origin_y"] != nil) {
+            newOrigin =  NSPoint(
+                x: CGFloat(args["origin_x"] as! Float),
+                y: CGFloat(args["origin_y"] as! Float)
+            )
+        }
+        if (args["size_width"] != nil && args["size_height"] != nil) {
+            newSize = NSSize(
+                width: CGFloat(truncating: args["size_width"] as! NSNumber),
+                height: CGFloat(truncating: args["size_height"] as! NSNumber)
+            )
+        }
+
         var frameRect = mainWindow.frame
-        frameRect.origin.y += (frameRect.size.height - CGFloat(newSize.height))
-        frameRect.size = newSize
-        
+        if (newSize != nil) {
+//            frameRect.origin.y = (frameRect.size.height - CGFloat(newSize!.height))
+            frameRect.size = newSize!
+        }
+        if (newOrigin != nil) {
+            frameRect.origin = newOrigin!
+        }
+
         if (_useAnimator) {
             mainWindow.animator().setFrame(frameRect, display: true, animate: true)
         } else {
@@ -179,6 +202,11 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     
     public func deminiaturize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         self.mainWindow.deminiaturize(nil)
+        result(true)
+    }
+    
+    public func terminate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        NSApplication.shared.terminate(nil)
         result(true)
     }
 }
