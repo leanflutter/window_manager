@@ -107,7 +107,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
 
         var frameRect = mainWindow.frame
         if (newSize != nil) {
-//            frameRect.origin.y = (frameRect.size.height - CGFloat(newSize!.height))
+            frameRect.origin.y += (frameRect.size.height - CGFloat(newSize!.height))
             frameRect.size = newSize!
         }
         if (newOrigin != nil) {
