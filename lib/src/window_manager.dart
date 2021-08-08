@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -60,12 +61,18 @@ class WindowManager {
   }
 
   Future<bool> isUseAnimator() async {
+    if (!Platform.isMacOS) return false;
+
     final Map<dynamic, dynamic> resultData =
         await _channel.invokeMethod('isUseAnimator');
     return resultData['isUseAnimator'];
   }
 
   Future<void> setUseAnimator(bool isUseAnimator) async {
+    if (!Platform.isMacOS) {
+      print('[window_manager] Warning: setUseAnimator is only supported on MacOS.');
+      return;
+    }
     final Map<String, dynamic> arguments = {
       'isUseAnimator': isUseAnimator,
     };
