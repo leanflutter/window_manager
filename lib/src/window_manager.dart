@@ -21,8 +21,11 @@ class WindowManager {
   }
 
   Future<Rect> getFrame() async {
+    final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
+    };
     final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('getFrame');
+        await _channel.invokeMethod('getFrame', arguments);
     return Rect.fromLTWH(
       resultData['origin_x'],
       resultData['origin_y'],
@@ -70,7 +73,8 @@ class WindowManager {
 
   Future<void> setUseAnimator(bool isUseAnimator) async {
     if (!Platform.isMacOS) {
-      print('[window_manager] Warning: setUseAnimator is only supported on MacOS.');
+      print(
+          '[window_manager] Warning: setUseAnimator is only supported on MacOS.');
       return;
     }
     final Map<String, dynamic> arguments = {
