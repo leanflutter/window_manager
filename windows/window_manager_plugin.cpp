@@ -65,7 +65,7 @@ namespace {
         result->Success(flutter::EncodableValue(true));
     }
 
-    void GetSize(
+    void GetFrame(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
@@ -77,23 +77,29 @@ namespace {
         RECT rect;
         if (GetWindowRect(mainWindow, &rect))
         {
+            double x = rect.left / devicePixelRatio * 1.0f;
+            double y = rect.top / devicePixelRatio * 1.0f;
             double width = (rect.right - rect.left) / devicePixelRatio * 1.0f;
             double height = (rect.bottom - rect.top) / devicePixelRatio * 1.0f;
 
-            resultMap[flutter::EncodableValue("width")] = flutter::EncodableValue(width);
-            resultMap[flutter::EncodableValue("height")] = flutter::EncodableValue(height);
+            resultMap[flutter::EncodableValue("origin_x")] = flutter::EncodableValue(x);
+            resultMap[flutter::EncodableValue("origin_y")] = flutter::EncodableValue(y);
+            resultMap[flutter::EncodableValue("size_width")] = flutter::EncodableValue(width);
+            resultMap[flutter::EncodableValue("size_height")] = flutter::EncodableValue(height);
         }
         result->Success(flutter::EncodableValue(resultMap));
     }
 
-    void SetSize(
+    void SetFrame(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
 
         double devicePixelRatio = std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
-        double width = std::get<double>(args.at(flutter::EncodableValue("width")));
-        double height = std::get<double>(args.at(flutter::EncodableValue("height")));
+        // double x = std::get<double>(args.at(flutter::EncodableValue("origin_x")));
+        // double y = std::get<double>(args.at(flutter::EncodableValue("origin_y")));
+        double width = std::get<double>(args.at(flutter::EncodableValue("size_width")));
+        double height = std::get<double>(args.at(flutter::EncodableValue("size_height")));
 
         HWND mainWindow = GetActiveWindow();
         SetWindowPos(mainWindow, HWND_TOP, 0, 0, int(width * devicePixelRatio), int(height * devicePixelRatio), SWP_NOMOVE);
@@ -128,7 +134,17 @@ namespace {
     void IsAlwaysOnTop(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        result->NotImplemented();
+        
+        HWND mainWindow = GetActiveWindow();
+        DWORD dwExStyle = GetWindowLong(mainWindow, GWL_EXSTYLE);
+
+        flutter::EncodableMap resultMap = flutter::EncodableMap();
+        if ((dwExStyle & WS_EX_TOPMOST) != 0) {
+            resultMap[flutter::EncodableValue("isAlwaysOnTop")] = flutter::EncodableValue(true);
+        } else {
+            resultMap[flutter::EncodableValue("isAlwaysOnTop")] = flutter::EncodableValue(false);
+        }
+        result->Success(flutter::EncodableValue(resultMap));
     }
 
     void SetAlwaysOnTop(
@@ -150,11 +166,11 @@ namespace {
         if (method_call.method_name().compare("setTitle") == 0) {
             SetTitle(method_call, std::move(result));
         }
-        else if (method_call.method_name().compare("getSize") == 0) {
-            GetSize(method_call, std::move(result));
+        else if (method_call.method_name().compare("getFrame") == 0) {
+            GetFrame(method_call, std::move(result));
         }
-        else if (method_call.method_name().compare("setSize") == 0) {
-            SetSize(method_call, std::move(result));
+        else if (method_call.method_name().compare("setFrame") == 0) {
+            SetFrame(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("setMinSize") == 0) {
             SetMinSize(method_call, std::move(result));
