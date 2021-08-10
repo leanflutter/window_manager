@@ -1,7 +1,15 @@
 import Cocoa
 import FlutterMacOS
 
-public class WindowManagerPlugin: NSObject, FlutterPlugin {
+
+let kEventOnWindowWillResize = "onWindowWillResize"
+let kEventOnWindowDidResize = "onWindowDidResize"
+let kEventOnWindowWillMiniaturize = "onWindowWillMiniaturize"
+let kEventOnWindowDidMiniaturize = "onWindowDidMiniaturize"
+let kEventOnWindowDidDeminiaturize = "onWindowDidDeminiaturize"
+
+public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
+    var channel: FlutterMethodChannel!
     
     var mainWindow: NSWindow {
         get {
@@ -11,11 +19,17 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         }
     }
     
+    public override init() {
+        super.init()
+        mainWindow.delegate = self
+    }
+    
     private var _useAnimator: Bool = false
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "window_manager", binaryMessenger: registrar.messenger)
         let instance = WindowManagerPlugin()
+        instance.channel = channel
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
     
@@ -104,7 +118,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
                 height: CGFloat(truncating: args["size_height"] as! NSNumber)
             )
         }
-
+        
         var frameRect = mainWindow.frame
         if (newSize != nil) {
             frameRect.origin.y += (frameRect.size.height - CGFloat(newSize!.height))
@@ -113,7 +127,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         if (newOrigin != nil) {
             frameRect.origin = newOrigin!
         }
-
+        
         if (_useAnimator) {
             mainWindow.animator().setFrame(frameRect, display: true, animate: true)
         } else {
@@ -208,5 +222,28 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
     public func terminate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         NSApplication.shared.terminate(nil)
         result(true)
+    }
+    
+    // NSWindowDelegate
+    
+    public func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
+        channel.invokeMethod(kEventOnWindowWillResize, arguments: nil, result: nil)
+        return frameSize;
+    }
+    
+    public func windowDidResize(_ notification: Notification) {
+        channel.invokeMethod(kEventOnWindowDidResize, arguments: nil, result: nil)
+    }
+    
+    public func windowWillMiniaturize(_ notification: Notification) {
+        channel.invokeMethod(kEventOnWindowWillMiniaturize, arguments: nil, result: nil)
+    }
+    
+    public func windowDidMiniaturize(_ notification: Notification) {
+        channel.invokeMethod(kEventOnWindowDidMiniaturize, arguments: nil, result: nil)
+    }
+    
+    public func windowDidDeminiaturize(_ notification: Notification) {
+        channel.invokeMethod(kEventOnWindowDidDeminiaturize, arguments: nil, result: nil)
     }
 }

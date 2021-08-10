@@ -2,8 +2,17 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'window_listener.dart';
+
+const kEventOnWindowWillResize = 'onWindowWillResize';
+const kEventOnWindowDidResize = 'onWindowDidResize';
+const kEventOnWindowWillMiniaturize = 'onWindowWillMiniaturize';
+const kEventOnWindowDidMiniaturize = 'onWindowDidMiniaturize';
+const kEventOnWindowDidDeminiaturize = 'onWindowDidDeminiaturize';
 
 class WindowManager {
   WindowManager._();
@@ -12,6 +21,66 @@ class WindowManager {
   static final WindowManager instance = WindowManager._();
 
   final MethodChannel _channel = const MethodChannel('window_manager');
+
+  bool _inited = false;
+
+  ObserverList<WindowListener>? _listeners = ObserverList<WindowListener>();
+
+  void _init() {
+    _channel.setMethodCallHandler(_methodCallHandler);
+    _inited = true;
+  }
+
+  Future<void> _methodCallHandler(MethodCall call) async {
+    if (_listeners == null) return;
+
+    final List<WindowListener> localListeners =
+        List<WindowListener>.from(_listeners!);
+    for (final WindowListener listener in localListeners) {
+      if (_listeners!.contains(listener)) {
+        switch (call.method) {
+          case kEventOnWindowWillResize:
+            listener.onWindowWillResize();
+            break;
+          case kEventOnWindowDidResize:
+            listener.onWindowDidResize();
+            break;
+          case kEventOnWindowWillMiniaturize:
+            listener.onWindowWillMiniaturize();
+            break;
+          case kEventOnWindowDidMiniaturize:
+            listener.onWindowDidMiniaturize();
+            break;
+          case kEventOnWindowDidDeminiaturize:
+            listener.onWindowDidDeminiaturize();
+            break;
+        }
+      }
+    }
+  }
+
+  bool get hasListeners {
+    return _listeners!.isNotEmpty;
+  }
+
+  void addListener(WindowListener listener) {
+    if (!_inited) this._init();
+
+    _listeners!.add(listener);
+  }
+
+  void removeListener(WindowListener listener) {
+    if (!_inited) this._init();
+
+    _listeners!.remove(listener);
+  }
+
+  Future<void> setId(String id) async {
+    final Map<String, dynamic> arguments = {
+      'id': id,
+    };
+    await _channel.invokeMethod('setId', arguments);
+  }
 
   Future<void> setTitle(String title) async {
     final Map<String, dynamic> arguments = {

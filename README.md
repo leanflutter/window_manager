@@ -10,7 +10,6 @@ This plugin allows Flutter **desktop** apps to resizing and repositioning the wi
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [window_manager](#window_manager)
   - [Platform Support](#platform-support)
   - [Quick Start](#quick-start)
@@ -18,15 +17,16 @@ This plugin allows Flutter **desktop** apps to resizing and repositioning the wi
     - [Usage](#usage)
   - [API](#api)
     - [WindowManager](#windowmanager)
+    - [WindowListener](#windowlistener)
   - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Platform Support
 
-| MacOS | Linux | Windows |
+| Linux | MacOS | Windows |
 | :---: | :---: | :-----: |
-|  ✔️   |  ➖   |   ✔️    |
+|  ➖   |  ✔️   |   ✔️    |
 
 ## Quick Start
 
@@ -53,7 +53,7 @@ dependencies:
 
 ```dart
 Size windowSize = await WindowManager.instance.getSize();
-await WindowManager.instance.setSize(Size(400, 600));
+await WindowManager.instance.setFrame(size: Size(400, 600));
 await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 ```
 
@@ -63,17 +63,32 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 
 ### WindowManager
 
-| Method         | Description |
-| -------------- | ----------- |
-| setTitle       |             |
-| getSize        |             |
-| setSize        |             |
-| setMinSize     |             |
-| setMaxSize     |             |
-| isUseAnimator  |             |
-| setUseAnimator |             |
-| isAlwaysOnTop  |             |
-| setAlwaysOnTop |             |
+| Method           | Description | Linux | MacOS | Windows |
+| ---------------- | ----------- | ----- | ----- | ------- |
+| `setTitle`       |             | ✔️    | ✔️    | ✔️      |
+| `getFrame`       |             | ✔️    | ✔️    | ✔️      |
+| `setFrame`       |             | ✔️    | ✔️    | ✔️      |
+| `setMinSize`     |             | ✔️    | ➖    | ➖      |
+| `setMaxSize`     |             | ✔️    | ➖    | ➖      |
+| `isUseAnimator`  |             | ✔️    | ➖    | ➖      |
+| `setUseAnimator` |             | ✔️    | ➖    | ➖      |
+| `isAlwaysOnTop`  |             | ✔️    | ➖    | ➖      |
+| `setAlwaysOnTop` |             | ✔️    | ✔️    | ✔️      |
+| `activate`       |             | ✔️    | ➖    | ➖      |
+| `deactivate`     |             | ✔️    | ➖    | ➖      |
+| `miniaturize`    |             | ✔️    | ➖    | ➖      |
+| `deminiaturize`  |             | ✔️    | ➖    | ➖      |
+| `terminate`      |             | ✔️    | ➖    | ➖      |
+
+### WindowListener
+
+| Method                     | Description | Linux | MacOS | Windows |
+| -------------------------- | ----------- | ----- | ----- | ------- |
+| `onWindowWillResize`       |             | ✔️    | ➖    | ➖      |
+| `onWindowDidResize`        |             | ✔️    | ➖    | ➖      |
+| `onWindowWillMiniaturize`  |             | ✔️    | ➖    | ➖      |
+| `onWindowDidMiniaturize`   |             | ✔️    | ➖    | ➖      |
+| `onWindowDidDeminiaturize` |             | ✔️    | ➖    | ➖      |
 
 ## License
 

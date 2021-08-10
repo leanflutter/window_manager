@@ -1,5 +1,6 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:preference_list/preference_list.dart';
 import 'package:window_manager/window_manager.dart';
@@ -25,12 +26,31 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WindowListener {
   Size _size = _kSizes.first;
   Size? _minSize;
   Size? _maxSize;
   bool _isUseAnimator = false;
   bool _isAlwaysOnTop = false;
+
+  @override
+  void initState() {
+    _init();
+    WindowManager.instance.addListener(this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WindowManager.instance.removeListener(this);
+    super.dispose();
+  }
+
+  _init() {
+    if (kIsWeb) {
+      WindowManager.instance.setId('window_manager_example');
+    }
+  }
 
   Widget _buildBody(BuildContext context) {
     return PreferenceList(
@@ -69,9 +89,9 @@ class _HomePageState extends State<HomePage> {
               onTap: () async {
                 Rect frame = await WindowManager.instance.getFrame();
                 Size size = frame.size;
+                Offset origin = frame.topLeft;
                 BotToast.showText(
-                  text: 'size: ${size.width.toInt()}x${size.height.toInt()}',
-                );
+                    text: '${size.toString()}\n${origin.toString()}');
               },
             ),
             PreferenceListItem(
@@ -193,5 +213,30 @@ class _HomePageState extends State<HomePage> {
       ),
       body: _buildBody(context),
     );
+  }
+
+  @override
+  void onWindowWillResize() {
+    print('onWindowWillResize');
+  }
+
+  @override
+  void onWindowDidResize() {
+    print('onWindowDidResize');
+  }
+
+  @override
+  void onWindowWillMiniaturize() {
+    print('onWindowWillMiniaturize');
+  }
+
+  @override
+  void onWindowDidMiniaturize() {
+    print('onWindowDidMiniaturize');
+  }
+
+  @override
+  void onWindowDidDeminiaturize() {
+    print('onWindowDidDeminiaturize');
   }
 }
