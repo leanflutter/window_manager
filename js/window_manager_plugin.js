@@ -1,34 +1,36 @@
-var _window = window.parent;
-var _document = window.parent.document;
+var _parentWindow = window.parent;
+var _parentDocument = window.parent.document;
 
-function windowManagerPluginSetup(id) {
-  var el = _document.getElementById(id);
+function windowManagerPluginInit() {
+  var el = _parentDocument.getElementById(window.flutterApp.windowId);
 
   var pos1 = 0;
   var pos2 = 0;
   var pos3 = 0;
   var pos4 = 0;
-  if (_document.getElementById(id + "_header")) {
+  if (_parentDocument.getElementById(window.flutterApp.windowHeaderId)) {
     // if present, the header is where you move the DIV from:
-    _document.getElementById(id + "_header").onmousedown = dragMouseDown;
+    _parentDocument.getElementById(
+      window.flutterApp.windowHeaderId
+    ).onmousedown = dragMouseDown;
   } else {
     // otherwise, move the DIV from anywhere inside the DIV:
     el.onmousedown = dragMouseDown;
   }
 
   function dragMouseDown(e) {
-    e = e || _window.event;
+    e = e || _parentWindow.event;
     e.preventDefault();
     // get the mouse cursor position at startup:
     pos3 = e.clientX;
     pos4 = e.clientY;
-    _document.onmouseup = closeDragElement;
+    _parentDocument.onmouseup = closeDragElement;
     // call a function whenever the cursor moves:
-    _document.onmousemove = elementDrag;
+    _parentDocument.onmousemove = elementDrag;
   }
 
   function elementDrag(e) {
-    e = e || _window.event;
+    e = e || _parentWindow.event;
     e.preventDefault();
     // calculate the new cursor position:
     pos1 = pos3 - e.clientX;
@@ -42,13 +44,13 @@ function windowManagerPluginSetup(id) {
 
   function closeDragElement() {
     // stop moving when mouse button is released:
-    _document.onmouseup = null;
-    _document.onmousemove = null;
+    _parentDocument.onmouseup = null;
+    _parentDocument.onmousemove = null;
   }
 }
 
-function windowManagerPluginGetFrame(id) {
-  var el = _document.getElementById(id);
+function windowManagerPluginGetFrame() {
+  var el = _parentDocument.getElementById(window.flutterApp.windowId);
 
   var elRect = el.getBoundingClientRect();
 
@@ -58,8 +60,8 @@ function windowManagerPluginGetFrame(id) {
   };
 }
 
-function windowManagerPluginSetFrame(id, frame) {
-  var el = _document.getElementById(id);
+function windowManagerPluginSetFrame(frame) {
+  var el = _parentDocument.getElementById(window.flutterApp.windowId);
 
   if (frame.size != null) {
     el.style.width = `${frame.size.width}px`;

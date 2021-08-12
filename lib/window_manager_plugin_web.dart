@@ -22,15 +22,20 @@ class WindowManagerPlugin {
     channel.setMethodCallHandler(pluginInstance.handleMethodCall);
   }
 
-  String? _windowId;
+  bool _inited = false;
+
+  void _init() {
+    js.context.callMethod(
+      'windowManagerPluginInit',
+      [],
+    );
+  }
 
   /// Handles method calls over the MethodChannel of this plugin.
   /// Note: Check the "federated" architecture for a new way of doing this:
   /// https://flutter.dev/go/federated-plugins
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
-      case 'setId':
-        return setId(call);
       case "setTitle":
         return setTitle(call);
       case "getFrame":
@@ -73,16 +78,6 @@ class WindowManagerPlugin {
     }
   }
 
-  Future<bool> setId(MethodCall call) {
-    Map<String, dynamic> args = Map<String, dynamic>.from(call.arguments);
-    _windowId = args['id'];
-    js.context.callMethod(
-      'windowManagerPluginSetup',
-      [_windowId],
-    );
-    return Future.value(true);
-  }
-
   Future<bool> setTitle(MethodCall call) {
     Map<String, dynamic> args = Map<String, dynamic>.from(call.arguments);
     html.document.title = args['title'];
@@ -90,27 +85,22 @@ class WindowManagerPlugin {
   }
 
   Future<Map<dynamic, dynamic>> getFrame(MethodCall call) {
+    if (!_inited) _init();
+
     num x = 0;
     num y = 0;
     num width = 0;
     num height = 0;
 
-    if (_windowId != null) {
-      js.JsObject frame = js.context.callMethod(
-        'windowManagerPluginGetFrame',
-        [_windowId],
-      );
+    js.JsObject frame = js.context.callMethod(
+      'windowManagerPluginGetFrame',
+      [],
+    );
 
-      x = frame['origin']['x'];
-      y = frame['origin']['y'];
-      width = frame['size']['width'];
-      height = frame['size']['height'];
-    } else {
-      x = html.window.screenX!;
-      y = html.window.screenY!;
-      width = html.window.outerWidth;
-      height = html.window.outerHeight;
-    }
+    x = frame['origin']['x'];
+    y = frame['origin']['y'];
+    width = frame['size']['width'];
+    height = frame['size']['height'];
 
     return Future<Map<dynamic, dynamic>>.value({
       'origin_x': x,
@@ -121,6 +111,8 @@ class WindowManagerPlugin {
   }
 
   Future<bool> setFrame(MethodCall call) {
+    if (!_inited) _init();
+
     Map<String, dynamic> args = Map<String, dynamic>.from(call.arguments);
     num? x = args['origin_x'];
     num? y = args['origin_y'];
@@ -130,7 +122,6 @@ class WindowManagerPlugin {
     js.context.callMethod(
       'windowManagerPluginSetFrame',
       [
-        _windowId,
         js.JsObject.jsify({
           'origin': x == null || y == null ? null : {'x': x, 'y': y},
           'size': (width == null || height == null)
