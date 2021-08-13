@@ -133,7 +133,7 @@ class WindowManager {
   }
 
   Future<bool> isUseAnimator() async {
-    if (!Platform.isMacOS) return false;
+    if (kIsWeb || !Platform.isMacOS) return false;
 
     final Map<dynamic, dynamic> resultData =
         await _channel.invokeMethod('isUseAnimator');
@@ -141,9 +141,10 @@ class WindowManager {
   }
 
   Future<void> setUseAnimator(bool isUseAnimator) async {
-    if (!Platform.isMacOS) {
+    if (kIsWeb || !Platform.isMacOS) {
       print(
-          '[window_manager] Warning: setUseAnimator is only supported on MacOS.');
+        '[window_manager] Warning: setUseAnimator is only supported on MacOS.',
+      );
       return;
     }
     final Map<String, dynamic> arguments = {
