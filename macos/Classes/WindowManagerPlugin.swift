@@ -1,13 +1,6 @@
 import Cocoa
 import FlutterMacOS
 
-
-let kEventOnWindowWillResize = "onWindowWillResize"
-let kEventOnWindowDidResize = "onWindowDidResize"
-let kEventOnWindowWillMiniaturize = "onWindowWillMiniaturize"
-let kEventOnWindowDidMiniaturize = "onWindowDidMiniaturize"
-let kEventOnWindowDidDeminiaturize = "onWindowDidDeminiaturize"
-
 public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
     var channel: FlutterMethodChannel!
     
@@ -24,8 +17,6 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         mainWindow.delegate = self
     }
     
-    private var _useAnimator: Bool = false
-    
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "window_manager", binaryMessenger: registrar.messenger)
         let instance = WindowManagerPlugin()
@@ -35,14 +26,38 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch (call.method) {
-        case "setTitle":
-            setTitle(call, result: result)
+        case "focus":
+            focus(call, result: result)
             break
-        case "getFrame":
-            getFrame(call, result: result)
+        case "blur":
+            blur(call, result: result)
             break
-        case "setFrame":
-            setFrame(call, result: result)
+        case "show":
+            show(call, result: result)
+            break
+        case "hide":
+            hide(call, result: result)
+            break
+        case "isVisible":
+            isVisible(call, result: result)
+            break
+        case "maximize":
+            maximize(call, result: result)
+            break
+        case "unmaximize":
+            unmaximize(call, result: result)
+            break
+        case "minimize":
+            minimize(call, result: result)
+            break
+        case "restore":
+            restore(call, result: result)
+            break
+        case "getBounds":
+            getBounds(call, result: result)
+            break
+        case "setBounds":
+            setBounds(call, result: result)
             break
         case "setMinSize":
             setMinSize(call, result: result)
@@ -50,29 +65,11 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         case "setMaxSize":
             setMaxSize(call, result: result)
             break
-        case "isUseAnimator":
-            isUseAnimator(call, result: result)
-            break
-        case "setUseAnimator":
-            setUseAnimator(call, result: result)
-            break
         case "isAlwaysOnTop":
             isAlwaysOnTop(call, result: result)
             break
         case "setAlwaysOnTop":
             setAlwaysOnTop(call, result: result)
-            break
-        case "activate":
-            activate(call, result: result)
-            break
-        case "deactivate":
-            deactivate(call, result: result)
-            break
-        case "miniaturize":
-            miniaturize(call, result: result)
-            break
-        case "deminiaturize":
-            deminiaturize(call, result: result)
             break
         case "terminate":
             terminate(call, result: result)
@@ -82,53 +79,86 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         }
     }
     
-    public func setTitle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let args:[String: Any] = call.arguments as! [String: Any]
-        mainWindow.title = args["title"] as! String
+    public func show(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        self.mainWindow.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+    
+    public func focus(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        self.mainWindow.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+    
+    public func blur(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        NSApp.deactivate()
+    }
+    
+    public func hide(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        self.mainWindow.orderOut(self.mainWindow)
         result(true)
     }
     
-    public func getFrame(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func isVisible(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        result(self.mainWindow.isVisible)
+    }
+    
+    public func maximize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        
+    }
+    
+    public func unmaximize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        
+    }
+    
+    public func minimize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        self.mainWindow.miniaturize(nil)
+    }
+    
+    public func restore(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        self.mainWindow.deminiaturize(nil)
+    }
+    
+    public func getBounds(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let origin: CGPoint = mainWindow.frame.origin;
         let size: CGSize = mainWindow.frame.size;
         
         let resultData: NSDictionary = [
-            "origin_x": origin.x,
-            "origin_y": origin.y,
-            "size_width": size.width,
-            "size_height": size.height,
+            "x": origin.x,
+            "y": origin.y,
+            "width": size.width,
+            "height": size.height,
         ]
         result(resultData)
     }
     
-    public func setFrame(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func setBounds(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args:[String: Any] = call.arguments as! [String: Any]
         var newOrigin: NSPoint?
         var newSize: NSSize?
+        let animate = args["animate"] as! Bool
         
-        if (args["origin_x"] != nil && args["origin_y"] != nil) {
+        if (args["x"] != nil && args["y"] != nil) {
             newOrigin =  NSPoint(
-                x: CGFloat(args["origin_x"] as! Float),
-                y: CGFloat(args["origin_y"] as! Float)
+                x: CGFloat(args["x"] as! Float),
+                y: CGFloat(args["y"] as! Float)
             )
         }
-        if (args["size_width"] != nil && args["size_height"] != nil) {
+        if (args["width"] != nil && args["height"] != nil) {
             newSize = NSSize(
-                width: CGFloat(truncating: args["size_width"] as! NSNumber),
-                height: CGFloat(truncating: args["size_height"] as! NSNumber)
+                width: CGFloat(truncating: args["width"] as! NSNumber),
+                height: CGFloat(truncating: args["height"] as! NSNumber)
             )
         }
         
         var frameRect = mainWindow.frame
         if (newSize != nil) {
-            frameRect.origin.y += (frameRect.size.height - CGFloat(newSize!.height))
             frameRect.size = newSize!
         }
         if (newOrigin != nil) {
             frameRect.origin = newOrigin!
         }
         
-        if (_useAnimator) {
+        if (animate) {
             mainWindow.animator().setFrame(frameRect, display: true, animate: true)
         } else {
             mainWindow.setFrame(frameRect, display: true)
@@ -143,12 +173,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
             height: CGFloat(args["height"] as! Float)
         )
         
-        if (_useAnimator) {
-            mainWindow.animator().minSize = minSize
-        } else {
-            mainWindow.minSize = minSize
-        }
-        result(true)
+        mainWindow.minSize = minSize
     }
     
     public func setMaxSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -158,25 +183,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
             height: CGFloat(args["height"] as! Float)
         )
         
-        if (_useAnimator) {
-            mainWindow.animator().maxSize = maxSize
-        } else {
-            mainWindow.maxSize = maxSize
-        }
-        result(true)
-    }
-    
-    public func isUseAnimator(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let resultData: NSDictionary = [
-            "isUseAnimator": _useAnimator,
-        ]
-        result(resultData)
-    }
-    
-    public func setUseAnimator(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let args:[String: Any] = call.arguments as! [String: Any]
-        _useAnimator = args["isUseAnimator"] as! Bool
-        result(true)
+        mainWindow.maxSize = maxSize
     }
     
     public func isAlwaysOnTop(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -190,33 +197,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         let args:[String: Any] = call.arguments as! [String: Any]
         let isAlwaysOnTop: Bool = args["isAlwaysOnTop"] as! Bool
         
-        if (_useAnimator) {
-            mainWindow.animator().level = isAlwaysOnTop ? .floating : .normal
-        } else {
-            mainWindow.level = isAlwaysOnTop ? .floating : .normal
-        }
-        result(true)
-    }
-    
-    public func activate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        self.mainWindow.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-        result(true)
-    }
-    
-    public func deactivate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        NSApp.deactivate()
-        result(true)
-    }
-    
-    public func miniaturize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        self.mainWindow.miniaturize(nil)
-        result(true)
-    }
-    
-    public func deminiaturize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        self.mainWindow.deminiaturize(nil)
-        result(true)
+        mainWindow.level = isAlwaysOnTop ? .floating : .normal
     }
     
     public func terminate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -226,24 +207,18 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
     
     // NSWindowDelegate
     
-    public func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
-        channel.invokeMethod(kEventOnWindowWillResize, arguments: nil, result: nil)
-        return frameSize;
+    public func windowDidBecomeMain(_ notification: Notification) {
+        _emitEvent("focus");
     }
     
-    public func windowDidResize(_ notification: Notification) {
-        channel.invokeMethod(kEventOnWindowDidResize, arguments: nil, result: nil)
+    public func windowDidResignMain(_ notification: Notification){
+        _emitEvent("blur");
     }
     
-    public func windowWillMiniaturize(_ notification: Notification) {
-        channel.invokeMethod(kEventOnWindowWillMiniaturize, arguments: nil, result: nil)
-    }
-    
-    public func windowDidMiniaturize(_ notification: Notification) {
-        channel.invokeMethod(kEventOnWindowDidMiniaturize, arguments: nil, result: nil)
-    }
-    
-    public func windowDidDeminiaturize(_ notification: Notification) {
-        channel.invokeMethod(kEventOnWindowDidDeminiaturize, arguments: nil, result: nil)
+    public func _emitEvent(_ eventName: String) {
+        let args: NSDictionary = [
+            "eventName": eventName,
+        ]
+        channel.invokeMethod("onEvent", arguments: args, result: nil)
     }
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -8,11 +7,8 @@ import 'package:flutter/services.dart';
 
 import 'window_listener.dart';
 
-const kEventOnWindowWillResize = 'onWindowWillResize';
-const kEventOnWindowDidResize = 'onWindowDidResize';
-const kEventOnWindowWillMiniaturize = 'onWindowWillMiniaturize';
-const kEventOnWindowDidMiniaturize = 'onWindowDidMiniaturize';
-const kEventOnWindowDidDeminiaturize = 'onWindowDidDeminiaturize';
+const kWindowEventFocus = 'focus';
+const kWindowEventBlur = 'blur';
 
 class WindowManager {
   WindowManager._();
@@ -37,25 +33,18 @@ class WindowManager {
     final List<WindowListener> localListeners =
         List<WindowListener>.from(_listeners!);
     for (final WindowListener listener in localListeners) {
-      if (_listeners!.contains(listener)) {
-        switch (call.method) {
-          case kEventOnWindowWillResize:
-            listener.onWindowWillResize();
-            break;
-          case kEventOnWindowDidResize:
-            listener.onWindowDidResize();
-            break;
-          case kEventOnWindowWillMiniaturize:
-            listener.onWindowWillMiniaturize();
-            break;
-          case kEventOnWindowDidMiniaturize:
-            listener.onWindowDidMiniaturize();
-            break;
-          case kEventOnWindowDidDeminiaturize:
-            listener.onWindowDidDeminiaturize();
-            break;
-        }
+      if (!_listeners!.contains(listener)) {
+        return;
       }
+
+      if (call.method != 'onEvent') throw UnimplementedError();
+
+      String eventName = call.arguments['eventName'];
+      Map<String, Function> funcMap = {
+        kWindowEventFocus: listener.onWindowFocus,
+        kWindowEventBlur: listener.onWindowBlur,
+      };
+      funcMap[eventName]!();
     }
   }
 
@@ -75,43 +64,110 @@ class WindowManager {
     _listeners!.remove(listener);
   }
 
-  Future<void> setId(String id) async {
-    final Map<String, dynamic> arguments = {
-      'id': id,
-    };
-    await _channel.invokeMethod('setId', arguments);
+  // 聚焦于窗口
+  void focus({bool inactive = false}) {
+    _channel.invokeMethod('focus');
   }
 
-  Future<void> setTitle(String title) async {
-    final Map<String, dynamic> arguments = {
-      'title': title,
-    };
-    await _channel.invokeMethod('setTitle', arguments);
+  // 取消窗口的聚焦
+  void blur({bool inactive = false}) {
+    _channel.invokeMethod('blur');
   }
 
-  Future<Rect> getFrame() async {
+  // 显示并聚焦于窗口
+  void show({bool inactive = false}) {
+    final Map<String, dynamic> arguments = {
+      'inactive': inactive,
+    };
+    _channel.invokeMethod('show', arguments);
+  }
+
+  // 隐藏窗口
+  void hide() {
+    _channel.invokeMethod('hide');
+  }
+
+  // 返回 bool - 判断窗口是否可见
+  Future<bool> isVisible() async {
+    return await _channel.invokeMethod('isVisible');
+  }
+
+  // 最大化窗口。 如果窗口尚未显示，该方法也会将其显示 (但不会聚焦)。
+  void maximize() {
+    _channel.invokeMethod('maximize');
+  }
+
+  // 取消窗口最大化
+  void unmaximize() {
+    _channel.invokeMethod('unmaximize');
+  }
+
+  // 最小化窗口。 在某些平台上, 最小化的窗口将显示在Dock中。
+  void minimize() {
+    _channel.invokeMethod('minimize');
+  }
+
+  // 将窗口从最小化状态恢复到以前的状态。
+  void restore() {
+    _channel.invokeMethod('restore');
+  }
+
+  Future<Rect> getBounds() async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
     };
     final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('getFrame', arguments);
+        await _channel.invokeMethod('getBounds', arguments);
     return Rect.fromLTWH(
-      resultData['origin_x'],
-      resultData['origin_y'],
-      resultData['size_width'],
-      resultData['size_height'],
+      resultData['x'],
+      resultData['y'],
+      resultData['width'],
+      resultData['height'],
     );
   }
 
-  Future<void> setFrame({Offset? origin, Size? size}) async {
+  Future<void> setBounds(Rect bounds, {animate = false}) async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
-      'origin_x': origin?.dx,
-      'origin_y': origin?.dy,
-      'size_width': size?.width,
-      'size_height': size?.height,
+      'x': bounds.topLeft.dx,
+      'y': bounds.topLeft.dy,
+      'width': bounds.size.width,
+      'height': bounds.size.height,
+      'animate': animate,
     }..removeWhere((key, value) => value == null);
-    await _channel.invokeMethod('setFrame', arguments);
+    await _channel.invokeMethod('setBounds', arguments);
+  }
+
+  Future<Offset> getPosition() async {
+    Rect bounds = await this.getBounds();
+    return bounds.topLeft;
+  }
+
+  Future<void> setPosition(Offset position, {animate = false}) async {
+    Rect oldBounds = await this.getBounds();
+    Rect newBounds = Rect.fromLTWH(
+      position.dx,
+      position.dy,
+      oldBounds.width,
+      oldBounds.height,
+    );
+    await this.setBounds(newBounds, animate: animate);
+  }
+
+  Future<Size> getSize() async {
+    Rect bounds = await this.getBounds();
+    return bounds.size;
+  }
+
+  Future<void> setSize(Size size, {animate = false}) async {
+    Rect oldBounds = await this.getBounds();
+    Rect newBounds = Rect.fromLTWH(
+      oldBounds.left,
+      oldBounds.top + (oldBounds.size.height - size.height),
+      size.width,
+      size.height,
+    );
+    await this.setBounds(newBounds, animate: animate);
   }
 
   Future<void> setMinSize(Size size) async {
@@ -132,54 +188,17 @@ class WindowManager {
     await _channel.invokeMethod('setMaxSize', arguments);
   }
 
-  Future<bool> isUseAnimator() async {
-    if (kIsWeb || !Platform.isMacOS) return false;
-
-    final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('isUseAnimator');
-    return resultData['isUseAnimator'];
-  }
-
-  Future<void> setUseAnimator(bool isUseAnimator) async {
-    if (kIsWeb || !Platform.isMacOS) {
-      print(
-        '[window_manager] Warning: setUseAnimator is only supported on MacOS.',
-      );
-      return;
-    }
-    final Map<String, dynamic> arguments = {
-      'isUseAnimator': isUseAnimator,
-    };
-    await _channel.invokeMethod('setUseAnimator', arguments);
-  }
-
   Future<bool> isAlwaysOnTop() async {
     final Map<dynamic, dynamic> resultData =
         await _channel.invokeMethod('isAlwaysOnTop');
     return resultData['isAlwaysOnTop'];
   }
 
-  Future<void> setAlwaysOnTop(bool isAlwaysOnTop) async {
+  void setAlwaysOnTop(bool isAlwaysOnTop) {
     final Map<String, dynamic> arguments = {
       'isAlwaysOnTop': isAlwaysOnTop,
     };
-    await _channel.invokeMethod('setAlwaysOnTop', arguments);
-  }
-
-  Future<void> activate() async {
-    await _channel.invokeMethod('activate');
-  }
-
-  Future<void> deactivate() async {
-    await _channel.invokeMethod('deactivate');
-  }
-
-  Future<void> miniaturize() async {
-    await _channel.invokeMethod('miniaturize');
-  }
-
-  Future<void> deminiaturize() async {
-    await _channel.invokeMethod('deminiaturize');
+    _channel.invokeMethod('setAlwaysOnTop', arguments);
   }
 
   Future<void> terminate() async {
