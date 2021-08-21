@@ -36,39 +36,14 @@ class WindowManagerPlugin {
   /// https://flutter.dev/go/federated-plugins
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
-      case "setTitle":
-        return setTitle(call);
-      case "getFrame":
-        return getFrame(call);
-      case "setFrame":
-        return setFrame(call);
-      case "setMinSize":
-        return setMinSize(call);
-      case "setMaxSize":
-        return setMaxSize(call);
-      case "isUseAnimator":
-        return isUseAnimator(call);
-      case "setUseAnimator":
-        return setUseAnimator(call);
+      case "getBounds":
+        return getBounds(call);
+      case "setBounds":
+        return setBounds(call);
       case "isAlwaysOnTop":
         return isAlwaysOnTop(call);
       case "setAlwaysOnTop":
         return setAlwaysOnTop(call);
-      case "activate":
-        activate(call);
-        break;
-      case "deactivate":
-        deactivate(call);
-        break;
-      case "miniaturize":
-        miniaturize(call);
-        break;
-      case "deminiaturize":
-        deminiaturize(call);
-        break;
-      case "terminate":
-        terminate(call);
-        break;
       default:
         throw PlatformException(
           code: 'Unimplemented',
@@ -78,13 +53,7 @@ class WindowManagerPlugin {
     }
   }
 
-  Future<bool> setTitle(MethodCall call) {
-    Map<String, dynamic> args = Map<String, dynamic>.from(call.arguments);
-    html.document.title = args['title'];
-    return Future.value(true);
-  }
-
-  Future<Map<dynamic, dynamic>> getFrame(MethodCall call) {
+  Future<Map<dynamic, dynamic>> getBounds(MethodCall call) {
     if (!_inited) _init();
 
     num x = 0;
@@ -92,64 +61,41 @@ class WindowManagerPlugin {
     num width = 0;
     num height = 0;
 
-    js.JsObject frame = js.context.callMethod(
-      'windowManagerPluginGetFrame',
+    js.JsObject bounds = js.context.callMethod(
+      'windowManagerPluginGetBounds',
       [],
     );
 
-    x = frame['origin']['x'];
-    y = frame['origin']['y'];
-    width = frame['size']['width'];
-    height = frame['size']['height'];
+    x = bounds['x'];
+    y = bounds['y'];
+    width = bounds['width'];
+    height = bounds['height'];
 
     return Future<Map<dynamic, dynamic>>.value({
-      'origin_x': x,
-      'origin_y': y,
-      'size_width': width,
-      'size_height': height,
+      'x': x,
+      'y': y,
+      'width': width,
+      'height': height,
     });
   }
 
-  Future<bool> setFrame(MethodCall call) {
+  Future<bool> setBounds(MethodCall call) {
     if (!_inited) _init();
 
     Map<String, dynamic> args = Map<String, dynamic>.from(call.arguments);
-    num? x = args['origin_x'];
-    num? y = args['origin_y'];
-    num? width = args['size_width'];
-    num? height = args['size_height'];
+    num? x = args['x'];
+    num? y = args['y'];
+    num? width = args['width'];
+    num? height = args['height'];
 
     js.context.callMethod(
-      'windowManagerPluginSetFrame',
+      'windowManagerPluginSetBounds',
       [
-        js.JsObject.jsify({
-          'origin': x == null || y == null ? null : {'x': x, 'y': y},
-          'size': (width == null || height == null)
-              ? null
-              : {'width': width, 'height': height},
-        }),
+        js.JsObject.jsify({'x': x, 'y': y, 'width': width, 'height': height}),
       ],
     );
 
     return Future.value(true);
-  }
-
-  Future<bool> setMinSize(MethodCall call) async {
-    return Future.value(false);
-  }
-
-  Future<bool> setMaxSize(MethodCall call) async {
-    return Future.value(false);
-  }
-
-  Future<Map<dynamic, dynamic>> isUseAnimator(MethodCall call) {
-    return Future.value({
-      'isUseAnimator': false,
-    });
-  }
-
-  Future<String> setUseAnimator(MethodCall call) async {
-    return '';
   }
 
   Future<Map<dynamic, dynamic>> isAlwaysOnTop(MethodCall call) {
@@ -159,26 +105,6 @@ class WindowManagerPlugin {
   }
 
   Future<bool> setAlwaysOnTop(MethodCall call) async {
-    return Future.value(false);
-  }
-
-  Future<String> activate(MethodCall call) async {
-    return '';
-  }
-
-  Future<String> deactivate(MethodCall call) async {
-    return '';
-  }
-
-  Future<String> miniaturize(MethodCall call) async {
-    return '';
-  }
-
-  Future<String> deminiaturize(MethodCall call) async {
-    return '';
-  }
-
-  Future<String> terminate(MethodCall call) async {
-    return '';
+    return Future.value(true);
   }
 }

@@ -49,26 +49,24 @@ function windowManagerPluginInit() {
   }
 }
 
-function windowManagerPluginGetFrame() {
+function windowManagerPluginGetBounds() {
   var el = _parentDocument.getElementById(window.flutterApp.windowId);
 
   var elRect = el.getBoundingClientRect();
 
   return {
-    origin: { x: elRect.top, y: elRect.left },
-    size: { width: el.offsetWidth, height: el.offsetHeight },
+    x: elRect.left,
+    y: elRect.bottom,
+    width: el.offsetWidth,
+    height: el.offsetHeight,
   };
 }
 
-function windowManagerPluginSetFrame(frame) {
+function windowManagerPluginSetBounds(bounds) {
   var el = _parentDocument.getElementById(window.flutterApp.windowId);
 
-  if (frame.size != null) {
-    el.style.width = `${frame.size.width}px`;
-    el.style.height = `${frame.size.height}px`;
-  }
-  if (frame.origin != null) {
-    el.style.top = `${frame.origin.x}px`;
-    el.style.left = `${frame.origin.y}px`;
-  }
+  el.style.width = `${bounds.width}px`;
+  el.style.height = `${bounds.height}px`;
+  el.style.left = `${bounds.x}px`;
+  el.style.bottom = `${bounds.y}px`;
 }
