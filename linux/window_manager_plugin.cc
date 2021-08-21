@@ -30,17 +30,7 @@ GtkWindow *get_window(WindowManagerPlugin *self)
   return GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(view)));
 }
 
-static FlMethodResponse *set_title(WindowManagerPlugin *self,
-                                   FlValue *args)
-{
-  const gchar *title = fl_value_get_string(fl_value_lookup_string(args, "title"));
-
-  gtk_window_set_title(get_window(self), title);
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
-}
-
-static FlMethodResponse *get_frame(WindowManagerPlugin *self)
+static FlMethodResponse *get_bounds(WindowManagerPlugin *self)
 {
   gint width, height;
   gtk_window_get_size(get_window(self), &width, &height);
@@ -49,19 +39,19 @@ static FlMethodResponse *get_frame(WindowManagerPlugin *self)
 
 
   g_autoptr(FlValue) result_data = fl_value_new_map();
-  fl_value_set_string_take(result_data, "size_width", fl_value_new_float(width));
-  fl_value_set_string_take(result_data, "size_height", fl_value_new_float(height));
-  fl_value_set_string_take(result_data, "origin_x", fl_value_new_float(x));
-  fl_value_set_string_take(result_data, "origin_y", fl_value_new_float(y));
+  fl_value_set_string_take(result_data, "x", fl_value_new_float(x));
+  fl_value_set_string_take(result_data, "y", fl_value_new_float(y));
+  fl_value_set_string_take(result_data, "width", fl_value_new_float(width));
+  fl_value_set_string_take(result_data, "height", fl_value_new_float(height));
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result_data));
 }
 
-static FlMethodResponse *set_frame(WindowManagerPlugin *self,
+static FlMethodResponse *set_bounds(WindowManagerPlugin *self,
                                   FlValue *args)
 {
-  const float width = fl_value_get_float(fl_value_lookup_string(args, "size_width"));
-  const float height = fl_value_get_float(fl_value_lookup_string(args, "size_height"));
+  const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
+  const float height = fl_value_get_float(fl_value_lookup_string(args, "height"));
 
   gtk_window_resize(get_window(self), static_cast<gint>(width), static_cast<gint>(height));
 
@@ -112,17 +102,13 @@ static void window_manager_plugin_handle_method_call(
   const gchar *method = fl_method_call_get_name(method_call);
   FlValue *args = fl_method_call_get_args(method_call);
 
-  if (strcmp(method, "setTitle") == 0)
+  if (strcmp(method, "getBounds") == 0)
   {
-    response = set_title(self, args);
+    response = get_bounds(self);
   }
-  else if (strcmp(method, "getFrame") == 0)
+  else if (strcmp(method, "setBounds") == 0)
   {
-    response = get_frame(self);
-  }
-  else if (strcmp(method, "setFrame") == 0)
-  {
-    response = set_frame(self, args);
+    response = set_bounds(self, args);
   }
   else if (strcmp(method, "setMinSize") == 0)
   {
