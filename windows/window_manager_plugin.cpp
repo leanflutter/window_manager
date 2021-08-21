@@ -51,21 +51,7 @@ namespace {
 
     WindowManagerPlugin::~WindowManagerPlugin() {}
 
-    void SetTitle(
-        const flutter::MethodCall<flutter::EncodableValue>& method_call,
-        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
-
-        std::string title = std::get<std::string>(args.at(flutter::EncodableValue("title")));
-
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        HWND mainWindow = GetActiveWindow();
-        SetWindowText(mainWindow, converter.from_bytes(title).c_str());
-
-        result->Success(flutter::EncodableValue(true));
-    }
-
-    void GetFrame(
+    void GetBounds(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
@@ -82,15 +68,15 @@ namespace {
             double width = (rect.right - rect.left) / devicePixelRatio * 1.0f;
             double height = (rect.bottom - rect.top) / devicePixelRatio * 1.0f;
 
-            resultMap[flutter::EncodableValue("origin_x")] = flutter::EncodableValue(x);
-            resultMap[flutter::EncodableValue("origin_y")] = flutter::EncodableValue(y);
-            resultMap[flutter::EncodableValue("size_width")] = flutter::EncodableValue(width);
-            resultMap[flutter::EncodableValue("size_height")] = flutter::EncodableValue(height);
+            resultMap[flutter::EncodableValue("x")] = flutter::EncodableValue(x);
+            resultMap[flutter::EncodableValue("y")] = flutter::EncodableValue(y);
+            resultMap[flutter::EncodableValue("width")] = flutter::EncodableValue(width);
+            resultMap[flutter::EncodableValue("height")] = flutter::EncodableValue(height);
         }
         result->Success(flutter::EncodableValue(resultMap));
     }
 
-    void SetFrame(
+    void SetBounds(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
@@ -98,8 +84,8 @@ namespace {
         double devicePixelRatio = std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
         // double x = std::get<double>(args.at(flutter::EncodableValue("origin_x")));
         // double y = std::get<double>(args.at(flutter::EncodableValue("origin_y")));
-        double width = std::get<double>(args.at(flutter::EncodableValue("size_width")));
-        double height = std::get<double>(args.at(flutter::EncodableValue("size_height")));
+        double width = std::get<double>(args.at(flutter::EncodableValue("width")));
+        double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
         HWND mainWindow = GetActiveWindow();
         SetWindowPos(mainWindow, HWND_TOP, 0, 0, int(width * devicePixelRatio), int(height * devicePixelRatio), SWP_NOMOVE);
@@ -114,18 +100,6 @@ namespace {
     }
 
     void SetMaxSize(
-        const flutter::MethodCall<flutter::EncodableValue>& method_call,
-        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        result->NotImplemented();
-    }
-
-    void IsUseAnimator(
-        const flutter::MethodCall<flutter::EncodableValue>& method_call,
-        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        result->NotImplemented();
-    }
-
-    void SetUseAnimator(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         result->NotImplemented();
@@ -163,26 +137,17 @@ namespace {
     void WindowManagerPlugin::HandleMethodCall(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        if (method_call.method_name().compare("setTitle") == 0) {
-            SetTitle(method_call, std::move(result));
+        if (method_call.method_name().compare("getBounds") == 0) {
+            GetBounds(method_call, std::move(result));
         }
-        else if (method_call.method_name().compare("getFrame") == 0) {
-            GetFrame(method_call, std::move(result));
-        }
-        else if (method_call.method_name().compare("setFrame") == 0) {
-            SetFrame(method_call, std::move(result));
+        else if (method_call.method_name().compare("setBounds") == 0) {
+            SetBounds(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("setMinSize") == 0) {
             SetMinSize(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("setMaxSize") == 0) {
             SetMaxSize(method_call, std::move(result));
-        }
-        else if (method_call.method_name().compare("isUseAnimator") == 0) {
-            IsUseAnimator(method_call, std::move(result));
-        }
-        else if (method_call.method_name().compare("setUseAnimator") == 0) {
-            SetUseAnimator(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("isAlwaysOnTop") == 0) {
             IsAlwaysOnTop(method_call, std::move(result));
