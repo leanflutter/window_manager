@@ -63,32 +63,35 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 
 ### WindowManager
 
-| Method           | Description | Linux | MacOS | Windows |
-| ---------------- | ----------- | ----- | ----- | ------- |
-| `setTitle`       |             | ✔️    | ✔️    | ✔️      |
-| `getFrame`       |             | ✔️    | ✔️    | ✔️      |
-| `setFrame`       |             | ✔️    | ✔️    | ✔️      |
-| `setMinSize`     |             | ✔️    | ➖    | ➖      |
-| `setMaxSize`     |             | ✔️    | ➖    | ➖      |
-| `isUseAnimator`  |             | ✔️    | ➖    | ➖      |
-| `setUseAnimator` |             | ✔️    | ➖    | ➖      |
-| `isAlwaysOnTop`  |             | ✔️    | ➖    | ➖      |
-| `setAlwaysOnTop` |             | ✔️    | ✔️    | ✔️      |
-| `activate`       |             | ✔️    | ➖    | ➖      |
-| `deactivate`     |             | ✔️    | ➖    | ➖      |
-| `miniaturize`    |             | ✔️    | ➖    | ➖      |
-| `deminiaturize`  |             | ✔️    | ➖    | ➖      |
-| `terminate`      |             | ✔️    | ➖    | ➖      |
+| Method           | Description                                                            | Linux | MacOS | Windows |
+| ---------------- | ---------------------------------------------------------------------- | ----- | ----- | ------- |
+| `focus`          | Focuses on the window.                                                 | ✔️    | ➖    | ➖      |
+| `blur`           | Removes focus from the window.                                         | ✔️    | ➖    | ➖      |
+| `show`           | Shows and gives focus to the window.                                   | ✔️    | ➖    | ➖      |
+| `hide`           | Hides the window.                                                      | ✔️    | ➖    | ➖      |
+| `isVisible`      | Returns `bool` - Whether the window is visible to the user.            | ✔️    | ➖    | ➖      |
+| `maximize`       | Maximizes the window.                                                  | ➖    | ➖    | ➖      |
+| `unmaximize`     | Unmaximizes the window.                                                | ➖    | ➖    | ➖      |
+| `minimize`       | Minimizes the window.                                                  | ✔️    | ➖    | ➖      |
+| `restore`        | Restores the window from minimized state to its previous state.        | ✔️    | ➖    | ➖      |
+| `getBounds`      | Returns `Rect` - The bounds of the window as Object.                   | ✔️    | ➖    | ➖      |
+| `setBounds`      | Resizes and moves the window to the supplied bounds.                   | ✔️    | ➖    | ➖      |
+| `getPosition`    |                                                                        | ✔️    | ➖    | ➖      |
+| `setPosition`    |                                                                        | ✔️    | ➖    | ➖      |
+| `getSize`        |                                                                        | ✔️    | ➖    | ➖      |
+| `setSize`        |                                                                        | ✔️    | ➖    | ➖      |
+| `setMinSize`     |                                                                        | ✔️    | ➖    | ➖      |
+| `setMaxSize`     |                                                                        | ✔️    | ➖    | ➖      |
+| `isAlwaysOnTop`  | Returns `bool` - Whether the window is always on top of other windows. | ✔️    | ➖    | ➖      |
+| `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.    | ✔️    | ➖    | ➖      |
+| `terminate`      |                                                                        | ✔️    | ➖    | ➖      |
 
 ### WindowListener
 
-| Method                     | Description | Linux | MacOS | Windows |
-| -------------------------- | ----------- | ----- | ----- | ------- |
-| `onWindowWillResize`       |             | ✔️    | ➖    | ➖      |
-| `onWindowDidResize`        |             | ✔️    | ➖    | ➖      |
-| `onWindowWillMiniaturize`  |             | ✔️    | ➖    | ➖      |
-| `onWindowDidMiniaturize`   |             | ✔️    | ➖    | ➖      |
-| `onWindowDidDeminiaturize` |             | ✔️    | ➖    | ➖      |
+| Method          | Description                          | Linux | MacOS | Windows |
+| --------------- | ------------------------------------ | ----- | ----- | ------- |
+| `onWindowFocus` | Emitted when the window gains focus. | ✔️    | ➖    | ➖      |
+| `onWindowBlur`  | Emitted when the window loses focus. | ✔️    | ➖    | ➖      |
 
 ## License
 
