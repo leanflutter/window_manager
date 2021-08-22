@@ -14,7 +14,7 @@ struct _WindowManagerPlugin
 {
   GObject parent_instance;
   FlPluginRegistrar *registrar;
-  bool _is_use_animator = false;
+  GdkGeometry window_geometry;
   bool _is_always_on_top = false;
 };
 
@@ -30,17 +30,54 @@ GtkWindow *get_window(WindowManagerPlugin *self)
   return GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(view)));
 }
 
+GdkWindow *get_gdk_window(WindowManagerPlugin *self)
+{
+  return gtk_widget_get_window(GTK_WIDGET(get_window(self)));
+}
+
 static FlMethodResponse *focus(WindowManagerPlugin *self)
 {
   gtk_window_present(get_window(self));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
 
+static FlMethodResponse *show(WindowManagerPlugin *self)
+{
+  gtk_widget_show(GTK_WIDGET(get_window(self)));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *hide(WindowManagerPlugin *self)
+{
+  gtk_widget_hide(GTK_WIDGET(get_window(self)));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *maximize(WindowManagerPlugin *self)
+{
+  gtk_window_maximize(get_window(self));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *unmaximize(WindowManagerPlugin *self)
+{
+  gtk_window_unmaximize(get_window(self));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *minimize(WindowManagerPlugin *self)
+{
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *restore(WindowManagerPlugin *self)
+{
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
 static FlMethodResponse *is_full_screen(WindowManagerPlugin *self)
 {
-  GdkWindow *gdk_window = gtk_widget_get_window(GTK_WIDGET(get_window(self)));
-  bool is_full_screen = (bool)(gdk_window_get_state(gdk_window) & GDK_WINDOW_STATE_FULLSCREEN);
+  bool is_full_screen = (bool)(gdk_window_get_state(get_gdk_window(self)) & GDK_WINDOW_STATE_FULLSCREEN);
 
   g_autoptr(FlValue) result_data = fl_value_new_map();
   fl_value_set_string_take(result_data, "isFullScreen", fl_value_new_bool(is_full_screen));
@@ -94,11 +131,38 @@ static FlMethodResponse *set_minimum_size(WindowManagerPlugin *self,
   const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
   const float height = fl_value_get_float(fl_value_lookup_string(args, "height"));
 
-  GdkGeometry geometry;
-  geometry.max_width = static_cast<gint>(width);
-  geometry.max_height = static_cast<gint>(height);
+  if (width >= 0 && height >= 0)
+  {
+    self->window_geometry.min_width = static_cast<gint>(width);
+    self->window_geometry.min_height = static_cast<gint>(height);
+  }
 
-  // gdk_window_set_geometry_hints(get_window(self), &geometry, static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE));
+  gdk_window_set_geometry_hints(
+      get_gdk_window(self),
+      &self->window_geometry,
+      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *set_maximum_size(WindowManagerPlugin *self,
+                                          FlValue *args)
+{
+  const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
+  const float height = fl_value_get_float(fl_value_lookup_string(args, "height"));
+
+  self->window_geometry.max_width = static_cast<gint>(width);
+  self->window_geometry.max_height = static_cast<gint>(height);
+
+  if (self->window_geometry.max_width < 0)
+    self->window_geometry.max_width = G_MAXINT;
+  if (self->window_geometry.max_height < 0)
+    self->window_geometry.max_height = G_MAXINT;
+
+  gdk_window_set_geometry_hints(
+      get_gdk_window(self),
+      &self->window_geometry,
+      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
@@ -141,6 +205,30 @@ static void window_manager_plugin_handle_method_call(
   {
     response = focus(self);
   }
+  else if (strcmp(method, "show") == 0)
+  {
+    response = show(self);
+  }
+  else if (strcmp(method, "hide") == 0)
+  {
+    response = hide(self);
+  }
+  else if (strcmp(method, "maximize") == 0)
+  {
+    response = maximize(self);
+  }
+  else if (strcmp(method, "unmaximize") == 0)
+  {
+    response = unmaximize(self);
+  }
+  else if (strcmp(method, "minimize") == 0)
+  {
+    response = minimize(self);
+  }
+  else if (strcmp(method, "restore") == 0)
+  {
+    response = restore(self);
+  }
   else if (strcmp(method, "isFullScreen") == 0)
   {
     response = is_full_screen(self);
@@ -161,10 +249,10 @@ static void window_manager_plugin_handle_method_call(
   {
     response = set_minimum_size(self, args);
   }
-  // else if (strcmp(method, "setMaximumSize") == 0)
-  // {
-  //   response = set_maximum_size(self, args);
-  // }
+  else if (strcmp(method, "setMaximumSize") == 0)
+  {
+    response = set_maximum_size(self, args);
+  }
   else if (strcmp(method, "isAlwaysOnTop") == 0)
   {
     response = is_always_on_top(self);
@@ -210,6 +298,11 @@ void window_manager_plugin_register_with_registrar(FlPluginRegistrar *registrar)
       g_object_new(window_manager_plugin_get_type(), nullptr));
 
   plugin->registrar = FL_PLUGIN_REGISTRAR(g_object_ref(registrar));
+
+  plugin->window_geometry.min_width = -1;
+  plugin->window_geometry.min_height = -1;
+  plugin->window_geometry.max_width = G_MAXINT;
+  plugin->window_geometry.max_height = G_MAXINT;
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlMethodChannel) channel =

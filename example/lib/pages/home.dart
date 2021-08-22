@@ -53,22 +53,33 @@ class _HomePageState extends State<HomePage> with WindowListener {
           children: [
             PreferenceListItem(
               title: Text('focus / blur'),
-              onTap: () {
-                windowManager.focus();
+              onTap: () async {
                 windowManager.blur();
+                await Future.delayed(Duration(seconds: 2));
+                windowManager.focus();
               },
             ),
             PreferenceListItem(
               title: Text('show / hide'),
-              onTap: () {
-                windowManager.show();
+              onTap: () async {
                 windowManager.hide();
+                await Future.delayed(Duration(seconds: 2));
+                windowManager.show();
+              },
+            ),
+            PreferenceListItem(
+              title: Text('maximize / unmaximize'),
+              onTap: () async {
+                windowManager.maximize();
+                await Future.delayed(Duration(seconds: 2));
+                windowManager.unmaximize();
               },
             ),
             PreferenceListItem(
               title: Text('minimize / restore'),
-              onTap: () {
+              onTap: () async {
                 windowManager.minimize();
+                await Future.delayed(Duration(seconds: 2));
                 windowManager.restore();
               },
             ),
