@@ -20,6 +20,8 @@ const _kMaxSizes = [
   Size(800, 800),
 ];
 
+final windowManager = WindowManager.instance;
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -29,17 +31,18 @@ class _HomePageState extends State<HomePage> with WindowListener {
   Size _size = _kSizes.first;
   Size? _minSize;
   Size? _maxSize;
+  bool _isFullScreen = false;
   bool _isAlwaysOnTop = false;
 
   @override
   void initState() {
-    WindowManager.instance.addListener(this);
+    windowManager.addListener(this);
     super.initState();
   }
 
   @override
   void dispose() {
-    WindowManager.instance.removeListener(this);
+    windowManager.removeListener(this);
     super.dispose();
   }
 
@@ -49,39 +52,24 @@ class _HomePageState extends State<HomePage> with WindowListener {
         PreferenceListSection(
           children: [
             PreferenceListItem(
-              title: Text('focus'),
+              title: Text('focus / blur'),
               onTap: () {
-                WindowManager.instance.focus();
+                windowManager.focus();
+                windowManager.blur();
               },
             ),
             PreferenceListItem(
-              title: Text('blur'),
+              title: Text('show / hide'),
               onTap: () {
-                WindowManager.instance.blur();
+                windowManager.show();
+                windowManager.hide();
               },
             ),
             PreferenceListItem(
-              title: Text('show'),
+              title: Text('minimize / restore'),
               onTap: () {
-                WindowManager.instance.show();
-              },
-            ),
-            PreferenceListItem(
-              title: Text('hide'),
-              onTap: () async {
-                WindowManager.instance.hide();
-              },
-            ),
-            PreferenceListItem(
-              title: Text('minimize'),
-              onTap: () {
-                WindowManager.instance.minimize();
-              },
-            ),
-            PreferenceListItem(
-              title: Text('restore'),
-              onTap: () {
-                WindowManager.instance.restore();
+                windowManager.minimize();
+                windowManager.restore();
               },
             ),
             PreferenceListItem(
@@ -93,8 +81,8 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 ],
                 onPressed: (int index) async {
                   _size = _kSizes[index];
-                  Rect bounds = await WindowManager.instance.getBounds();
-                  WindowManager.instance.setBounds(
+                  Rect bounds = await windowManager.getBounds();
+                  windowManager.setBounds(
                     Rect.fromLTWH(
                       bounds.left,
                       bounds.top,
@@ -107,7 +95,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 isSelected: _kSizes.map((e) => e == _size).toList(),
               ),
               onTap: () async {
-                Rect bounds = await WindowManager.instance.getBounds();
+                Rect bounds = await windowManager.getBounds();
                 Size size = bounds.size;
                 Offset origin = bounds.topLeft;
                 BotToast.showText(
@@ -116,7 +104,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
               },
             ),
             PreferenceListItem(
-              title: Text('getMinSize / setMinSize'),
+              title: Text('getMinimumSize / setMinimumSize'),
               accessoryView: ToggleButtons(
                 children: <Widget>[
                   for (var size in _kMinSizes)
@@ -124,14 +112,14 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 ],
                 onPressed: (int index) {
                   _minSize = _kMinSizes[index];
-                  WindowManager.instance.setMinSize(_minSize!);
+                  windowManager.setMinimumSize(_minSize!);
                   setState(() {});
                 },
                 isSelected: _kMinSizes.map((e) => e == _minSize).toList(),
               ),
             ),
             PreferenceListItem(
-              title: Text('getMaxSize / setMaxSize'),
+              title: Text('getMaximumSize / setMaximumSize'),
               accessoryView: ToggleButtons(
                 children: <Widget>[
                   for (var size in _kMaxSizes)
@@ -139,7 +127,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 ],
                 onPressed: (int index) {
                   _maxSize = _kMaxSizes[index];
-                  WindowManager.instance.setMaxSize(_maxSize!);
+                  windowManager.setMaximumSize(_maxSize!);
                   setState(() {});
                 },
                 isSelected: _kMaxSizes.map((e) => e == _maxSize).toList(),
@@ -148,7 +136,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
             PreferenceListItem(
               title: Text('terminate'),
               onTap: () async {
-                await WindowManager.instance.terminate();
+                await windowManager.terminate();
               },
             ),
           ],
@@ -156,6 +144,25 @@ class _HomePageState extends State<HomePage> with WindowListener {
         PreferenceListSection(
           title: Text('Option'),
           children: [
+            PreferenceListItem(
+              title: Text('isFullScreen / setFullScreen'),
+              accessoryView: ToggleButtons(
+                children: <Widget>[
+                  Text('YES'),
+                  Text('NO'),
+                ],
+                onPressed: (int index) {
+                  _isFullScreen = !_isFullScreen;
+                  windowManager.setFullScreen(_isFullScreen);
+                  setState(() {});
+                },
+                isSelected: [_isFullScreen, !_isFullScreen],
+              ),
+              onTap: () async {
+                bool isFullScreen = await windowManager.isFullScreen();
+                BotToast.showText(text: 'isFullScreen: $isFullScreen');
+              },
+            ),
             PreferenceListItem(
               title: Text('isAlwaysOnTop / setAlwaysOnTop'),
               accessoryView: ToggleButtons(
@@ -165,14 +172,13 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 ],
                 onPressed: (int index) {
                   _isAlwaysOnTop = !_isAlwaysOnTop;
-                  WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
+                  windowManager.setAlwaysOnTop(_isAlwaysOnTop);
                   setState(() {});
                 },
                 isSelected: [_isAlwaysOnTop, !_isAlwaysOnTop],
               ),
               onTap: () async {
-                bool isAlwaysOnTop =
-                    await WindowManager.instance.isAlwaysOnTop();
+                bool isAlwaysOnTop = await windowManager.isAlwaysOnTop();
                 BotToast.showText(text: 'isAlwaysOnTop: $isAlwaysOnTop');
               },
             ),
@@ -193,27 +199,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
   }
 
   @override
-  void onWindowWillResize() {
-    print('onWindowWillResize');
-  }
-
-  @override
-  void onWindowDidResize() {
-    print('onWindowDidResize');
-  }
-
-  @override
-  void onWindowWillMiniaturize() {
-    print('onWindowWillMiniaturize');
-  }
-
-  @override
-  void onWindowDidMiniaturize() {
-    print('onWindowDidMiniaturize');
-  }
-
-  @override
-  void onWindowDidDeminiaturize() {
-    print('onWindowDidDeminiaturize');
+  void onWindowEvent(String eventName) {
+    print('[WindowManager] onWindowEvent: $eventName');
   }
 }

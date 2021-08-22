@@ -58,7 +58,7 @@ static FlMethodResponse *set_bounds(WindowManagerPlugin *self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
-static FlMethodResponse *set_min_size(WindowManagerPlugin *self,
+static FlMethodResponse *set_minimum_size(WindowManagerPlugin *self,
                                       FlValue *args)
 {
   const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
@@ -110,12 +110,13 @@ static void window_manager_plugin_handle_method_call(
   {
     response = set_bounds(self, args);
   }
-  else if (strcmp(method, "setMinSize") == 0)
+  else if (strcmp(method, "setMinimumSize") == 0)
   {
-    response = set_min_size(self, args);
+    response = set_minimum_size(self, args);
   }
-  else if (strcmp(method, "setMaxSize") == 0)
+  else if (strcmp(method, "setMaximumSize") == 0)
   {
+    response = set_maximum_size(self, args);
   }
   else if (strcmp(method, "isAlwaysOnTop") == 0)
   {

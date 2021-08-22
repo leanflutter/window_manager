@@ -9,6 +9,8 @@ import 'window_listener.dart';
 
 const kWindowEventFocus = 'focus';
 const kWindowEventBlur = 'blur';
+const kWindowEventEnterFullScreen = 'enter-full-screen';
+const kWindowEventLeaveFullScreen = 'leave-full-screen';
 
 class WindowManager {
   WindowManager._();
@@ -40,9 +42,12 @@ class WindowManager {
       if (call.method != 'onEvent') throw UnimplementedError();
 
       String eventName = call.arguments['eventName'];
+      listener.onWindowEvent(eventName);
       Map<String, Function> funcMap = {
         kWindowEventFocus: listener.onWindowFocus,
         kWindowEventBlur: listener.onWindowBlur,
+        kWindowEventEnterFullScreen: listener.onWindowEnterFullScreen,
+        kWindowEventLeaveFullScreen: listener.onWindowLeaveFullScreen,
       };
       funcMap[eventName]!();
     }
@@ -112,6 +117,21 @@ class WindowManager {
     _channel.invokeMethod('restore');
   }
 
+  // 返回 bool - 窗口当前是否已全屏
+  Future<bool> isFullScreen() async {
+    final Map<dynamic, dynamic> resultData =
+        await _channel.invokeMethod('isFullScreen');
+    return resultData['isFullScreen'];
+  }
+
+  // 设置窗口是否应处于全屏模式。
+  void setFullScreen(bool isFullScreen) {
+    final Map<String, dynamic> arguments = {
+      'isFullScreen': isFullScreen,
+    };
+    _channel.invokeMethod('setFullScreen', arguments);
+  }
+
   Future<Rect> getBounds() async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
@@ -170,22 +190,22 @@ class WindowManager {
     await this.setBounds(newBounds, animate: animate);
   }
 
-  Future<void> setMinSize(Size size) async {
+  Future<void> setMinimumSize(Size size) async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
       'width': size.width,
       'height': size.height,
     };
-    await _channel.invokeMethod('setMinSize', arguments);
+    await _channel.invokeMethod('setMinimumSize', arguments);
   }
 
-  Future<void> setMaxSize(Size size) async {
+  Future<void> setMaximumSize(Size size) async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
       'width': size.width,
       'height': size.height,
     };
-    await _channel.invokeMethod('setMaxSize', arguments);
+    await _channel.invokeMethod('setMaximumSize', arguments);
   }
 
   Future<bool> isAlwaysOnTop() async {

@@ -53,17 +53,23 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         case "restore":
             restore(call, result: result)
             break
+        case "isFullScreen":
+            isFullScreen(call, result: result)
+            break
+        case "setFullScreen":
+            setFullScreen(call, result: result)
+            break
         case "getBounds":
             getBounds(call, result: result)
             break
         case "setBounds":
             setBounds(call, result: result)
             break
-        case "setMinSize":
-            setMinSize(call, result: result)
+        case "setMinimumSize":
+            setMinimumSize(call, result: result)
             break
-        case "setMaxSize":
-            setMaxSize(call, result: result)
+        case "setMaximumSize":
+            setMaximumSize(call, result: result)
             break
         case "isAlwaysOnTop":
             isAlwaysOnTop(call, result: result)
@@ -118,6 +124,29 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         self.mainWindow.deminiaturize(nil)
     }
     
+    
+    public func isFullScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let resultData: NSDictionary = [
+            "isFullScreen": mainWindow.styleMask.contains(.fullScreen),
+        ]
+        result(resultData)
+    }
+    
+    public func setFullScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args:[String: Any] = call.arguments as! [String: Any]
+        let isFullScreen: Bool = args["isFullScreen"] as! Bool
+        
+        if (isFullScreen) {
+            if (!mainWindow.styleMask.contains(.fullScreen)) {
+                mainWindow.toggleFullScreen(nil)
+            }
+        } else {
+            if (mainWindow.styleMask.contains(.fullScreen)) {
+                mainWindow.toggleFullScreen(nil)
+            }
+        }
+    }
+    
     public func getBounds(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let origin: CGPoint = mainWindow.frame.origin;
         let size: CGSize = mainWindow.frame.size;
@@ -166,7 +195,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         result(true)
     }
     
-    public func setMinSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func setMinimumSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args:[String: Any] = call.arguments as! [String: Any]
         let minSize: NSSize = NSSize(
             width: CGFloat(args["width"] as! Float),
@@ -176,7 +205,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         mainWindow.minSize = minSize
     }
     
-    public func setMaxSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func setMaximumSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args:[String: Any] = call.arguments as! [String: Any]
         let maxSize: NSSize = NSSize(
             width: CGFloat(args["width"] as! Float),
@@ -213,6 +242,14 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
     
     public func windowDidResignMain(_ notification: Notification){
         _emitEvent("blur");
+    }
+    
+    public func windowDidEnterFullScreen(_ notification: Notification){
+        _emitEvent("enter-full-screen");
+    }
+    
+    public func windowDidExitFullScreen(_ notification: Notification){
+        _emitEvent("leave-full-screen");
     }
     
     public func _emitEvent(_ eventName: String) {

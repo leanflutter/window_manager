@@ -93,13 +93,13 @@ namespace {
         result->Success(flutter::EncodableValue(true));
     }
 
-    void SetMinSize(
+    void SetMinimumSize(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         result->NotImplemented();
     }
 
-    void SetMaxSize(
+    void SetMaximumSize(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         result->NotImplemented();
@@ -143,11 +143,11 @@ namespace {
         else if (method_call.method_name().compare("setBounds") == 0) {
             SetBounds(method_call, std::move(result));
         }
-        else if (method_call.method_name().compare("setMinSize") == 0) {
-            SetMinSize(method_call, std::move(result));
+        else if (method_call.method_name().compare("setMinimumSize") == 0) {
+            SetMinimumSize(method_call, std::move(result));
         }
-        else if (method_call.method_name().compare("setMaxSize") == 0) {
-            SetMaxSize(method_call, std::move(result));
+        else if (method_call.method_name().compare("setMaximumSize") == 0) {
+            SetMaximumSize(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("isAlwaysOnTop") == 0) {
             IsAlwaysOnTop(method_call, std::move(result));
