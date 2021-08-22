@@ -30,13 +30,43 @@ GtkWindow *get_window(WindowManagerPlugin *self)
   return GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(view)));
 }
 
+static FlMethodResponse *focus(WindowManagerPlugin *self)
+{
+  gtk_window_present(get_window(self));
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *is_full_screen(WindowManagerPlugin *self)
+{
+  GdkWindow *gdk_window = gtk_widget_get_window(GTK_WIDGET(get_window(self)));
+  bool is_full_screen = (bool)(gdk_window_get_state(gdk_window) & GDK_WINDOW_STATE_FULLSCREEN);
+
+  g_autoptr(FlValue) result_data = fl_value_new_map();
+  fl_value_set_string_take(result_data, "isFullScreen", fl_value_new_bool(is_full_screen));
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result_data));
+}
+
+static FlMethodResponse *set_full_screen(WindowManagerPlugin *self,
+                                         FlValue *args)
+{
+  bool is_full_screen = fl_value_get_bool(fl_value_lookup_string(args, "isFullScreen"));
+
+  if (is_full_screen)
+    gtk_window_fullscreen(get_window(self));
+  else
+    gtk_window_unfullscreen(get_window(self));
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
 static FlMethodResponse *get_bounds(WindowManagerPlugin *self)
 {
   gint width, height;
   gtk_window_get_size(get_window(self), &width, &height);
   gint x, y;
   gtk_window_get_position(get_window(self), &x, &y);
-
 
   g_autoptr(FlValue) result_data = fl_value_new_map();
   fl_value_set_string_take(result_data, "x", fl_value_new_float(x));
@@ -48,7 +78,7 @@ static FlMethodResponse *get_bounds(WindowManagerPlugin *self)
 }
 
 static FlMethodResponse *set_bounds(WindowManagerPlugin *self,
-                                  FlValue *args)
+                                    FlValue *args)
 {
   const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
   const float height = fl_value_get_float(fl_value_lookup_string(args, "height"));
@@ -59,7 +89,7 @@ static FlMethodResponse *set_bounds(WindowManagerPlugin *self,
 }
 
 static FlMethodResponse *set_minimum_size(WindowManagerPlugin *self,
-                                      FlValue *args)
+                                          FlValue *args)
 {
   const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
   const float height = fl_value_get_float(fl_value_lookup_string(args, "height"));
@@ -92,6 +122,12 @@ static FlMethodResponse *set_always_on_top(WindowManagerPlugin *self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse *terminate(WindowManagerPlugin *self)
+{
+  gtk_window_close(get_window(self));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
 // Called when a method call is received from Flutter.
 static void window_manager_plugin_handle_method_call(
     WindowManagerPlugin *self,
@@ -101,8 +137,19 @@ static void window_manager_plugin_handle_method_call(
 
   const gchar *method = fl_method_call_get_name(method_call);
   FlValue *args = fl_method_call_get_args(method_call);
-
-  if (strcmp(method, "getBounds") == 0)
+  if (strcmp(method, "focus") == 0)
+  {
+    response = focus(self);
+  }
+  else if (strcmp(method, "isFullScreen") == 0)
+  {
+    response = is_full_screen(self);
+  }
+  else if (strcmp(method, "setFullScreen") == 0)
+  {
+    response = set_full_screen(self, args);
+  }
+  else if (strcmp(method, "getBounds") == 0)
   {
     response = get_bounds(self);
   }
@@ -114,10 +161,10 @@ static void window_manager_plugin_handle_method_call(
   {
     response = set_minimum_size(self, args);
   }
-  else if (strcmp(method, "setMaximumSize") == 0)
-  {
-    response = set_maximum_size(self, args);
-  }
+  // else if (strcmp(method, "setMaximumSize") == 0)
+  // {
+  //   response = set_maximum_size(self, args);
+  // }
   else if (strcmp(method, "isAlwaysOnTop") == 0)
   {
     response = is_always_on_top(self);
@@ -125,6 +172,10 @@ static void window_manager_plugin_handle_method_call(
   else if (strcmp(method, "setAlwaysOnTop") == 0)
   {
     response = set_always_on_top(self, args);
+  }
+  else if (strcmp(method, "terminate") == 0)
+  {
+    response = terminate(self);
   }
   else
   {

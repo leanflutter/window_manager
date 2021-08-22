@@ -74,19 +74,19 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `unmaximize`     | Unmaximizes the window.                                                | ➖    | ➖    | ➖      |
 | `minimize`       | Minimizes the window.                                                  | ➖    | ✔️    | ➖      |
 | `restore`        | Restores the window from minimized state to its previous state.        | ➖    | ✔️    | ➖      |
-| `isFullScreen`   |                                                                        | ➖    | ✔️    | ➖      |
-| `setFullScreen`  |                                                                        | ➖    | ✔️    | ➖      |
-| `getBounds`      | Returns `Rect` - The bounds of the window as Object.                   | ➖    | ✔️    | ➖      |
+| `isFullScreen`   |                                                                        | ✔️    | ✔️    | ➖      |
+| `setFullScreen`  |                                                                        | ✔️    | ✔️    | ➖      |
+| `getBounds`      | Returns `Rect` - The bounds of the window as Object.                   | ✔️    | ✔️    | ➖      |
 | `setBounds`      | Resizes and moves the window to the supplied bounds.                   | ➖    | ✔️    | ➖      |
 | `getPosition`    |                                                                        | ➖    | ✔️    | ➖      |
 | `setPosition`    |                                                                        | ➖    | ✔️    | ➖      |
-| `getSize`        |                                                                        | ➖    | ✔️    | ➖      |
-| `setSize`        |                                                                        | ➖    | ✔️    | ➖      |
+| `getSize`        |                                                                        | ✔️    | ✔️    | ✔️      |
+| `setSize`        |                                                                        | ✔️    | ✔️    | ✔️      |
 | `setMinimumSize` |                                                                        | ➖    | ✔️    | ➖      |
 | `setMaximumSize` |                                                                        | ➖    | ✔️    | ➖      |
-| `isAlwaysOnTop`  | Returns `bool` - Whether the window is always on top of other windows. | ➖    | ✔️    | ➖      |
-| `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.    | ➖    | ✔️    | ➖      |
-| `terminate`      |                                                                        | ➖    | ✔️    | ➖      |
+| `isAlwaysOnTop`  | Returns `bool` - Whether the window is always on top of other windows. | ✔️    | ✔️    | ➖      |
+| `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.    | ✔️    | ✔️    | ➖      |
+| `terminate`      |                                                                        | ✔️    | ✔️    | ➖      |
 
 ### WindowListener
 
