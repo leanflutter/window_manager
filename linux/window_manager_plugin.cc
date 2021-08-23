@@ -41,6 +41,11 @@ static FlMethodResponse *focus(WindowManagerPlugin *self)
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse *blur(WindowManagerPlugin *self)
+{
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
 static FlMethodResponse *show(WindowManagerPlugin *self)
 {
   gtk_widget_show(GTK_WIDGET(get_window(self)));
@@ -51,6 +56,12 @@ static FlMethodResponse *hide(WindowManagerPlugin *self)
 {
   gtk_widget_hide(GTK_WIDGET(get_window(self)));
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *is_visible(WindowManagerPlugin *self)
+{
+  bool is_visible = gtk_widget_is_visible(GTK_WIDGET(get_window(self)));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(is_visible)));
 }
 
 static FlMethodResponse *maximize(WindowManagerPlugin *self)
@@ -205,6 +216,10 @@ static void window_manager_plugin_handle_method_call(
   {
     response = focus(self);
   }
+  else if (strcmp(method, "blur") == 0)
+  {
+    response = blur(self);
+  }
   else if (strcmp(method, "show") == 0)
   {
     response = show(self);
@@ -212,6 +227,10 @@ static void window_manager_plugin_handle_method_call(
   else if (strcmp(method, "hide") == 0)
   {
     response = hide(self);
+  }
+  else if (strcmp(method, "isVisible") == 0)
+  {
+    response = is_visible(self);
   }
   else if (strcmp(method, "maximize") == 0)
   {

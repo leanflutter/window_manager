@@ -68,6 +68,20 @@ class _HomePageState extends State<HomePage> with WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('isVisible'),
+              onTap: () async {
+                bool isVisible = await windowManager.isVisible();
+                BotToast.showText(
+                  text: 'isVisible: $isVisible',
+                );
+
+                await Future.delayed(Duration(seconds: 2));
+                windowManager.hide();
+                isVisible = await windowManager.isVisible();
+                print('isVisible: $isVisible');
+              },
+            ),
+            PreferenceListItem(
               title: Text('maximize / unmaximize'),
               onTap: () async {
                 windowManager.maximize();

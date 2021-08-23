@@ -69,7 +69,7 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `blur`           | Removes focus from the window.                                         | ➖    | ✔️    | ➖      |
 | `show`           | Shows and gives focus to the window.                                   | ✔️    | ✔️    | ➖      |
 | `hide`           | Hides the window.                                                      | ✔️    | ✔️    | ➖      |
-| `isVisible`      | Returns `bool` - Whether the window is visible to the user.            | ➖    | ✔️    | ➖      |
+| `isVisible`      | Returns `bool` - Whether the window is visible to the user.            | ✔️    | ✔️    | ➖      |
 | `maximize`       | Maximizes the window.                                                  | ✔️    | ➖    | ➖      |
 | `unmaximize`     | Unmaximizes the window.                                                | ✔️    | ➖    | ➖      |
 | `minimize`       | Minimizes the window.                                                  | ➖    | ✔️    | ➖      |
