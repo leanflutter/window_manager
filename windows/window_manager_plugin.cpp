@@ -23,8 +23,60 @@ namespace {
         virtual ~WindowManagerPlugin();
 
     private:
+        flutter::PluginRegistrarWindows* registrar;
+
         // Called when a method is called on this plugin's channel from Dart.
         void HandleMethodCall(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+
+        HWND GetMainWindow();
+        void Show(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void Hide(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::IsVisible(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::Maximize(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::Unmaximize(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::Minimize(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::Restore(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::IsFullScreen(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::SetFullScreen(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::GetBounds(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::SetBounds(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::SetMinimumSize(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::SetMaximumSize(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::IsAlwaysOnTop(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::SetAlwaysOnTop(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::Terminate(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
     };
@@ -38,6 +90,7 @@ namespace {
                 &flutter::StandardMethodCodec::GetInstance());
 
         auto plugin = std::make_unique<WindowManagerPlugin>();
+        plugin->registrar = registrar;
 
         channel->SetMethodCallHandler(
             [plugin_pointer = plugin.get()](const auto& call, auto result) {
@@ -51,7 +104,127 @@ namespace {
 
     WindowManagerPlugin::~WindowManagerPlugin() {}
 
-    void GetBounds(
+    HWND WindowManagerPlugin::GetMainWindow() {
+        return ::GetAncestor(registrar->GetView()->GetNativeWindow(), GA_ROOT);
+    }
+
+    void WindowManagerPlugin::Show(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+
+        ShowWindow(GetMainWindow(), SW_SHOW);
+
+        result->Success(flutter::EncodableValue(true));
+    }
+
+    void WindowManagerPlugin::Hide(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+
+        ShowWindow(GetMainWindow(), SW_HIDE);
+
+        result->Success(flutter::EncodableValue(true));
+    }
+
+    void WindowManagerPlugin::IsVisible(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+    }
+
+    void WindowManagerPlugin::Maximize(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        HWND mainWindow = GetMainWindow();
+        WINDOWPLACEMENT windowPlacement;
+        GetWindowPlacement(mainWindow, &windowPlacement);
+
+        if (windowPlacement.showCmd != SW_MAXIMIZE) {
+            windowPlacement.showCmd = SW_MAXIMIZE;
+            SetWindowPlacement(mainWindow, &windowPlacement);
+        }
+        result->Success(flutter::EncodableValue(true));
+    }
+
+    void WindowManagerPlugin::Unmaximize(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        HWND mainWindow = GetMainWindow();
+        WINDOWPLACEMENT windowPlacement;
+        GetWindowPlacement(mainWindow, &windowPlacement);
+
+        if (windowPlacement.showCmd != SW_NORMAL) {
+            windowPlacement.showCmd = SW_NORMAL;
+            SetWindowPlacement(mainWindow, &windowPlacement);
+        }
+        result->Success(flutter::EncodableValue(true));
+    }
+
+    void WindowManagerPlugin::Minimize(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        HWND mainWindow = GetMainWindow();
+        WINDOWPLACEMENT windowPlacement;
+        GetWindowPlacement(mainWindow, &windowPlacement);
+
+        if (windowPlacement.showCmd != SW_MINIMIZE) {
+            windowPlacement.showCmd = SW_MINIMIZE;
+            SetWindowPlacement(mainWindow, &windowPlacement);
+        }
+        result->Success(flutter::EncodableValue(true));
+    }
+
+    void WindowManagerPlugin::Restore(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        HWND mainWindow = GetMainWindow();
+        WINDOWPLACEMENT windowPlacement;
+        GetWindowPlacement(mainWindow, &windowPlacement);
+
+        if (windowPlacement.showCmd != SW_NORMAL) {
+            windowPlacement.showCmd = SW_NORMAL;
+            SetWindowPlacement(mainWindow, &windowPlacement);
+        }
+        result->Success(flutter::EncodableValue(true));
+    }
+
+    void WindowManagerPlugin::IsFullScreen(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+
+        HWND mainWindow = GetMainWindow();
+        WINDOWPLACEMENT windowPlacement;
+        GetWindowPlacement(mainWindow, &windowPlacement);
+
+        flutter::EncodableMap resultMap = flutter::EncodableMap();
+        resultMap[flutter::EncodableValue("isFullScreen")] = flutter::EncodableValue(windowPlacement.showCmd == SW_MAXIMIZE);
+        
+        result->Success(flutter::EncodableValue(resultMap));
+    }
+
+    void WindowManagerPlugin::SetFullScreen(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
+
+        bool isFullScreen = std::get<bool>(args.at(flutter::EncodableValue("isFullScreen")));
+
+        HWND mainWindow = GetMainWindow();
+        WINDOWPLACEMENT windowPlacement;
+        GetWindowPlacement(mainWindow, &windowPlacement);
+
+        if (isFullScreen) {
+            windowPlacement.showCmd = SW_MAXIMIZE;
+            SetWindowPlacement(mainWindow, &windowPlacement);
+        }
+        else {
+            windowPlacement.showCmd = SW_NORMAL;
+            SetWindowPlacement(mainWindow, &windowPlacement);
+        }
+
+        result->Success(flutter::EncodableValue(true));
+    }
+
+    void WindowManagerPlugin::GetBounds(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
@@ -59,9 +232,8 @@ namespace {
         double devicePixelRatio = std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
 
         flutter::EncodableMap resultMap = flutter::EncodableMap();
-        HWND mainWindow = GetActiveWindow();
         RECT rect;
-        if (GetWindowRect(mainWindow, &rect))
+        if (GetWindowRect(GetMainWindow(), &rect))
         {
             double x = rect.left / devicePixelRatio * 1.0f;
             double y = rect.top / devicePixelRatio * 1.0f;
@@ -76,7 +248,7 @@ namespace {
         result->Success(flutter::EncodableValue(resultMap));
     }
 
-    void SetBounds(
+    void WindowManagerPlugin::SetBounds(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
@@ -87,57 +259,84 @@ namespace {
         double width = std::get<double>(args.at(flutter::EncodableValue("width")));
         double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
-        HWND mainWindow = GetActiveWindow();
-        SetWindowPos(mainWindow, HWND_TOP, 0, 0, int(width * devicePixelRatio), int(height * devicePixelRatio), SWP_NOMOVE);
+        SetWindowPos(GetMainWindow(), HWND_TOP, 0, 0, int(width * devicePixelRatio), int(height * devicePixelRatio), SWP_NOMOVE);
 
         result->Success(flutter::EncodableValue(true));
     }
 
-    void SetMinimumSize(
+    void WindowManagerPlugin::SetMinimumSize(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         result->NotImplemented();
     }
 
-    void SetMaximumSize(
+    void WindowManagerPlugin::SetMaximumSize(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         result->NotImplemented();
     }
 
-    void IsAlwaysOnTop(
+    void WindowManagerPlugin::IsAlwaysOnTop(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        
-        HWND mainWindow = GetActiveWindow();
-        DWORD dwExStyle = GetWindowLong(mainWindow, GWL_EXSTYLE);
+
+        DWORD dwExStyle = GetWindowLong(GetMainWindow(), GWL_EXSTYLE);
 
         flutter::EncodableMap resultMap = flutter::EncodableMap();
-        if ((dwExStyle & WS_EX_TOPMOST) != 0) {
-            resultMap[flutter::EncodableValue("isAlwaysOnTop")] = flutter::EncodableValue(true);
-        } else {
-            resultMap[flutter::EncodableValue("isAlwaysOnTop")] = flutter::EncodableValue(false);
-        }
+        resultMap[flutter::EncodableValue("isAlwaysOnTop")] = flutter::EncodableValue((dwExStyle & WS_EX_TOPMOST) != 0);
+        
         result->Success(flutter::EncodableValue(resultMap));
     }
 
-    void SetAlwaysOnTop(
+    void WindowManagerPlugin::SetAlwaysOnTop(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
 
         bool isAlwaysOnTop = std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnTop")));
 
-        HWND mainWindow = GetActiveWindow();
-        SetWindowPos(mainWindow, isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        SetWindowPos(GetMainWindow(), isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
         result->Success(flutter::EncodableValue(true));
+    }
+
+    void WindowManagerPlugin::Terminate(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        ExitProcess(1);
     }
 
     void WindowManagerPlugin::HandleMethodCall(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        if (method_call.method_name().compare("getBounds") == 0) {
+        if (method_call.method_name().compare("show") == 0) {
+            Show(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("hide") == 0) {
+            Hide(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("isVisible") == 0) {
+            IsVisible(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("maximize") == 0) {
+            Maximize(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("unmaximize") == 0) {
+            Unmaximize(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("minimize") == 0) {
+            Minimize(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("restore") == 0) {
+            Restore(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("isFullScreen") == 0) {
+            IsFullScreen(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("setFullScreen") == 0) {
+            SetFullScreen(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("getBounds") == 0) {
             GetBounds(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("setBounds") == 0) {
@@ -154,6 +353,9 @@ namespace {
         }
         else if (method_call.method_name().compare("setAlwaysOnTop") == 0) {
             SetAlwaysOnTop(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("terminate") == 0) {
+            Terminate(method_call, std::move(result));
         }
         else {
             result->NotImplemented();
