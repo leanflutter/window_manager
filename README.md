@@ -70,32 +70,38 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `show`           | Shows and gives focus to the window.                                   | ✔️    | ✔️    | ✔️      |
 | `hide`           | Hides the window.                                                      | ✔️    | ✔️    | ✔️      |
 | `isVisible`      | Returns `bool` - Whether the window is visible to the user.            | ✔️    | ✔️    | ➖      |
-| `maximize`       | Maximizes the window.                                                  | ✔️    | ➖    | ✔️      |
-| `unmaximize`     | Unmaximizes the window.                                                | ✔️    | ➖    | ✔️      |
+| `isMaximized`    | Returns Boolean - Whether the window is maximized.                     | ➖    | ✔️    | ➖      |
+| `maximize`       | Maximizes the window.                                                  | ✔️    | ✔️    | ✔️      |
+| `unmaximize`     | Unmaximizes the window.                                                | ✔️    | ✔️    | ✔️      |
+| `isMinimized`    | Returns `bool` - Whether the window is minimized.                      | ➖    | ✔️    | ➖      |
 | `minimize`       | Minimizes the window.                                                  | ➖    | ✔️    | ✔️      |
 | `restore`        | Restores the window from minimized state to its previous state.        | ➖    | ✔️    | ✔️      |
 | `isFullScreen`   | Returns `bool` - Whether the window is in fullscreen mode.             | ✔️    | ✔️    | ✔️      |
 | `setFullScreen`  | Sets whether the window should be in fullscreen mode.                  | ✔️    | ✔️    | ✔️      |
 | `getBounds`      | Returns `Rect` - The bounds of the window as Object.                   | ✔️    | ✔️    | ✔️      |
 | `setBounds`      | Resizes and moves the window to the supplied bounds.                   | ➖    | ✔️    | ➖      |
-| `getPosition`    | Moves window to `x` and `y`.                                           | ➖    | ✔️    | ➖      |
-| `setPosition`    | Returns `Offset` - Contains the window's current position.             | ➖    | ✔️    | ➖      |
+| `getPosition`    | Returns `Offset` - Contains the window's current position.             | ➖    | ✔️    | ➖      |
+| `setPosition`    | Moves window to `x` and `y`.                                           | ➖    | ✔️    | ➖      |
 | `getSize`        | Returns `Size` - Contains the window's width and height.               | ✔️    | ✔️    | ✔️      |
 | `setSize`        | Resizes the window to `width` and `height`.                            | ✔️    | ✔️    | ✔️      |
-| `setMinimumSize` | Sets the minimum size of window to width and height.                   | ✔️    | ✔️    | ➖      |
-| `setMaximumSize` | Sets the maximum size of window to width and height.                   | ✔️    | ✔️    | ➖      |
+| `setMinimumSize` | Sets the minimum size of window to `width` and `height`.               | ✔️    | ✔️    | ➖      |
+| `setMaximumSize` | Sets the maximum size of window to `width` and `height`.               | ✔️    | ✔️    | ➖      |
 | `isAlwaysOnTop`  | Returns `bool` - Whether the window is always on top of other windows. | ✔️    | ✔️    | ✔️      |
 | `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.    | ✔️    | ✔️    | ✔️      |
 | `terminate`      |                                                                        | ✔️    | ✔️    | ✔️      |
 
 ### WindowListener
 
-| Method                    | Description                                         | Linux | MacOS | Windows |
-| ------------------------- | --------------------------------------------------- | ----- | ----- | ------- |
-| `onWindowFocus`           | Emitted when the window gains focus.                | ➖    | ✔️    | ➖      |
-| `onWindowBlur`            | Emitted when the window loses focus.                | ➖    | ✔️    | ➖      |
-| `onWindowEnterFullScreen` | Emitted when the window enters a full-screen state. | ➖    | ✔️    | ➖      |
-| `onWindowLeaveFullScreen` | Emitted when the window leaves a full-screen state. | ➖    | ✔️    | ➖      |
+| Method                    | Description                                                 | Linux | MacOS | Windows |
+| ------------------------- | ----------------------------------------------------------- | ----- | ----- | ------- |
+| `onWindowFocus`           | Emitted when the window gains focus.                        | ➖    | ✔️    | ➖      |
+| `onWindowBlur`            | Emitted when the window loses focus.                        | ➖    | ✔️    | ➖      |
+| `onWindowMaximize`        | Emitted when window is maximized.                           | ➖    | ➖    | ➖      |
+| `onWindowUnmaximize`      | Emitted when the window exits from a maximized state.       | ➖    | ➖    | ➖      |
+| `onWindowMinimize`        | Emitted when the window is minimized.                       | ➖    | ✔️    | ➖      |
+| `onWindowRestore`         | Emitted when the window is restored from a minimized state. | ➖    | ✔️    | ➖      |
+| `onWindowEnterFullScreen` | Emitted when the window enters a full-screen state.         | ➖    | ✔️    | ➖      |
+| `onWindowLeaveFullScreen` | Emitted when the window leaves a full-screen state.         | ➖    | ✔️    | ➖      |
 
 ## License
 

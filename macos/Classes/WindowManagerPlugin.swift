@@ -41,11 +41,17 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         case "isVisible":
             isVisible(call, result: result)
             break
+        case "isMaximized":
+            isMaximized(call, result: result)
+            break
         case "maximize":
             maximize(call, result: result)
             break
         case "unmaximize":
             unmaximize(call, result: result)
+            break
+        case "isMinimized":
+            isMinimized(call, result: result)
             break
         case "minimize":
             minimize(call, result: result)
@@ -108,12 +114,24 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         result(self.mainWindow.isVisible)
     }
     
-    public func maximize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        
+    public func isMaximized(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        result(mainWindow.isZoomed)
     }
     
+    public func maximize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        if (!self.mainWindow.isZoomed) {
+            self.mainWindow.zoom(nil);
+        }
+    }
+
     public func unmaximize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        
+        if (self.mainWindow.isZoomed) {
+            self.mainWindow.zoom(nil);
+        }
+    }
+    
+    public func isMinimized(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        result(mainWindow.isMiniaturized)
     }
     
     public func minimize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -124,12 +142,8 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         self.mainWindow.deminiaturize(nil)
     }
     
-    
     public func isFullScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let resultData: NSDictionary = [
-            "isFullScreen": mainWindow.styleMask.contains(.fullScreen),
-        ]
-        result(resultData)
+        result(mainWindow.styleMask.contains(.fullScreen))
     }
     
     public func setFullScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -242,6 +256,14 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
     
     public func windowDidResignMain(_ notification: Notification){
         _emitEvent("blur");
+    }
+    
+    public func windowDidMiniaturize(_ notification: Notification) {
+        _emitEvent("minimize");
+    }
+    
+    public func windowDidDeminiaturize(_ notification: Notification) {
+        _emitEvent("restore");
     }
     
     public func windowDidEnterFullScreen(_ notification: Notification){

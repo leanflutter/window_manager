@@ -9,6 +9,10 @@ import 'window_listener.dart';
 
 const kWindowEventFocus = 'focus';
 const kWindowEventBlur = 'blur';
+const kWindowEventMaximize = 'maximize';
+const kWindowEventUnmaximize = 'unmaximize';
+const kWindowEventMinimize = 'minimize';
+const kWindowEventRestore = 'restore';
 const kWindowEventEnterFullScreen = 'enter-full-screen';
 const kWindowEventLeaveFullScreen = 'leave-full-screen';
 
@@ -46,6 +50,10 @@ class WindowManager {
       Map<String, Function> funcMap = {
         kWindowEventFocus: listener.onWindowFocus,
         kWindowEventBlur: listener.onWindowBlur,
+        kWindowEventMaximize: listener.onWindowMaximize,
+        kWindowEventUnmaximize: listener.onWindowUnmaximize,
+        kWindowEventMinimize: listener.onWindowMinimize,
+        kWindowEventRestore: listener.onWindowRestore,
         kWindowEventEnterFullScreen: listener.onWindowEnterFullScreen,
         kWindowEventLeaveFullScreen: listener.onWindowLeaveFullScreen,
       };
@@ -97,6 +105,10 @@ class WindowManager {
     return await _channel.invokeMethod('isVisible');
   }
 
+  Future<bool> isMaximized() async {
+    return await _channel.invokeMethod('isMaximized');
+  }
+
   // 最大化窗口。 如果窗口尚未显示，该方法也会将其显示 (但不会聚焦)。
   void maximize() {
     _channel.invokeMethod('maximize');
@@ -105,6 +117,10 @@ class WindowManager {
   // 取消窗口最大化
   void unmaximize() {
     _channel.invokeMethod('unmaximize');
+  }
+
+  Future<bool> isMinimized() async {
+    return await _channel.invokeMethod('isMinimized');
   }
 
   // 最小化窗口。 在某些平台上, 最小化的窗口将显示在Dock中。
@@ -119,9 +135,7 @@ class WindowManager {
 
   // 返回 bool - 窗口当前是否已全屏
   Future<bool> isFullScreen() async {
-    final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('isFullScreen');
-    return resultData['isFullScreen'];
+    return await _channel.invokeMethod('isFullScreen');
   }
 
   // 设置窗口是否应处于全屏模式。

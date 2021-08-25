@@ -82,11 +82,34 @@ class _HomePageState extends State<HomePage> with WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('isMaximized'),
+              onTap: () async {
+                bool isMaximized = await windowManager.isMaximized();
+                BotToast.showText(
+                  text: 'isMaximized: $isMaximized',
+                );
+              },
+            ),
+            PreferenceListItem(
               title: Text('maximize / unmaximize'),
               onTap: () async {
                 windowManager.maximize();
                 await Future.delayed(Duration(seconds: 2));
                 windowManager.unmaximize();
+              },
+            ),
+            PreferenceListItem(
+              title: Text('isMinimized'),
+              onTap: () async {
+                bool isMinimized = await windowManager.isMinimized();
+                BotToast.showText(
+                  text: 'isMinimized: $isMinimized',
+                );
+
+                await Future.delayed(Duration(seconds: 2));
+                windowManager.minimize();
+                isMinimized = await windowManager.isMinimized();
+                print('isMinimized: $isMinimized');
               },
             ),
             PreferenceListItem(
