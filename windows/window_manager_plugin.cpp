@@ -25,6 +25,11 @@ namespace {
     private:
         flutter::PluginRegistrarWindows* registrar;
 
+        bool g_is_window_fullscreen = false;
+        // Initial window frame before going fullscreen & used for restoring window to
+        // initial frame upon exiting fullscreen.
+        RECT g_frame_before_fullscreen;
+
         // Called when a method is called on this plugin's channel from Dart.
         void HandleMethodCall(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
@@ -241,14 +246,7 @@ namespace {
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
 
-        HWND mainWindow = GetMainWindow();
-        WINDOWPLACEMENT windowPlacement;
-        GetWindowPlacement(mainWindow, &windowPlacement);
-
-        flutter::EncodableMap resultMap = flutter::EncodableMap();
-        resultMap[flutter::EncodableValue("isFullScreen")] = flutter::EncodableValue(windowPlacement.showCmd == SW_MAXIMIZE);
-        
-        result->Success(flutter::EncodableValue(resultMap));
+        result->Success(flutter::EncodableValue(g_is_window_fullscreen));
     }
 
     void WindowManagerPlugin::SetFullScreen(
@@ -262,13 +260,30 @@ namespace {
         WINDOWPLACEMENT windowPlacement;
         GetWindowPlacement(mainWindow, &windowPlacement);
 
+        // https://github.com/alexmercerind/flutter-desktop-embedding/blob/da98a3b5a0e2b9425fbcb2a3e4b4ba50754abf93/plugins/window_size/windows/window_size_plugin.cpp#L258
         if (isFullScreen) {
-            windowPlacement.showCmd = SW_MAXIMIZE;
-            SetWindowPlacement(mainWindow, &windowPlacement);
+            HMONITOR monitor = ::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST);
+            MONITORINFO info;
+            info.cbSize = sizeof(MONITORINFO);
+            ::GetMonitorInfo(monitor, &info);
+            ::SetWindowLongPtr(mainWindow, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+            ::GetWindowRect(mainWindow, &g_frame_before_fullscreen);
+            ::SetWindowPos(
+                mainWindow, HWND_TOPMOST, info.rcMonitor.left, info.rcMonitor.top,
+                info.rcMonitor.right - info.rcMonitor.left,
+                info.rcMonitor.bottom - info.rcMonitor.top, SWP_SHOWWINDOW);
+            ::ShowWindow(mainWindow, SW_MAXIMIZE);
         }
         else {
-            windowPlacement.showCmd = SW_NORMAL;
-            SetWindowPlacement(mainWindow, &windowPlacement);
+            g_is_window_fullscreen = false;
+            ::SetWindowLongPtr(mainWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+            ::SetWindowPos(
+                mainWindow, HWND_NOTOPMOST, g_frame_before_fullscreen.left,
+                g_frame_before_fullscreen.top,
+                g_frame_before_fullscreen.right - g_frame_before_fullscreen.left,
+                g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top,
+                SWP_SHOWWINDOW);
+            ::ShowWindow(mainWindow, SW_RESTORE);
         }
 
         result->Success(flutter::EncodableValue(true));
