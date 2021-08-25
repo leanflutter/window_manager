@@ -69,19 +69,19 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `blur`           | Removes focus from the window.                                         | ➖    | ✔️    | ➖      |
 | `show`           | Shows and gives focus to the window.                                   | ✔️    | ✔️    | ✔️      |
 | `hide`           | Hides the window.                                                      | ✔️    | ✔️    | ✔️      |
-| `isVisible`      | Returns `bool` - Whether the window is visible to the user.            | ✔️    | ✔️    | ➖      |
-| `isMaximized`    | Returns Boolean - Whether the window is maximized.                     | ✔️    | ✔️    | ➖      |
+| `isVisible`      | Returns `bool` - Whether the window is visible to the user.            | ✔️    | ✔️    | ✔️      |
+| `isMaximized`    | Returns Boolean - Whether the window is maximized.                     | ✔️    | ✔️    | ✔️      |
 | `maximize`       | Maximizes the window.                                                  | ✔️    | ✔️    | ✔️      |
 | `unmaximize`     | Unmaximizes the window.                                                | ✔️    | ✔️    | ✔️      |
-| `isMinimized`    | Returns `bool` - Whether the window is minimized.                      | ➖    | ✔️    | ➖      |
+| `isMinimized`    | Returns `bool` - Whether the window is minimized.                      | ➖    | ✔️    | ✔️      |
 | `minimize`       | Minimizes the window.                                                  | ➖    | ✔️    | ✔️      |
 | `restore`        | Restores the window from minimized state to its previous state.        | ➖    | ✔️    | ✔️      |
 | `isFullScreen`   | Returns `bool` - Whether the window is in fullscreen mode.             | ✔️    | ✔️    | ✔️      |
 | `setFullScreen`  | Sets whether the window should be in fullscreen mode.                  | ✔️    | ✔️    | ✔️      |
 | `getBounds`      | Returns `Rect` - The bounds of the window as Object.                   | ✔️    | ✔️    | ✔️      |
-| `setBounds`      | Resizes and moves the window to the supplied bounds.                   | ✔️    | ✔️    | ➖      |
-| `getPosition`    | Returns `Offset` - Contains the window's current position.             | ✔️    | ✔️    | ➖      |
-| `setPosition`    | Moves window to `x` and `y`.                                           | ✔️    | ✔️    | ➖      |
+| `setBounds`      | Resizes and moves the window to the supplied bounds.                   | ✔️    | ✔️    | ✔️      |
+| `getPosition`    | Returns `Offset` - Contains the window's current position.             | ✔️    | ✔️    | ✔️      |
+| `setPosition`    | Moves window to `x` and `y`.                                           | ✔️    | ✔️    | ✔️      |
 | `getSize`        | Returns `Size` - Contains the window's width and height.               | ✔️    | ✔️    | ✔️      |
 | `setSize`        | Resizes the window to `width` and `height`.                            | ✔️    | ✔️    | ✔️      |
 | `setMinimumSize` | Sets the minimum size of window to `width` and `height`.               | ✔️    | ✔️    | ➖      |

@@ -40,10 +40,16 @@ namespace {
         void WindowManagerPlugin::IsVisible(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::IsMaximized(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
         void WindowManagerPlugin::Maximize(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
         void WindowManagerPlugin::Unmaximize(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::IsMinimized(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
         void WindowManagerPlugin::Minimize(
@@ -129,6 +135,20 @@ namespace {
     void WindowManagerPlugin::IsVisible(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+
+        bool isVisible = IsWindowVisible(GetMainWindow());
+
+        result->Success(flutter::EncodableValue(isVisible));
+    }
+
+    void WindowManagerPlugin::IsMaximized(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        HWND mainWindow = GetMainWindow();
+        WINDOWPLACEMENT windowPlacement;
+        GetWindowPlacement(mainWindow, &windowPlacement);
+
+        result->Success(flutter::EncodableValue(windowPlacement.showCmd == SW_MAXIMIZE));
     }
 
     void WindowManagerPlugin::Maximize(
@@ -159,6 +179,16 @@ namespace {
         result->Success(flutter::EncodableValue(true));
     }
 
+    void WindowManagerPlugin::IsMinimized(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        HWND mainWindow = GetMainWindow();
+        WINDOWPLACEMENT windowPlacement;
+        GetWindowPlacement(mainWindow, &windowPlacement);
+
+        result->Success(flutter::EncodableValue(windowPlacement.showCmd == SW_SHOWMINIMIZED));
+    }
+
     void WindowManagerPlugin::Minimize(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
@@ -166,8 +196,8 @@ namespace {
         WINDOWPLACEMENT windowPlacement;
         GetWindowPlacement(mainWindow, &windowPlacement);
 
-        if (windowPlacement.showCmd != SW_MINIMIZE) {
-            windowPlacement.showCmd = SW_MINIMIZE;
+        if (windowPlacement.showCmd != SW_SHOWMINIMIZED) {
+            windowPlacement.showCmd = SW_SHOWMINIMIZED;
             SetWindowPlacement(mainWindow, &windowPlacement);
         }
         result->Success(flutter::EncodableValue(true));
@@ -254,12 +284,20 @@ namespace {
         const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
 
         double devicePixelRatio = std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
-        // double x = std::get<double>(args.at(flutter::EncodableValue("origin_x")));
-        // double y = std::get<double>(args.at(flutter::EncodableValue("origin_y")));
+        double x = std::get<double>(args.at(flutter::EncodableValue("x")));
+        double y = std::get<double>(args.at(flutter::EncodableValue("y")));
         double width = std::get<double>(args.at(flutter::EncodableValue("width")));
         double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
-        SetWindowPos(GetMainWindow(), HWND_TOP, 0, 0, int(width * devicePixelRatio), int(height * devicePixelRatio), SWP_NOMOVE);
+        SetWindowPos(
+            GetMainWindow(), 
+            HWND_TOP, 
+            int(x * devicePixelRatio), 
+            int(y * devicePixelRatio), 
+            int(width * devicePixelRatio), 
+            int(height * devicePixelRatio), 
+            SWP_SHOWWINDOW
+        );
 
         result->Success(flutter::EncodableValue(true));
     }
@@ -318,11 +356,17 @@ namespace {
         else if (method_call.method_name().compare("isVisible") == 0) {
             IsVisible(method_call, std::move(result));
         }
+        else if (method_call.method_name().compare("isMaximized") == 0) {
+            IsMaximized(method_call, std::move(result));
+        }
         else if (method_call.method_name().compare("maximize") == 0) {
             Maximize(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("unmaximize") == 0) {
             Unmaximize(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("isMinimized") == 0) {
+            IsMinimized(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("minimize") == 0) {
             Minimize(method_call, std::move(result));
