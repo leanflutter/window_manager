@@ -79,6 +79,8 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 windowManager.hide();
                 isVisible = await windowManager.isVisible();
                 print('isVisible: $isVisible');
+                await Future.delayed(Duration(seconds: 2));
+                windowManager.show();
               },
             ),
             PreferenceListItem(

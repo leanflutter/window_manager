@@ -31,10 +31,16 @@ namespace {
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 
         HWND GetMainWindow();
-        void Show(
+        void WindowManagerPlugin::Focus(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
-        void Hide(
+        void WindowManagerPlugin::Blur(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::Show(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::Hide(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
         void WindowManagerPlugin::IsVisible(
@@ -112,6 +118,20 @@ namespace {
 
     HWND WindowManagerPlugin::GetMainWindow() {
         return ::GetAncestor(registrar->GetView()->GetNativeWindow(), GA_ROOT);
+    }
+
+    void WindowManagerPlugin::Focus(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        
+        result->Success(flutter::EncodableValue(true));
+    }
+
+    void WindowManagerPlugin::Blur(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        
+        result->Success(flutter::EncodableValue(true));
     }
 
     void WindowManagerPlugin::Show(
