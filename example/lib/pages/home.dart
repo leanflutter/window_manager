@@ -152,6 +152,44 @@ class _HomePageState extends State<HomePage> with WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('getPosition / setPosition'),
+              accessoryView: CupertinoButton(
+                child: Text('Set'),
+                onPressed: () async {
+                  Offset position = await windowManager.getPosition();
+                  windowManager.setPosition(
+                    Offset(position.dx + 100, position.dy + 100),
+                  );
+                  setState(() {});
+                },
+              ),
+              onTap: () async {
+                Offset position = await windowManager.getPosition();
+                BotToast.showText(
+                  text: '${position.toString()}',
+                );
+              },
+            ),
+            PreferenceListItem(
+              title: Text('getSize / setSize'),
+              accessoryView: CupertinoButton(
+                child: Text('Set'),
+                onPressed: () async {
+                  Size size = await windowManager.getSize();
+                  windowManager.setSize(
+                    Size(size.width + 100, size.height + 100),
+                  );
+                  setState(() {});
+                },
+              ),
+              onTap: () async {
+                Offset position = await windowManager.getPosition();
+                BotToast.showText(
+                  text: '${position.toString()}',
+                );
+              },
+            ),
+            PreferenceListItem(
               title: Text('getMinimumSize / setMinimumSize'),
               accessoryView: ToggleButtons(
                 children: <Widget>[

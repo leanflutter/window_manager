@@ -64,6 +64,12 @@ static FlMethodResponse *is_visible(WindowManagerPlugin *self)
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(is_visible)));
 }
 
+static FlMethodResponse *is_maximized(WindowManagerPlugin *self)
+{
+  bool is_maximized = gtk_window_is_maximized(get_window(self));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(is_maximized)));
+}
+
 static FlMethodResponse *maximize(WindowManagerPlugin *self)
 {
   gtk_window_maximize(get_window(self));
@@ -128,10 +134,13 @@ static FlMethodResponse *get_bounds(WindowManagerPlugin *self)
 static FlMethodResponse *set_bounds(WindowManagerPlugin *self,
                                     FlValue *args)
 {
+  const float x = fl_value_get_float(fl_value_lookup_string(args, "x"));
+  const float y = fl_value_get_float(fl_value_lookup_string(args, "y"));
   const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
   const float height = fl_value_get_float(fl_value_lookup_string(args, "height"));
 
   gtk_window_resize(get_window(self), static_cast<gint>(width), static_cast<gint>(height));
+  gtk_window_move(get_window(self), static_cast<gint>(x), static_cast<gint>(y));
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
@@ -180,10 +189,7 @@ static FlMethodResponse *set_maximum_size(WindowManagerPlugin *self,
 
 static FlMethodResponse *is_always_on_top(WindowManagerPlugin *self)
 {
-  g_autoptr(FlValue) result_data = fl_value_new_map();
-  fl_value_set_string_take(result_data, "isAlwaysOnTop", fl_value_new_bool(self->_is_always_on_top));
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(result_data));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(self->_is_always_on_top)));
 }
 
 static FlMethodResponse *set_always_on_top(WindowManagerPlugin *self,
@@ -231,6 +237,10 @@ static void window_manager_plugin_handle_method_call(
   else if (strcmp(method, "isVisible") == 0)
   {
     response = is_visible(self);
+  }
+  else if (strcmp(method, "isMaximized") == 0)
+  {
+    response = is_maximized(self);
   }
   else if (strcmp(method, "maximize") == 0)
   {
