@@ -2,29 +2,21 @@ import Cocoa
 import FlutterMacOS
 
 public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
+    var registrar: FlutterPluginRegistrar!;
     var channel: FlutterMethodChannel!
-    
-    var mainWindow: NSWindow {
-        get {
-            return NSApp.windows.first(where: { window in
-                return String(describing: type(of: window)) == "MainFlutterWindow"
-            })!;
-        }
-    }
-    
-    public override init() {
-        super.init()
-        mainWindow.delegate = self
-    }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "window_manager", binaryMessenger: registrar.messenger)
         let instance = WindowManagerPlugin()
+        instance.registrar = registrar
         instance.channel = channel
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        if (getMainWindow().delegate == nil) {
+            getMainWindow().delegate = self;
+        }
         switch (call.method) {
         case "focus":
             focus(call, result: result)
@@ -91,13 +83,17 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         }
     }
     
+    public func getMainWindow() -> NSWindow {
+        return (registrar.view?.window)!
+    }
+    
     public func show(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        self.mainWindow.makeKeyAndOrderFront(nil)
+        getMainWindow().makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
     
     public func focus(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        self.mainWindow.makeKeyAndOrderFront(nil)
+        getMainWindow().makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
     
@@ -106,44 +102,44 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
     }
     
     public func hide(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        self.mainWindow.orderOut(self.mainWindow)
+        getMainWindow().orderOut(getMainWindow())
         result(true)
     }
     
     public func isVisible(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        result(self.mainWindow.isVisible)
+        result(getMainWindow().isVisible)
     }
     
     public func isMaximized(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        result(mainWindow.isZoomed)
+        result(getMainWindow().isZoomed)
     }
     
     public func maximize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if (!self.mainWindow.isZoomed) {
-            self.mainWindow.zoom(nil);
+        if (!getMainWindow().isZoomed) {
+            getMainWindow().zoom(nil);
         }
     }
 
     public func unmaximize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if (self.mainWindow.isZoomed) {
-            self.mainWindow.zoom(nil);
+        if (getMainWindow().isZoomed) {
+            getMainWindow().zoom(nil);
         }
     }
     
     public func isMinimized(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        result(mainWindow.isMiniaturized)
+        result(getMainWindow().isMiniaturized)
     }
     
     public func minimize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        self.mainWindow.miniaturize(nil)
+        getMainWindow().miniaturize(nil)
     }
     
     public func restore(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        self.mainWindow.deminiaturize(nil)
+        getMainWindow().deminiaturize(nil)
     }
     
     public func isFullScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        result(mainWindow.styleMask.contains(.fullScreen))
+        result(getMainWindow().styleMask.contains(.fullScreen))
     }
     
     public func setFullScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -151,19 +147,19 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         let isFullScreen: Bool = args["isFullScreen"] as! Bool
         
         if (isFullScreen) {
-            if (!mainWindow.styleMask.contains(.fullScreen)) {
-                mainWindow.toggleFullScreen(nil)
+            if (!getMainWindow().styleMask.contains(.fullScreen)) {
+                getMainWindow().toggleFullScreen(nil)
             }
         } else {
-            if (mainWindow.styleMask.contains(.fullScreen)) {
-                mainWindow.toggleFullScreen(nil)
+            if (getMainWindow().styleMask.contains(.fullScreen)) {
+                getMainWindow().toggleFullScreen(nil)
             }
         }
     }
     
     public func getBounds(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let origin: CGPoint = mainWindow.frame.origin;
-        let size: CGSize = mainWindow.frame.size;
+        let origin: CGPoint = getMainWindow().frame.origin;
+        let size: CGSize = getMainWindow().frame.size;
         
         let resultData: NSDictionary = [
             "x": origin.x,
@@ -193,7 +189,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
             )
         }
         
-        var frameRect = mainWindow.frame
+        var frameRect = getMainWindow().frame
         if (newSize != nil) {
             frameRect.size = newSize!
         }
@@ -202,9 +198,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         }
         
         if (animate) {
-            mainWindow.animator().setFrame(frameRect, display: true, animate: true)
+            getMainWindow().animator().setFrame(frameRect, display: true, animate: true)
         } else {
-            mainWindow.setFrame(frameRect, display: true)
+            getMainWindow().setFrame(frameRect, display: true)
         }
         result(true)
     }
@@ -216,7 +212,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
             height: CGFloat(args["height"] as! Float)
         )
         
-        mainWindow.minSize = minSize
+        getMainWindow().minSize = minSize
     }
     
     public func setMaximumSize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -226,12 +222,12 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
             height: CGFloat(args["height"] as! Float)
         )
         
-        mainWindow.maxSize = maxSize
+        getMainWindow().maxSize = maxSize
     }
     
     public func isAlwaysOnTop(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let resultData: NSDictionary = [
-            "isAlwaysOnTop": mainWindow.level == .floating,
+            "isAlwaysOnTop": getMainWindow().level == .floating,
         ]
         result(resultData)
     }
@@ -240,7 +236,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         let args:[String: Any] = call.arguments as! [String: Any]
         let isAlwaysOnTop: Bool = args["isAlwaysOnTop"] as! Bool
         
-        mainWindow.level = isAlwaysOnTop ? .floating : .normal
+        getMainWindow().level = isAlwaysOnTop ? .floating : .normal
     }
     
     public func terminate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
