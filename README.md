@@ -77,9 +77,9 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `isMaximized`    | Returns Boolean - Whether the window is maximized.                     | ✔️    | ✔️    | ✔️      |
 | `maximize`       | Maximizes the window.                                                  | ✔️    | ✔️    | ✔️      |
 | `unmaximize`     | Unmaximizes the window.                                                | ✔️    | ✔️    | ✔️      |
-| `isMinimized`    | Returns `bool` - Whether the window is minimized.                      | ➖    | ✔️    | ✔️      |
-| `minimize`       | Minimizes the window.                                                  | ➖    | ✔️    | ✔️      |
-| `restore`        | Restores the window from minimized state to its previous state.        | ➖    | ✔️    | ✔️      |
+| `isMinimized`    | Returns `bool` - Whether the window is minimized.                      | ✔️    | ✔️    | ✔️      |
+| `minimize`       | Minimizes the window.                                                  | ✔️    | ✔️    | ✔️      |
+| `restore`        | Restores the window from minimized state to its previous state.        | ✔️    | ✔️    | ✔️      |
 | `isFullScreen`   | Returns `bool` - Whether the window is in fullscreen mode.             | ✔️    | ✔️    | ✔️      |
 | `setFullScreen`  | Sets whether the window should be in fullscreen mode.                  | ✔️    | ✔️    | ✔️      |
 | `getBounds`      | Returns `Rect` - The bounds of the window as Object.                   | ✔️    | ✔️    | ✔️      |

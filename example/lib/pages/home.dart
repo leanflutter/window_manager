@@ -113,6 +113,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 await Future.delayed(Duration(seconds: 2));
                 isMinimized = await windowManager.isMinimized();
                 print('isMinimized: $isMinimized');
+                windowManager.restore();
               },
             ),
             PreferenceListItem(

@@ -15,6 +15,7 @@ struct _WindowManagerPlugin
   GObject parent_instance;
   FlPluginRegistrar *registrar;
   GdkGeometry window_geometry;
+  bool _is_minimized = false;
   bool _is_always_on_top = false;
 };
 
@@ -82,13 +83,23 @@ static FlMethodResponse *unmaximize(WindowManagerPlugin *self)
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse *is_minimized(WindowManagerPlugin *self)
+{
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(self->_is_minimized)));
+}
+
 static FlMethodResponse *minimize(WindowManagerPlugin *self)
 {
+  gtk_window_iconify(get_window(self));
+  self->_is_minimized = true;
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
 static FlMethodResponse *restore(WindowManagerPlugin *self)
 {
+  gtk_window_deiconify(get_window(self));
+  gtk_window_present(get_window(self));
+  self->_is_minimized = false;
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
@@ -249,6 +260,10 @@ static void window_manager_plugin_handle_method_call(
   else if (strcmp(method, "unmaximize") == 0)
   {
     response = unmaximize(self);
+  }
+  else if (strcmp(method, "isMinimized") == 0)
+  {
+    response = is_minimized(self);
   }
   else if (strcmp(method, "minimize") == 0)
   {
