@@ -87,11 +87,6 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         return (registrar.view?.window)!
     }
     
-    public func show(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        getMainWindow().makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-    }
-    
     public func focus(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         getMainWindow().makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -99,6 +94,11 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
     
     public func blur(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         NSApp.deactivate()
+    }
+    
+    public func show(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        getMainWindow().makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     public func hide(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
