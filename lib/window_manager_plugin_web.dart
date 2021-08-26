@@ -22,13 +22,12 @@ class WindowManagerPlugin {
     channel.setMethodCallHandler(pluginInstance.handleMethodCall);
   }
 
-  bool _inited = false;
+  WindowManagerPlugin() {
+    _init();
+  }
 
   void _init() {
-    js.context.callMethod(
-      'windowManagerPluginInit',
-      [],
-    );
+    js.context.callMethod('windowManagerPluginInit', []);
   }
 
   /// Handles method calls over the MethodChannel of this plugin.
@@ -36,6 +35,22 @@ class WindowManagerPlugin {
   /// https://flutter.dev/go/federated-plugins
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
+      case "show":
+        return show(call);
+      case "hide":
+        return hide(call);
+      case "isVisible":
+        return isVisible(call);
+      case "isMaximized":
+        return isMaximized(call);
+      case "maximize":
+        return maximize(call);
+      case "unmaximize":
+        return unmaximize(call);
+      case "isFullScreen":
+        return isFullScreen(call);
+      case "setFullScreen":
+        return setFullScreen(call);
       case "getBounds":
         return getBounds(call);
       case "setBounds":
@@ -53,9 +68,50 @@ class WindowManagerPlugin {
     }
   }
 
-  Future<Map<dynamic, dynamic>> getBounds(MethodCall call) {
-    if (!_inited) _init();
+  Future<bool> show(MethodCall call) {
+    js.context.callMethod('windowManagerPluginShow', []);
+    return Future.value(true);
+  }
 
+  Future<bool> hide(MethodCall call) {
+    js.context.callMethod('windowManagerPluginHide', []);
+    return Future.value(true);
+  }
+
+  Future<bool> isVisible(MethodCall call) {
+    js.JsObject resultData =
+        js.context.callMethod('windowManagerPluginIsVisible', []);
+    return Future.value(resultData['isVisible'] as bool);
+  }
+
+  Future<bool> isMaximized(MethodCall call) {
+    js.JsObject resultData =
+        js.context.callMethod('windowManagerPluginIsMaximized', []);
+    return Future.value(resultData['isMaximized'] as bool);
+  }
+
+  Future<bool> maximize(MethodCall call) {
+    js.context.callMethod('windowManagerPluginMaximize', []);
+    return Future.value(true);
+  }
+
+  Future<bool> unmaximize(MethodCall call) {
+    js.context.callMethod('windowManagerPluginUnmaximize', []);
+    return Future.value(true);
+  }
+
+  Future<bool> isFullScreen(MethodCall call) {
+    js.JsObject resultData =
+        js.context.callMethod('windowManagerPluginIsFullScreen', []);
+    return Future.value(resultData['isFullScreen'] as bool);
+  }
+
+  Future<bool> setFullScreen(MethodCall call) {
+    js.context.callMethod('windowManagerPluginSetFullScreen', []);
+    return Future.value(true);
+  }
+
+  Future<Map<dynamic, dynamic>> getBounds(MethodCall call) {
     num x = 0;
     num y = 0;
     num width = 0;
@@ -80,8 +136,6 @@ class WindowManagerPlugin {
   }
 
   Future<bool> setBounds(MethodCall call) {
-    if (!_inited) _init();
-
     Map<String, dynamic> args = Map<String, dynamic>.from(call.arguments);
     num? x = args['x'];
     num? y = args['y'];
