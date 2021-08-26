@@ -74,7 +74,7 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `show`           | Shows and gives focus to the window.                                   | ✔️    | ✔️    | ✔️      |
 | `hide`           | Hides the window.                                                      | ✔️    | ✔️    | ✔️      |
 | `isVisible`      | Returns `bool` - Whether the window is visible to the user.            | ✔️    | ✔️    | ✔️      |
-| `isMaximized`    | Returns Boolean - Whether the window is maximized.                     | ✔️    | ✔️    | ✔️      |
+| `isMaximized`    | Returns `bool` - Whether the window is maximized.                      | ✔️    | ✔️    | ✔️      |
 | `maximize`       | Maximizes the window.                                                  | ✔️    | ✔️    | ✔️      |
 | `unmaximize`     | Unmaximizes the window.                                                | ✔️    | ✔️    | ✔️      |
 | `isMinimized`    | Returns `bool` - Whether the window is minimized.                      | ✔️    | ✔️    | ✔️      |
@@ -92,6 +92,8 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `setMaximumSize` | Sets the maximum size of window to `width` and `height`.               | ✔️    | ✔️    | ➖      |
 | `isAlwaysOnTop`  | Returns `bool` - Whether the window is always on top of other windows. | ✔️    | ✔️    | ✔️      |
 | `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.    | ✔️    | ✔️    | ✔️      |
+| `getTitle`       | Returns `String` - The title of the native window.                     | ✔️    | ✔️    | ✔️      |
+| `setTitle`       | Changes the title of native window to title.                           | ✔️    | ✔️    | ✔️      |
 | `terminate`      |                                                                        | ✔️    | ✔️    | ✔️      |
 
 ### WindowListener

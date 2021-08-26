@@ -235,6 +235,17 @@ class WindowManager {
     _channel.invokeMethod('setAlwaysOnTop', arguments);
   }
 
+  Future<String> getTitle() async {
+    return await _channel.invokeMethod('getTitle');
+  }
+
+  Future<void> setTitle(String title) async {
+    final Map<String, dynamic> arguments = {
+      'title': title,
+    };
+    await _channel.invokeMethod('setTitle', arguments);
+  }
+
   Future<void> terminate() async {
     await _channel.invokeMethod('terminate');
   }

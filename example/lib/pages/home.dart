@@ -125,6 +125,25 @@ class _HomePageState extends State<HomePage> with WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('isFullScreen / setFullScreen'),
+              accessoryView: ToggleButtons(
+                children: <Widget>[
+                  Text('YES'),
+                  Text('NO'),
+                ],
+                onPressed: (int index) {
+                  _isFullScreen = !_isFullScreen;
+                  windowManager.setFullScreen(_isFullScreen);
+                  setState(() {});
+                },
+                isSelected: [_isFullScreen, !_isFullScreen],
+              ),
+              onTap: () async {
+                bool isFullScreen = await windowManager.isFullScreen();
+                BotToast.showText(text: 'isFullScreen: $isFullScreen');
+              },
+            ),
+            PreferenceListItem(
               title: Text('setBounds / setBounds'),
               accessoryView: ToggleButtons(
                 children: <Widget>[
@@ -224,36 +243,6 @@ class _HomePageState extends State<HomePage> with WindowListener {
               ),
             ),
             PreferenceListItem(
-              title: Text('terminate'),
-              onTap: () async {
-                await windowManager.terminate();
-              },
-            ),
-          ],
-        ),
-        PreferenceListSection(
-          title: Text('Option'),
-          children: [
-            PreferenceListItem(
-              title: Text('isFullScreen / setFullScreen'),
-              accessoryView: ToggleButtons(
-                children: <Widget>[
-                  Text('YES'),
-                  Text('NO'),
-                ],
-                onPressed: (int index) {
-                  _isFullScreen = !_isFullScreen;
-                  windowManager.setFullScreen(_isFullScreen);
-                  setState(() {});
-                },
-                isSelected: [_isFullScreen, !_isFullScreen],
-              ),
-              onTap: () async {
-                bool isFullScreen = await windowManager.isFullScreen();
-                BotToast.showText(text: 'isFullScreen: $isFullScreen');
-              },
-            ),
-            PreferenceListItem(
               title: Text('isAlwaysOnTop / setAlwaysOnTop'),
               accessoryView: ToggleButtons(
                 children: <Widget>[
@@ -270,6 +259,24 @@ class _HomePageState extends State<HomePage> with WindowListener {
               onTap: () async {
                 bool isAlwaysOnTop = await windowManager.isAlwaysOnTop();
                 BotToast.showText(text: 'isAlwaysOnTop: $isAlwaysOnTop');
+              },
+            ),
+            PreferenceListItem(
+              title: Text('getTitle / setTitle'),
+              onTap: () async {
+                String title = await windowManager.getTitle();
+                BotToast.showText(
+                  text: '${title.toString()}',
+                );
+                title =
+                    'window_manager_example - ${DateTime.now().millisecondsSinceEpoch}';
+                await windowManager.setTitle(title);
+              },
+            ),
+            PreferenceListItem(
+              title: Text('terminate'),
+              onTap: () async {
+                await windowManager.terminate();
               },
             ),
           ],

@@ -75,12 +75,22 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         case "setAlwaysOnTop":
             setAlwaysOnTop(call, result: result)
             break
+        case "getTitle":
+            getTitle(call, result: result)
+            break
+        case "setTitle":
+            setTitle(call, result: result)
+            break
         case "terminate":
             terminate(call, result: result)
             break
         default:
             result(FlutterMethodNotImplemented)
         }
+    }
+    
+    public func getFlutterView() -> NSView {
+        return (registrar.view)!
     }
     
     public func getMainWindow() -> NSWindow {
@@ -237,6 +247,17 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         let isAlwaysOnTop: Bool = args["isAlwaysOnTop"] as! Bool
         
         getMainWindow().level = isAlwaysOnTop ? .floating : .normal
+    }
+    
+    public func getTitle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        result(getMainWindow().title)
+    }
+    
+    public func setTitle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args:[String: Any] = call.arguments as! [String: Any]
+        let title: String = args["title"] as! String
+        
+        getMainWindow().title = title;
     }
     
     public func terminate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
