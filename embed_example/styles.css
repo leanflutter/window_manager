@@ -1,0 +1,53 @@
+body {
+  height: 100vh;
+}
+#embed-flutter-app {
+  z-index: 9999;
+  position: absolute;
+  overflow: hidden;
+  border-color: #e1e1e1;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px 2px rgba(0, 0, 0, 0.2);
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+#embed-flutter-app #embed-flutter-app-header {
+  width: 100%;
+  height: 32px;
+  background-color: #f9f0f1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* justify-content: center; */
+}
+#embed-flutter-app #embed-flutter-app-header .button-close,
+#embed-flutter-app #embed-flutter-app-header .button-minimize,
+#embed-flutter-app #embed-flutter-app-header .button-maximize {
+  width: 12px;
+  height: 12px;
+  border-radius: 12px;
+  margin-left: 8px;
+}
+
+#embed-flutter-app #embed-flutter-app-header .button-close {
+  background-color: #ed6951;
+}
+
+#embed-flutter-app #embed-flutter-app-header .button-minimize {
+  background-color: #f5bd4f;
+}
+
+#embed-flutter-app #embed-flutter-app-header .button-maximize {
+  background-color: #61c454;
+}
+
+#embed-flutter-app iframe {
+  background-color: white;
+  width: 100%;
+  flex: 1;
+  border: none;
+}
