@@ -88,8 +88,8 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `setPosition`    | Moves window to `x` and `y`.                                           | ✔️    | ✔️    | ✔️      |
 | `getSize`        | Returns `Size` - Contains the window's width and height.               | ✔️    | ✔️    | ✔️      |
 | `setSize`        | Resizes the window to `width` and `height`.                            | ✔️    | ✔️    | ✔️      |
-| `setMinimumSize` | Sets the minimum size of window to `width` and `height`.               | ✔️    | ✔️    | ➖      |
-| `setMaximumSize` | Sets the maximum size of window to `width` and `height`.               | ✔️    | ✔️    | ➖      |
+| `setMinimumSize` | Sets the minimum size of window to `width` and `height`.               | ✔️    | ✔️    | ✔️      |
+| `setMaximumSize` | Sets the maximum size of window to `width` and `height`.               | ✔️    | ✔️    | ✔️      |
 | `isAlwaysOnTop`  | Returns `bool` - Whether the window is always on top of other windows. | ✔️    | ✔️    | ✔️      |
 | `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.    | ✔️    | ✔️    | ✔️      |
 | `getTitle`       | Returns `String` - The title of the native window.                     | ✔️    | ✔️    | ✔️      |

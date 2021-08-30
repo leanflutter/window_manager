@@ -18,7 +18,7 @@ namespace {
     public:
         static void RegisterWithRegistrar(flutter::PluginRegistrarWindows* registrar);
 
-        WindowManagerPlugin();
+        WindowManagerPlugin(flutter::PluginRegistrarWindows* registrar);
 
         virtual ~WindowManagerPlugin();
 
@@ -30,11 +30,23 @@ namespace {
         // initial frame upon exiting fullscreen.
         RECT g_frame_before_fullscreen;
 
+        // The ID of the WindowProc delegate registration.
+        int window_proc_id = -1;
+
+        // The minimum size set by the platform channel.
+        POINT minimum_size = { 0, 0 };
+
+        // The maximum size set by the platform channel.
+        POINT maximum_size = { -1, -1 };
+
         // Called when a method is called on this plugin's channel from Dart.
         void HandleMethodCall(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 
+        // Called for top-level WindowProc delegation.
+        std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hwnd, UINT message,
+            WPARAM wparam, LPARAM lparam);
         HWND GetMainWindow();
         void WindowManagerPlugin::Focus(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
@@ -106,36 +118,68 @@ namespace {
                 registrar->messenger(), "window_manager",
                 &flutter::StandardMethodCodec::GetInstance());
 
-        auto plugin = std::make_unique<WindowManagerPlugin>();
-        plugin->registrar = registrar;
+        auto plugin = std::make_unique<WindowManagerPlugin>(registrar);
 
         channel->SetMethodCallHandler(
-            [plugin_pointer = plugin.get()](const auto& call, auto result) {
+            [plugin_pointer = plugin.get()](const auto& call, auto result)
+        {
             plugin_pointer->HandleMethodCall(call, std::move(result));
         });
 
         registrar->AddPlugin(std::move(plugin));
     }
 
-    WindowManagerPlugin::WindowManagerPlugin() {}
 
-    WindowManagerPlugin::~WindowManagerPlugin() {}
+    WindowManagerPlugin::WindowManagerPlugin(flutter::PluginRegistrarWindows* registrar)
+        : registrar(registrar) {
+        window_proc_id = registrar->RegisterTopLevelWindowProcDelegate(
+            [this](HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
+                return HandleWindowProc(hwnd, message, wparam, lparam);
+            });
+    }
+
+    WindowManagerPlugin::~WindowManagerPlugin() {
+        registrar->UnregisterTopLevelWindowProcDelegate(window_proc_id);
+    }
 
     HWND WindowManagerPlugin::GetMainWindow() {
         return ::GetAncestor(registrar->GetView()->GetNativeWindow(), GA_ROOT);
     }
 
+    std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hwnd,
+        UINT message,
+        WPARAM wparam,
+        LPARAM lparam) {
+        std::optional<LRESULT> result;
+        switch (message) {
+        case WM_GETMINMAXINFO:
+            MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
+            // For the special "unconstrained" values, leave the defaults.
+            if (minimum_size.x != 0)
+                info->ptMinTrackSize.x = minimum_size.x;
+            if (minimum_size.y != 0)
+                info->ptMinTrackSize.y = minimum_size.y;
+            if (maximum_size.x != -1)
+                info->ptMaxTrackSize.x = maximum_size.x;
+            if (maximum_size.y != -1)
+                info->ptMaxTrackSize.y = maximum_size.y;
+            result = 0;
+            break;
+        }
+        return result;
+    }
+
     void WindowManagerPlugin::Focus(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        
+
         result->Success(flutter::EncodableValue(true));
     }
 
     void WindowManagerPlugin::Blur(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        
+
         result->Success(flutter::EncodableValue(true));
     }
 
@@ -298,8 +342,7 @@ namespace {
 
         flutter::EncodableMap resultMap = flutter::EncodableMap();
         RECT rect;
-        if (GetWindowRect(GetMainWindow(), &rect))
-        {
+        if (GetWindowRect(GetMainWindow(), &rect)) {
             double x = rect.left / devicePixelRatio * 1.0f;
             double y = rect.top / devicePixelRatio * 1.0f;
             double width = (rect.right - rect.left) / devicePixelRatio * 1.0f;
@@ -325,14 +368,13 @@ namespace {
         double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
         SetWindowPos(
-            GetMainWindow(), 
-            HWND_TOP, 
-            int(x * devicePixelRatio), 
-            int(y * devicePixelRatio), 
-            int(width * devicePixelRatio), 
-            int(height * devicePixelRatio), 
-            SWP_SHOWWINDOW
-        );
+            GetMainWindow(),
+            HWND_TOP,
+            int(x * devicePixelRatio),
+            int(y * devicePixelRatio),
+            int(width * devicePixelRatio),
+            int(height * devicePixelRatio),
+            SWP_SHOWWINDOW);
 
         result->Success(flutter::EncodableValue(true));
     }
@@ -340,13 +382,37 @@ namespace {
     void WindowManagerPlugin::SetMinimumSize(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        result->NotImplemented();
+        const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
+
+        double devicePixelRatio = std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
+        double width = std::get<double>(args.at(flutter::EncodableValue("width")));
+        double height = std::get<double>(args.at(flutter::EncodableValue("height")));
+
+        if (width >= 0 && height >= 0) {
+            POINT point = {};
+            point.x = static_cast<LONG>(width * devicePixelRatio);
+            point.y = static_cast<LONG>(height * devicePixelRatio);
+            minimum_size = point;
+        }
+        result->Success(flutter::EncodableValue(true));
     }
 
     void WindowManagerPlugin::SetMaximumSize(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-        result->NotImplemented();
+        const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
+
+        double devicePixelRatio = std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
+        double width = std::get<double>(args.at(flutter::EncodableValue("width")));
+        double height = std::get<double>(args.at(flutter::EncodableValue("height")));
+
+        if (width >= 0 && height >= 0) {
+            POINT point = {};
+            point.x = static_cast<LONG>(width * devicePixelRatio);
+            point.y = static_cast<LONG>(height * devicePixelRatio);
+            maximum_size = point;
+        }
+        result->Success(flutter::EncodableValue(true));
     }
 
     void WindowManagerPlugin::IsAlwaysOnTop(
@@ -357,7 +423,7 @@ namespace {
 
         flutter::EncodableMap resultMap = flutter::EncodableMap();
         resultMap[flutter::EncodableValue("isAlwaysOnTop")] = flutter::EncodableValue((dwExStyle & WS_EX_TOPMOST) != 0);
-        
+
         result->Success(flutter::EncodableValue(resultMap));
     }
 
@@ -441,7 +507,7 @@ namespace {
         }
     }
 
-}  // namespace
+} // namespace
 
 void WindowManagerPluginRegisterWithRegistrar(
     FlutterDesktopPluginRegistrarRef registrar) {
