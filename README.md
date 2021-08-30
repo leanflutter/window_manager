@@ -25,7 +25,7 @@ This plugin allows Flutter **desktop** apps to resizing and repositioning the wi
 
 ## Platform Support
 
-| Linux | MacOS | Windows |
+| Linux | macOS | Windows |
 | :---: | :---: | :-----: |
 |  ✔️   |  ✔️   |   ✔️    |
 
@@ -76,7 +76,7 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 
 ### WindowManager
 
-| Method           | Description                                                            | Linux | MacOS | Windows |
+| Method           | Description                                                            | Linux | macOS | Windows |
 | ---------------- | ---------------------------------------------------------------------- | ----- | ----- | ------- |
 | `focus`          | Focuses on the window.                                                 | ✔️    | ✔️    | ➖      |
 | `blur`           | Removes focus from the window.                                         | ➖    | ✔️    | ➖      |
@@ -103,11 +103,13 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.    | ✔️    | ✔️    | ✔️      |
 | `getTitle`       | Returns `String` - The title of the native window.                     | ✔️    | ✔️    | ✔️      |
 | `setTitle`       | Changes the title of native window to title.                           | ✔️    | ✔️    | ✔️      |
+| `hasShadow`      | Returns `bool` - Whether the window has a shadow.                      | ➖    | ✔️    | ➖      |
+| `setHasShadow`   | Sets whether the window should have a shadow.                          | ➖    | ✔️    | ➖      |
 | `terminate`      |                                                                        | ✔️    | ✔️    | ✔️      |
 
 ### WindowListener
 
-| Method                    | Description                                                 | Linux | MacOS | Windows |
+| Method                    | Description                                                 | Linux | macOS | Windows |
 | ------------------------- | ----------------------------------------------------------- | ----- | ----- | ------- |
 | `onWindowFocus`           | Emitted when the window gains focus.                        | ➖    | ✔️    | ➖      |
 | `onWindowBlur`            | Emitted when the window loses focus.                        | ➖    | ✔️    | ➖      |

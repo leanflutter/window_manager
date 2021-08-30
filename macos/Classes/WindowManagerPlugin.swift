@@ -81,6 +81,12 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         case "setTitle":
             setTitle(call, result: result)
             break
+        case "hasShadow":
+            hasShadow(call, result: result)
+            break
+        case "setHasShadow":
+            setHasShadow(call, result: result)
+            break
         case "terminate":
             terminate(call, result: result)
             break
@@ -259,7 +265,18 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         
         getMainWindow().title = title;
     }
-    
+
+    public func hasShadow(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args:[String: Any] = call.arguments as! [String: Any]
+        let hasShadow: Bool = args["hasShadow"] as! Bool
+        getMainWindow().hasShadow = hasShadow;
+        getMainWindow().invalidateShadow();
+    }
+
+    public func setHasShadow(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        result(getMainWindow().hasShadow)
+    }
+
     public func terminate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         NSApplication.shared.terminate(nil)
         result(true)

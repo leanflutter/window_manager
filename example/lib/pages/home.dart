@@ -33,6 +33,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
   Size? _maxSize;
   bool _isFullScreen = false;
   bool _isAlwaysOnTop = false;
+  bool _hasShadow = true;
 
   @override
   void initState() {
@@ -271,6 +272,27 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 title =
                     'window_manager_example - ${DateTime.now().millisecondsSinceEpoch}';
                 await windowManager.setTitle(title);
+              },
+            ),
+            PreferenceListItem(
+              title: Text('hasShadow / setHasShadow'),
+              accessoryView: ToggleButtons(
+                children: <Widget>[
+                  Text('YES'),
+                  Text('NO'),
+                ],
+                onPressed: (int index) {
+                  _hasShadow = !_hasShadow;
+                  windowManager.setHasShadow(_hasShadow);
+                  setState(() {});
+                },
+                isSelected: [_hasShadow, !_hasShadow],
+              ),
+              onTap: () async {
+                bool hasShadow = await windowManager.hasShadow();
+                BotToast.showText(
+                  text: 'hasShadow: $hasShadow',
+                );
               },
             ),
             PreferenceListItem(

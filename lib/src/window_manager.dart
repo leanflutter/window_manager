@@ -246,6 +246,17 @@ class WindowManager {
     await _channel.invokeMethod('setTitle', arguments);
   }
 
+  Future<bool> hasShadow() async {
+    return await _channel.invokeMethod('setHasShadow');
+  }
+
+  Future<void> setHasShadow(bool hasShadow) async {
+    final Map<String, dynamic> arguments = {
+      'hasShadow': hasShadow,
+    };
+    await _channel.invokeMethod('hasShadow', arguments);
+  }
+
   Future<void> terminate() async {
     await _channel.invokeMethod('terminate');
   }
