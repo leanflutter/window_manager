@@ -313,7 +313,7 @@ namespace {
             ::SetWindowLongPtr(mainWindow, GWL_STYLE, WS_POPUP | WS_VISIBLE);
             ::GetWindowRect(mainWindow, &g_frame_before_fullscreen);
             ::SetWindowPos(
-                mainWindow, HWND_TOPMOST, info.rcMonitor.left, info.rcMonitor.top,
+                mainWindow, NULL, info.rcMonitor.left, info.rcMonitor.top,
                 info.rcMonitor.right - info.rcMonitor.left,
                 info.rcMonitor.bottom - info.rcMonitor.top, SWP_SHOWWINDOW);
             ::ShowWindow(mainWindow, SW_MAXIMIZE);
@@ -322,7 +322,7 @@ namespace {
             g_is_window_fullscreen = false;
             ::SetWindowLongPtr(mainWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
             ::SetWindowPos(
-                mainWindow, HWND_NOTOPMOST, g_frame_before_fullscreen.left,
+                mainWindow, NULL, g_frame_before_fullscreen.left,
                 g_frame_before_fullscreen.top,
                 g_frame_before_fullscreen.right - g_frame_before_fullscreen.left,
                 g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top,
