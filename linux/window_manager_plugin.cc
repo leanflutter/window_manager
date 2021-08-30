@@ -214,6 +214,22 @@ static FlMethodResponse *set_always_on_top(WindowManagerPlugin *self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse *get_title(WindowManagerPlugin *self)
+{
+  const gchar *title = gtk_window_get_title(get_window(self));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(title)));
+}
+
+static FlMethodResponse *set_title(WindowManagerPlugin *self,
+                                           FlValue *args)
+{
+  const gchar *title = fl_value_get_string(fl_value_lookup_string(args, "title"));
+
+  gtk_window_set_title(get_window(self), title);
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
 static FlMethodResponse *terminate(WindowManagerPlugin *self)
 {
   gtk_window_close(get_window(self));
@@ -304,6 +320,14 @@ static void window_manager_plugin_handle_method_call(
   else if (strcmp(method, "setAlwaysOnTop") == 0)
   {
     response = set_always_on_top(self, args);
+  }
+  else if (strcmp(method, "getTitle") == 0)
+  {
+    response = get_title(self);
+  }
+  else if (strcmp(method, "setTitle") == 0)
+  {
+    response = set_title(self, args);
   }
   else if (strcmp(method, "terminate") == 0)
   {
