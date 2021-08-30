@@ -177,15 +177,48 @@ class _HomePageState extends State<HomePage> with WindowListener {
             ),
             PreferenceListItem(
               title: Text('getPosition / setPosition'),
-              accessoryView: CupertinoButton(
-                child: Text('Set'),
-                onPressed: () async {
-                  Offset position = await windowManager.getPosition();
-                  windowManager.setPosition(
-                    Offset(position.dx + 100, position.dy + 100),
-                  );
-                  setState(() {});
-                },
+              accessoryView: Row(
+                children: [
+                  CupertinoButton(
+                    child: Text('xy>zero'),
+                    onPressed: () async {
+                      windowManager.setPosition(Offset(0, 0));
+                      setState(() {});
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('x+20'),
+                    onPressed: () async {
+                      Offset p = await windowManager.getPosition();
+                      windowManager.setPosition(Offset(p.dx + 20, p.dy));
+                      setState(() {});
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('x-20'),
+                    onPressed: () async {
+                      Offset p = await windowManager.getPosition();
+                      windowManager.setPosition(Offset(p.dx - 20, p.dy));
+                      setState(() {});
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('y+20'),
+                    onPressed: () async {
+                      Offset p = await windowManager.getPosition();
+                      windowManager.setPosition(Offset(p.dx, p.dy + 20));
+                      setState(() {});
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('y-20'),
+                    onPressed: () async {
+                      Offset p = await windowManager.getPosition();
+                      windowManager.setPosition(Offset(p.dx, p.dy - 20));
+                      setState(() {});
+                    },
+                  ),
+                ],
               ),
               onTap: () async {
                 Offset position = await windowManager.getPosition();

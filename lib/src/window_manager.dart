@@ -197,7 +197,7 @@ class WindowManager {
     Rect oldBounds = await this.getBounds();
     Rect newBounds = Rect.fromLTWH(
       oldBounds.left,
-      oldBounds.top + (oldBounds.size.height - size.height),
+      oldBounds.top,
       size.width,
       size.height,
     );

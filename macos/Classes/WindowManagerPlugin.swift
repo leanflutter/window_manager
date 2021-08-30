@@ -1,6 +1,20 @@
 import Cocoa
 import FlutterMacOS
 
+extension NSRect {
+    var topLeft: CGPoint {
+        set {
+            let screenFrameRect = NSScreen.main!.frame
+            origin.x = newValue.x
+            origin.y = screenFrameRect.height - newValue.y - size.height
+        }
+        get {
+            let screenFrameRect = NSScreen.main!.frame
+            return CGPoint(x: origin.x, y: screenFrameRect.height - origin.y - size.height)
+        }
+    }
+}
+
 public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
     var registrar: FlutterPluginRegistrar!;
     var channel: FlutterMethodChannel!
@@ -135,7 +149,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
             getMainWindow().zoom(nil);
         }
     }
-
+    
     public func unmaximize(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         if (getMainWindow().isZoomed) {
             getMainWindow().zoom(nil);
@@ -174,43 +188,34 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
     }
     
     public func getBounds(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let origin: CGPoint = getMainWindow().frame.origin;
-        let size: CGSize = getMainWindow().frame.size;
+        let frameRect: NSRect = getMainWindow().frame;
         
         let resultData: NSDictionary = [
-            "x": origin.x,
-            "y": origin.y,
-            "width": size.width,
-            "height": size.height,
+            "x": frameRect.topLeft.x,
+            "y": frameRect.topLeft.y,
+            "width": frameRect.size.width,
+            "height": frameRect.size.height,
         ]
         result(resultData)
     }
     
     public func setBounds(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args:[String: Any] = call.arguments as! [String: Any]
-        var newOrigin: NSPoint?
-        var newSize: NSSize?
+        
         let animate = args["animate"] as! Bool
         
-        if (args["x"] != nil && args["y"] != nil) {
-            newOrigin =  NSPoint(
-                x: CGFloat(args["x"] as! Float),
-                y: CGFloat(args["y"] as! Float)
-            )
-        }
-        if (args["width"] != nil && args["height"] != nil) {
-            newSize = NSSize(
-                width: CGFloat(truncating: args["width"] as! NSNumber),
-                height: CGFloat(truncating: args["height"] as! NSNumber)
-            )
-        }
-        
         var frameRect = getMainWindow().frame
-        if (newSize != nil) {
-            frameRect.size = newSize!
+        if (args["width"] != nil) {
+            frameRect.size.width = CGFloat(truncating: args["width"] as! NSNumber)
         }
-        if (newOrigin != nil) {
-            frameRect.origin = newOrigin!
+        if (args["height"] != nil) {
+            frameRect.size.height = CGFloat(truncating: args["height"] as! NSNumber)
+        }
+        if (args["x"] != nil) {
+            frameRect.topLeft.x = CGFloat(args["x"] as! Float)
+        }
+        if (args["y"] != nil) {
+            frameRect.topLeft.y = CGFloat(args["y"] as! Float)
         }
         
         if (animate) {
@@ -265,18 +270,18 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         
         getMainWindow().title = title;
     }
-
+    
     public func hasShadow(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args:[String: Any] = call.arguments as! [String: Any]
         let hasShadow: Bool = args["hasShadow"] as! Bool
         getMainWindow().hasShadow = hasShadow;
         getMainWindow().invalidateShadow();
     }
-
+    
     public func setHasShadow(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         result(getMainWindow().hasShadow)
     }
-
+    
     public func terminate(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         NSApplication.shared.terminate(nil)
         result(true)
