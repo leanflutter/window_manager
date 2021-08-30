@@ -1,3 +1,9 @@
+## 0.0.3
+
+- Implemented `isMinimized`, `minimize`, `restore` Methods.
+- Implemented `setMinimumSize`, `setMaximumSize` Methods.
+- [windows] [#4](https://github.com/leanflutter/window_manager/issues/4) Do not set `HWND_TOPMOST` flag in `setFullScreen`
+
 ## 0.0.2
 
 - Implemented `show`, `hide`, `isVisible` Methods.
