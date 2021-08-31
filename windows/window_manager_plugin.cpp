@@ -105,6 +105,12 @@ namespace {
         void WindowManagerPlugin::SetAlwaysOnTop(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::GetTitle(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::SetTitle(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
         void WindowManagerPlugin::Terminate(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
@@ -438,6 +444,31 @@ namespace {
 
         result->Success(flutter::EncodableValue(true));
     }
+    
+    void WindowManagerPlugin::GetTitle(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+       
+        int const bufferSize = 1 + GetWindowTextLength(GetMainWindow());
+        std::wstring title( bufferSize, L'\0' );
+        GetWindowText(GetMainWindow(), &title[0], bufferSize);
+
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        result->Success(flutter::EncodableValue(converter.to_bytes(title)));
+    }
+    
+    void WindowManagerPlugin::SetTitle(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
+
+        std::string title = std::get<std::string>(args.at(flutter::EncodableValue("title")));
+
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        SetWindowText(GetMainWindow(), converter.from_bytes(title).c_str());
+
+        result->Success(flutter::EncodableValue(true));
+    }
 
     void WindowManagerPlugin::Terminate(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
@@ -498,6 +529,12 @@ namespace {
         }
         else if (method_call.method_name().compare("setAlwaysOnTop") == 0) {
             SetAlwaysOnTop(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("getTitle") == 0) {
+            GetTitle(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("setTitle") == 0) {
+            SetTitle(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("terminate") == 0) {
             Terminate(method_call, std::move(result));
