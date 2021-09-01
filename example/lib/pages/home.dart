@@ -32,6 +32,10 @@ class _HomePageState extends State<HomePage> with WindowListener {
   Size? _minSize;
   Size? _maxSize;
   bool _isFullScreen = false;
+  bool _isResizable = true;
+  bool _isMovable = true;
+  bool _isMinimizable = true;
+  bool _isClosable = true;
   bool _isAlwaysOnTop = false;
   bool _hasShadow = true;
 
@@ -275,6 +279,82 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 },
                 isSelected: _kMaxSizes.map((e) => e == _maxSize).toList(),
               ),
+            ),
+            PreferenceListItem(
+              title: Text('isResizable / setResizable'),
+              accessoryView: ToggleButtons(
+                children: <Widget>[
+                  Text('YES'),
+                  Text('NO'),
+                ],
+                onPressed: (int index) {
+                  _isResizable = !_isResizable;
+                  windowManager.setResizable(_isResizable);
+                  setState(() {});
+                },
+                isSelected: [_isResizable, !_isResizable],
+              ),
+              onTap: () async {
+                bool isResizable = await windowManager.isResizable();
+                BotToast.showText(text: 'isResizable: $isResizable');
+              },
+            ),
+            PreferenceListItem(
+              title: Text('isMovable / setMovable'),
+              accessoryView: ToggleButtons(
+                children: <Widget>[
+                  Text('YES'),
+                  Text('NO'),
+                ],
+                onPressed: (int index) {
+                  _isMovable = !_isMovable;
+                  windowManager.setMovable(_isMovable);
+                  setState(() {});
+                },
+                isSelected: [_isMovable, !_isMovable],
+              ),
+              onTap: () async {
+                bool isMovable = await windowManager.isMovable();
+                BotToast.showText(text: 'isMovable: $isMovable');
+              },
+            ),
+            PreferenceListItem(
+              title: Text('isMinimizable / setMinimizable'),
+              accessoryView: ToggleButtons(
+                children: <Widget>[
+                  Text('YES'),
+                  Text('NO'),
+                ],
+                onPressed: (int index) {
+                  _isMinimizable = !_isMinimizable;
+                  windowManager.setMinimizable(_isMinimizable);
+                  setState(() {});
+                },
+                isSelected: [_isMinimizable, !_isMinimizable],
+              ),
+              onTap: () async {
+                bool isClosable = await windowManager.isClosable();
+                BotToast.showText(text: 'isMinimizable: $isClosable');
+              },
+            ),
+            PreferenceListItem(
+              title: Text('isClosable / setClosable'),
+              accessoryView: ToggleButtons(
+                children: <Widget>[
+                  Text('YES'),
+                  Text('NO'),
+                ],
+                onPressed: (int index) {
+                  _isClosable = !_isClosable;
+                  windowManager.setClosable(_isClosable);
+                  setState(() {});
+                },
+                isSelected: [_isClosable, !_isClosable],
+              ),
+              onTap: () async {
+                bool isClosable = await windowManager.isClosable();
+                BotToast.showText(text: 'isClosable: $isClosable');
+              },
             ),
             PreferenceListItem(
               title: Text('isAlwaysOnTop / setAlwaysOnTop'),

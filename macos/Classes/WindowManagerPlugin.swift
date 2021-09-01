@@ -83,6 +83,30 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         case "setMaximumSize":
             setMaximumSize(call, result: result)
             break
+        case "isResizable":
+            isResizable(call, result: result)
+            break
+        case "setResizable":
+            setResizable(call, result: result)
+            break
+        case "isMovable":
+            isMovable(call, result: result)
+            break
+        case "setMovable":
+            setMovable(call, result: result)
+            break
+        case "isMinimizable":
+            isMinimizable(call, result: result)
+            break
+        case "setMinimizable":
+            setMinimizable(call, result: result)
+            break
+        case "isClosable":
+            isClosable(call, result: result)
+            break
+        case "setClosable":
+            setClosable(call, result: result)
+            break
         case "isAlwaysOnTop":
             isAlwaysOnTop(call, result: result)
             break
@@ -245,12 +269,65 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         
         getMainWindow().maxSize = maxSize
     }
+
+    public func isResizable(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        result(getMainWindow().styleMask.contains(.resizable))
+    }
+    
+    public func setResizable(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args:[String: Any] = call.arguments as! [String: Any]
+        let isResizable: Bool = args["isResizable"] as! Bool
+
+        if (isResizable) {
+            getMainWindow().styleMask.insert(.resizable)
+        } else {
+            getMainWindow().styleMask.remove(.resizable)
+        }
+    }
+    
+    public func isMovable(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        result(getMainWindow().isMovable)
+    }
+    
+    public func setMovable(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args:[String: Any] = call.arguments as! [String: Any]
+        let isMovable: Bool = args["isMovable"] as! Bool
+        
+        getMainWindow().isMovable = isMovable
+    }
+    
+    public func isMinimizable(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        result(getMainWindow().styleMask.contains(.miniaturizable))
+    }
+    
+    public func setMinimizable(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args:[String: Any] = call.arguments as! [String: Any]
+        let isMinimizable: Bool = args["isMinimizable"] as! Bool
+        
+        if (isMinimizable) {
+            getMainWindow().styleMask.insert(.miniaturizable)
+        } else {
+            getMainWindow().styleMask.remove(.miniaturizable)
+        }
+    }
+    
+    public func isClosable(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        result(getMainWindow().styleMask.contains(.closable))
+    }
+    
+    public func setClosable(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args:[String: Any] = call.arguments as! [String: Any]
+        let isClosable: Bool = args["isClosable"] as! Bool
+        
+        if (isClosable) {
+            getMainWindow().styleMask.insert(.closable)
+        } else {
+            getMainWindow().styleMask.remove(.closable)
+        }
+    }
     
     public func isAlwaysOnTop(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let resultData: NSDictionary = [
-            "isAlwaysOnTop": getMainWindow().level == .floating,
-        ]
-        result(resultData)
+        result(getMainWindow().level == .floating)
     }
     
     public func setAlwaysOnTop(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

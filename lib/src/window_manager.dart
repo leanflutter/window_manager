@@ -222,6 +222,48 @@ class WindowManager {
     await _channel.invokeMethod('setMaximumSize', arguments);
   }
 
+  Future<bool> isResizable() async {
+    return await _channel.invokeMethod('isResizable');
+  }
+
+  setResizable(isResizable) {
+    final Map<String, dynamic> arguments = {
+      'isResizable': isResizable,
+    };
+    _channel.invokeMethod('setResizable', arguments);
+  }
+
+  Future<bool> isMovable() async {
+    return await _channel.invokeMethod('isMovable');
+  }
+
+  setMovable(isMovable) {
+    final Map<String, dynamic> arguments = {
+      'isMovable': isMovable,
+    };
+    _channel.invokeMethod('setMovable', arguments);
+  }
+
+  Future<bool> isMinimizable() async {
+    return await _channel.invokeMethod('isResizable');
+  }
+
+  setMinimizable(isMinimizable) {
+    final Map<String, dynamic> arguments = {
+      'isMinimizable': isMinimizable,
+    };
+    _channel.invokeMethod('setMinimizable', arguments);
+  }
+
+  Future<bool> isClosable() async {
+    return await _channel.invokeMethod('isClosable');
+  }
+
+  void setClosable(bool isClosable) {
+    final Map<String, dynamic> arguments = {'isClosable': isClosable};
+    _channel.invokeMethod('setClosable', arguments);
+  }
+
   Future<bool> isAlwaysOnTop() async {
     final Map<dynamic, dynamic> resultData =
         await _channel.invokeMethod('isAlwaysOnTop');
