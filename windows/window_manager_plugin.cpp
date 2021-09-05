@@ -227,7 +227,8 @@ namespace {
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
 
-        ShowWindow(GetMainWindow(), SW_SHOW);
+        ShowWindowAsync(GetMainWindow(), SW_SHOW);
+        SetForegroundWindow(GetMainWindow());
 
         result->Success(flutter::EncodableValue(true));
     }
