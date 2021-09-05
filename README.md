@@ -15,6 +15,7 @@ This plugin allows Flutter **desktop** apps to resizing and repositioning the wi
   - [Quick Start](#quick-start)
     - [Installation](#installation)
     - [Usage](#usage)
+  - [Who's using it?](#whos-using-it)
   - [Discussion](#discussion)
   - [API](#api)
     - [WindowManager](#windowmanager)
@@ -63,6 +64,11 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 ```
 
 > Please see the example app of this plugin for a full example.
+
+## Who's using it?
+
+- [AuthPass](https://authpass.app/) - Password Manager based on Flutter for all platforms. Keepass 2.x (kdbx 3.x) compatible.
+- [Biyi (比译)](https://biyidev.com/) - A convenient translation and dictionary app written in dart / Flutter.
 
 ## Discussion
 
