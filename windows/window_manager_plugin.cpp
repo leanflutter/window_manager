@@ -13,6 +13,7 @@
 #include <sstream>
 
 namespace {
+    std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>, std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>> channel = nullptr;
 
     class WindowManagerPlugin : public flutter::Plugin {
     public:
@@ -24,6 +25,9 @@ namespace {
 
     private:
         flutter::PluginRegistrarWindows* registrar;
+
+        bool g_is_maximized = false;
+        bool g_is_minimized = false;
 
         bool g_is_window_fullscreen = false;
         // Initial window frame before going fullscreen & used for restoring window to
@@ -44,10 +48,11 @@ namespace {
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 
+        void WindowManagerPlugin::_EmitEvent(std::string eventName);
+        HWND GetMainWindow();
         // Called for top-level WindowProc delegation.
         std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hwnd, UINT message,
             WPARAM wparam, LPARAM lparam);
-        HWND GetMainWindow();
         void WindowManagerPlugin::Focus(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
@@ -119,7 +124,7 @@ namespace {
     // static
     void WindowManagerPlugin::RegisterWithRegistrar(
         flutter::PluginRegistrarWindows* registrar) {
-        auto channel =
+        channel =
             std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
                 registrar->messenger(), "window_manager",
                 &flutter::StandardMethodCodec::GetInstance());
@@ -148,18 +153,23 @@ namespace {
         registrar->UnregisterTopLevelWindowProcDelegate(window_proc_id);
     }
 
+    void WindowManagerPlugin::_EmitEvent(std::string eventName) {
+        flutter::EncodableMap args = flutter::EncodableMap();
+            args[flutter::EncodableValue("eventName")] = flutter::EncodableValue(eventName);
+        channel->InvokeMethod("onEvent", std::make_unique<flutter::EncodableValue>(args));
+    }
+
     HWND WindowManagerPlugin::GetMainWindow() {
         return ::GetAncestor(registrar->GetView()->GetNativeWindow(), GA_ROOT);
     }
 
-    std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hwnd,
+    std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
         UINT message,
-        WPARAM wparam,
-        LPARAM lparam) {
+        WPARAM wParam,
+        LPARAM lParam) {
         std::optional<LRESULT> result;
-        switch (message) {
-        case WM_GETMINMAXINFO:
-            MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
+        if  (message == WM_GETMINMAXINFO) {
+            MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lParam);
             // For the special "unconstrained" values, leave the defaults.
             if (minimum_size.x != 0)
                 info->ptMinTrackSize.x = minimum_size.x;
@@ -170,7 +180,31 @@ namespace {
             if (maximum_size.y != -1)
                 info->ptMaxTrackSize.y = maximum_size.y;
             result = 0;
-            break;
+        } else if (message == WM_NCACTIVATE) {
+            if (wParam == TRUE) {
+                _EmitEvent("focus");
+            } else {
+                _EmitEvent("blur");
+            }
+        } else if (message == WM_SIZE) {
+            if (wParam == SIZE_MAXIMIZED) {
+                _EmitEvent("maximize");
+                g_is_maximized = true;
+                g_is_minimized = false;
+            } else if (wParam == SIZE_MINIMIZED) {
+                _EmitEvent("minimize");
+                g_is_maximized = false;
+                g_is_minimized = true;
+            } else if (wParam == SIZE_RESTORED) {
+                if (g_is_maximized) {
+                    _EmitEvent("unmaximize");
+                }
+                if (g_is_minimized) {
+                    _EmitEvent("restore");
+                }
+                g_is_maximized = false;
+                g_is_minimized = false;
+            }
         }
         return result;
     }
@@ -323,6 +357,7 @@ namespace {
                 info.rcMonitor.right - info.rcMonitor.left,
                 info.rcMonitor.bottom - info.rcMonitor.top, SWP_SHOWWINDOW);
             ::ShowWindow(mainWindow, SW_MAXIMIZE);
+            _EmitEvent("enter-full-screen");
         }
         else {
             g_is_window_fullscreen = false;
@@ -334,6 +369,7 @@ namespace {
                 g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top,
                 SWP_SHOWWINDOW);
             ::ShowWindow(mainWindow, SW_RESTORE);
+            _EmitEvent("leave-full-screen");
         }
 
         result->Success(flutter::EncodableValue(true));
