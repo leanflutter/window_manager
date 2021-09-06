@@ -69,6 +69,7 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 
 - [AuthPass](https://authpass.app/) - Password Manager based on Flutter for all platforms. Keepass 2.x (kdbx 3.x) compatible.
 - [Biyi (比译)](https://biyidev.com/) - A convenient translation and dictionary app written in dart / Flutter.
+- [Yukino](https://github.com/yukino-app/yukino/tree/flutter-rewrite) - Yukino lets you read manga or stream anime ad-free from multiple sources.
 
 ## Discussion
 
