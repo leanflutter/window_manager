@@ -10,10 +10,13 @@
   (G_TYPE_CHECK_INSTANCE_CAST((obj), window_manager_plugin_get_type(), \
                               WindowManagerPlugin))
 
+WindowManagerPlugin *plugin_instance;
+
 struct _WindowManagerPlugin
 {
   GObject parent_instance;
   FlPluginRegistrar *registrar;
+  FlMethodChannel *channel;
   GdkGeometry window_geometry;
   bool _is_minimized = false;
   bool _is_always_on_top = false;
@@ -221,11 +224,32 @@ static FlMethodResponse *get_title(WindowManagerPlugin *self)
 }
 
 static FlMethodResponse *set_title(WindowManagerPlugin *self,
-                                           FlValue *args)
+                                   FlValue *args)
 {
   const gchar *title = fl_value_get_string(fl_value_lookup_string(args, "title"));
 
   gtk_window_set_title(get_window(self), title);
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *start_dragging(WindowManagerPlugin *self)
+{
+  auto window = get_window(self);
+  auto screen = gtk_window_get_screen(window);
+  auto display = gdk_screen_get_display(screen);
+  auto seat = gdk_display_get_default_seat(display);
+  auto device = gdk_seat_get_pointer(seat);
+
+  gint root_x, root_y;
+  gdk_device_get_position(device, nullptr, &root_x, &root_y);
+  guint32 timestamp = (guint32)g_get_monotonic_time();
+
+  gtk_window_begin_move_drag(window,
+                             1,
+                             root_x,
+                             root_y,
+                             timestamp);
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
@@ -329,6 +353,10 @@ static void window_manager_plugin_handle_method_call(
   {
     response = set_title(self, args);
   }
+  else if (strcmp(method, "startDragging") == 0)
+  {
+    response = start_dragging(self);
+  }
   else if (strcmp(method, "terminate") == 0)
   {
     response = terminate(self);
@@ -360,6 +388,50 @@ static void method_call_cb(FlMethodChannel *channel, FlMethodCall *method_call,
   window_manager_plugin_handle_method_call(plugin, method_call);
 }
 
+void _emit_event(const char *event_name)
+{
+  g_autoptr(FlValue) result_data = fl_value_new_map();
+  fl_value_set_string_take(result_data, "eventName", fl_value_new_string(event_name));
+  fl_method_channel_invoke_method(plugin_instance->channel,
+                                  "onEvent", result_data,
+                                  nullptr, nullptr, nullptr);
+}
+
+void on_window_focus(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  _emit_event("focus");
+}
+
+void on_window_blur(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  _emit_event("blur");
+}
+void on_window_show(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  _emit_event("show");
+}
+
+void on_window_hide(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  _emit_event("hide");
+}
+
+void on_window_state_change(GtkWidget *widget, GdkEventWindowState *event, gpointer data)
+{
+  if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED)
+  {
+    _emit_event("maximize");
+  }
+  else if (event->new_window_state & GDK_WINDOW_STATE_ICONIFIED)
+  {
+    _emit_event("minimize");
+  }
+  else if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
+  {
+    _emit_event("enter-full-screen");
+  }
+}
+
 void window_manager_plugin_register_with_registrar(FlPluginRegistrar *registrar)
 {
   WindowManagerPlugin *plugin = WINDOW_MANAGER_PLUGIN(
@@ -372,14 +444,22 @@ void window_manager_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   plugin->window_geometry.max_width = G_MAXINT;
   plugin->window_geometry.max_height = G_MAXINT;
 
+  g_signal_connect(get_window(plugin), "focus-in-event", G_CALLBACK(on_window_focus), NULL);
+  g_signal_connect(get_window(plugin), "focus-out-event", G_CALLBACK(on_window_blur), NULL);
+  g_signal_connect(get_window(plugin), "show", G_CALLBACK(on_window_show), NULL);
+  g_signal_connect(get_window(plugin), "hide", G_CALLBACK(on_window_hide), NULL);
+  g_signal_connect(get_window(plugin), "window-state-event", G_CALLBACK(on_window_state_change), NULL);
+
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
-  g_autoptr(FlMethodChannel) channel =
+  plugin->channel =
       fl_method_channel_new(fl_plugin_registrar_get_messenger(registrar),
                             "window_manager",
                             FL_METHOD_CODEC(codec));
-  fl_method_channel_set_method_call_handler(channel, method_call_cb,
+  fl_method_channel_set_method_call_handler(plugin->channel, method_call_cb,
                                             g_object_ref(plugin),
                                             g_object_unref);
+
+  plugin_instance = plugin;
 
   g_object_unref(plugin);
 }

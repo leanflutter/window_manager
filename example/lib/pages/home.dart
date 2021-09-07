@@ -54,6 +54,28 @@ class _HomePageState extends State<HomePage> with WindowListener {
   Widget _buildBody(BuildContext context) {
     return PreferenceList(
       children: <Widget>[
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onPanStart: (details) {
+            windowManager.startDragging();
+          },
+          onDoubleTap: () async {
+            bool isMaximized = await windowManager.isMaximized();
+            if (!isMaximized) {
+              windowManager.maximize();
+            } else {
+              windowManager.unmaximize();
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            height: 54,
+            color: Colors.grey.withOpacity(0.3),
+            child: Center(
+              child: Text('DragToMoveArea'),
+            ),
+          ),
+        ),
         PreferenceListSection(
           children: [
             PreferenceListItem(
@@ -424,7 +446,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plugin example app'),
+        title: const Text("Get Started"),
       ),
       body: _buildBody(context),
     );

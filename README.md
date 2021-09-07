@@ -126,13 +126,13 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 
 | Method                    | Description                                                 | Linux | macOS | Windows |
 | ------------------------- | ----------------------------------------------------------- | ----- | ----- | ------- |
-| `onWindowFocus`           | Emitted when the window gains focus.                        | ➖    | ✔️    | ✔️      |
-| `onWindowBlur`            | Emitted when the window loses focus.                        | ➖    | ✔️    | ✔️      |
-| `onWindowMaximize`        | Emitted when window is maximized.                           | ➖    | ➖    | ✔️      |
+| `onWindowFocus`           | Emitted when the window gains focus.                        | ✔️    | ✔️    | ✔️      |
+| `onWindowBlur`            | Emitted when the window loses focus.                        | ✔️    | ✔️    | ✔️      |
+| `onWindowMaximize`        | Emitted when window is maximized.                           | ✔️    | ➖    | ✔️      |
 | `onWindowUnmaximize`      | Emitted when the window exits from a maximized state.       | ➖    | ➖    | ✔️      |
-| `onWindowMinimize`        | Emitted when the window is minimized.                       | ➖    | ✔️    | ✔️      |
+| `onWindowMinimize`        | Emitted when the window is minimized.                       | ✔️    | ✔️    | ✔️      |
 | `onWindowRestore`         | Emitted when the window is restored from a minimized state. | ➖    | ✔️    | ✔️      |
-| `onWindowEnterFullScreen` | Emitted when the window enters a full-screen state.         | ➖    | ✔️    | ✔️      |
+| `onWindowEnterFullScreen` | Emitted when the window enters a full-screen state.         | ✔️    | ✔️    | ✔️      |
 | `onWindowLeaveFullScreen` | Emitted when the window leaves a full-screen state.         | ➖    | ✔️    | ✔️      |
 
 ## License

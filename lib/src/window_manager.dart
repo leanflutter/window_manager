@@ -299,6 +299,10 @@ class WindowManager {
     await _channel.invokeMethod('hasShadow', arguments);
   }
 
+  Future<void> startDragging() async {
+    await _channel.invokeMethod('startDragging');
+  }
+
   Future<void> terminate() async {
     await _channel.invokeMethod('terminate');
   }
