@@ -77,6 +77,19 @@ class WindowManager {
     _listeners!.remove(listener);
   }
 
+  void setCustomFrame({
+    String? titleBarStyle,
+    bool? transparent,
+    bool? hasShadow,
+  }) {
+    final Map<String, dynamic> arguments = {
+      'titleBarStyle': titleBarStyle,
+      'backgroundColor': transparent == true ? 'transparent' : "default",
+      'hasShadow': hasShadow,
+    }..removeWhere((key, value) => value == null);
+    _channel.invokeMethod('setCustomFrame', arguments);
+  }
+
   // 聚焦于窗口
   void focus({bool inactive = false}) {
     _channel.invokeMethod('focus');
@@ -265,9 +278,7 @@ class WindowManager {
   }
 
   Future<bool> isAlwaysOnTop() async {
-    final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('isAlwaysOnTop');
-    return resultData['isAlwaysOnTop'];
+    return await _channel.invokeMethod('isAlwaysOnTop');
   }
 
   void setAlwaysOnTop(bool isAlwaysOnTop) {
@@ -289,14 +300,14 @@ class WindowManager {
   }
 
   Future<bool> hasShadow() async {
-    return await _channel.invokeMethod('setHasShadow');
+    return await _channel.invokeMethod('hasShadow');
   }
 
   Future<void> setHasShadow(bool hasShadow) async {
     final Map<String, dynamic> arguments = {
       'hasShadow': hasShadow,
     };
-    await _channel.invokeMethod('hasShadow', arguments);
+    await _channel.invokeMethod('setHasShadow', arguments);
   }
 
   Future<void> startDragging() async {

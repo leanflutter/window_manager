@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:preference_list/preference_list.dart';
 import 'package:window_manager/window_manager.dart';
 
+const _kTitleBarStyles = [
+  'default',
+  'hidden',
+];
+
 const _kSizes = [
   Size(400, 400),
   Size(600, 600),
@@ -37,11 +42,14 @@ class _HomePageState extends State<HomePage> with WindowListener {
   bool _isMinimizable = true;
   bool _isClosable = true;
   bool _isAlwaysOnTop = false;
+  bool _transparent = true;
   bool _hasShadow = true;
+  String _titleBarStyle = _kTitleBarStyles.first;
 
   @override
   void initState() {
     windowManager.addListener(this);
+    _init();
     super.initState();
   }
 
@@ -51,32 +59,58 @@ class _HomePageState extends State<HomePage> with WindowListener {
     super.dispose();
   }
 
+  void _init() {}
+
+  void _handleSetCustomFrame() {
+    windowManager.setCustomFrame(
+      titleBarStyle: _titleBarStyle,
+      transparent: _transparent,
+      hasShadow: _hasShadow,
+    );
+    setState(() {});
+  }
+
   Widget _buildBody(BuildContext context) {
     return PreferenceList(
       children: <Widget>[
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onPanStart: (details) {
-            windowManager.startDragging();
-          },
-          onDoubleTap: () async {
-            bool isMaximized = await windowManager.isMaximized();
-            if (!isMaximized) {
-              windowManager.maximize();
-            } else {
-              windowManager.unmaximize();
-            }
-          },
-          child: Container(
-            width: double.infinity,
-            height: 54,
-            color: Colors.grey.withOpacity(0.3),
-            child: Center(
-              child: Text('DragToMoveArea'),
+        PreferenceListSection(
+          title: Text('CUSTOM FRAME'),
+          children: [
+            PreferenceListItem(
+              title: Text('titleBarStyle'),
+              accessoryView: ToggleButtons(
+                children: <Widget>[
+                  for (var _titleBarStyle in _kTitleBarStyles)
+                    Text(' $_titleBarStyle '),
+                ],
+                onPressed: (int index) async {
+                  _titleBarStyle = _kTitleBarStyles[index];
+                  _handleSetCustomFrame();
+                },
+                isSelected:
+                    _kTitleBarStyles.map((e) => e == _titleBarStyle).toList(),
+              ),
             ),
-          ),
+            PreferenceListSwitchItem(
+              title: Text('transparent'),
+              value: _transparent,
+              onChanged: (newValue) {
+                _transparent = newValue;
+                _handleSetCustomFrame();
+              },
+            ),
+            PreferenceListSwitchItem(
+              title: Text('hasShadow'),
+              value: _hasShadow,
+              onChanged: (newValue) {
+                _hasShadow = newValue;
+                _handleSetCustomFrame();
+              },
+            ),
+          ],
         ),
         PreferenceListSection(
+          title: Text('METHODS'),
           children: [
             PreferenceListItem(
               title: Text('focus / blur'),
@@ -151,23 +185,17 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 windowManager.restore();
               },
             ),
-            PreferenceListItem(
+            PreferenceListSwitchItem(
               title: Text('isFullScreen / setFullScreen'),
-              accessoryView: ToggleButtons(
-                children: <Widget>[
-                  Text('YES'),
-                  Text('NO'),
-                ],
-                onPressed: (int index) {
-                  _isFullScreen = !_isFullScreen;
-                  windowManager.setFullScreen(_isFullScreen);
-                  setState(() {});
-                },
-                isSelected: [_isFullScreen, !_isFullScreen],
-              ),
               onTap: () async {
                 bool isFullScreen = await windowManager.isFullScreen();
                 BotToast.showText(text: 'isFullScreen: $isFullScreen');
+              },
+              value: _isFullScreen,
+              onChanged: (newValue) {
+                _isFullScreen = newValue;
+                windowManager.setFullScreen(_isFullScreen);
+                setState(() {});
               },
             ),
             PreferenceListItem(
@@ -302,99 +330,69 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 isSelected: _kMaxSizes.map((e) => e == _maxSize).toList(),
               ),
             ),
-            PreferenceListItem(
+            PreferenceListSwitchItem(
               title: Text('isResizable / setResizable'),
-              accessoryView: ToggleButtons(
-                children: <Widget>[
-                  Text('YES'),
-                  Text('NO'),
-                ],
-                onPressed: (int index) {
-                  _isResizable = !_isResizable;
-                  windowManager.setResizable(_isResizable);
-                  setState(() {});
-                },
-                isSelected: [_isResizable, !_isResizable],
-              ),
               onTap: () async {
                 bool isResizable = await windowManager.isResizable();
                 BotToast.showText(text: 'isResizable: $isResizable');
               },
+              value: _isResizable,
+              onChanged: (newValue) {
+                _isResizable = newValue;
+                windowManager.setResizable(_isResizable);
+                setState(() {});
+              },
             ),
-            PreferenceListItem(
+            PreferenceListSwitchItem(
               title: Text('isMovable / setMovable'),
-              accessoryView: ToggleButtons(
-                children: <Widget>[
-                  Text('YES'),
-                  Text('NO'),
-                ],
-                onPressed: (int index) {
-                  _isMovable = !_isMovable;
-                  windowManager.setMovable(_isMovable);
-                  setState(() {});
-                },
-                isSelected: [_isMovable, !_isMovable],
-              ),
               onTap: () async {
                 bool isMovable = await windowManager.isMovable();
                 BotToast.showText(text: 'isMovable: $isMovable');
               },
-            ),
-            PreferenceListItem(
-              title: Text('isMinimizable / setMinimizable'),
-              accessoryView: ToggleButtons(
-                children: <Widget>[
-                  Text('YES'),
-                  Text('NO'),
-                ],
-                onPressed: (int index) {
-                  _isMinimizable = !_isMinimizable;
-                  windowManager.setMinimizable(_isMinimizable);
-                  setState(() {});
-                },
-                isSelected: [_isMinimizable, !_isMinimizable],
-              ),
-              onTap: () async {
-                bool isClosable = await windowManager.isClosable();
-                BotToast.showText(text: 'isMinimizable: $isClosable');
+              value: _isMovable,
+              onChanged: (newValue) {
+                _isMovable = newValue;
+                windowManager.setMovable(_isMovable);
+                setState(() {});
               },
             ),
-            PreferenceListItem(
+            PreferenceListSwitchItem(
+              title: Text('isMinimizable / setMinimizable'),
+              onTap: () async {
+                bool isMinimizable = await windowManager.isClosable();
+                BotToast.showText(text: 'isMinimizable: $isMinimizable');
+              },
+              value: _isMinimizable,
+              onChanged: (newValue) {
+                _isMinimizable = newValue;
+                windowManager.setMinimizable(_isMinimizable);
+                setState(() {});
+              },
+            ),
+            PreferenceListSwitchItem(
               title: Text('isClosable / setClosable'),
-              accessoryView: ToggleButtons(
-                children: <Widget>[
-                  Text('YES'),
-                  Text('NO'),
-                ],
-                onPressed: (int index) {
-                  _isClosable = !_isClosable;
-                  windowManager.setClosable(_isClosable);
-                  setState(() {});
-                },
-                isSelected: [_isClosable, !_isClosable],
-              ),
               onTap: () async {
                 bool isClosable = await windowManager.isClosable();
                 BotToast.showText(text: 'isClosable: $isClosable');
               },
+              value: _isClosable,
+              onChanged: (newValue) {
+                _isClosable = newValue;
+                windowManager.setClosable(_isClosable);
+                setState(() {});
+              },
             ),
-            PreferenceListItem(
+            PreferenceListSwitchItem(
               title: Text('isAlwaysOnTop / setAlwaysOnTop'),
-              accessoryView: ToggleButtons(
-                children: <Widget>[
-                  Text('YES'),
-                  Text('NO'),
-                ],
-                onPressed: (int index) {
-                  _isAlwaysOnTop = !_isAlwaysOnTop;
-                  windowManager.setAlwaysOnTop(_isAlwaysOnTop);
-                  setState(() {});
-                },
-                isSelected: [_isAlwaysOnTop, !_isAlwaysOnTop],
-              ),
               onTap: () async {
                 bool isAlwaysOnTop = await windowManager.isAlwaysOnTop();
                 BotToast.showText(text: 'isAlwaysOnTop: $isAlwaysOnTop');
+              },
+              value: _isAlwaysOnTop,
+              onChanged: (newValue) {
+                _isAlwaysOnTop = newValue;
+                windowManager.setAlwaysOnTop(_isAlwaysOnTop);
+                setState(() {});
               },
             ),
             PreferenceListItem(
@@ -409,25 +407,19 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 await windowManager.setTitle(title);
               },
             ),
-            PreferenceListItem(
+            PreferenceListSwitchItem(
               title: Text('hasShadow / setHasShadow'),
-              accessoryView: ToggleButtons(
-                children: <Widget>[
-                  Text('YES'),
-                  Text('NO'),
-                ],
-                onPressed: (int index) {
-                  _hasShadow = !_hasShadow;
-                  windowManager.setHasShadow(_hasShadow);
-                  setState(() {});
-                },
-                isSelected: [_hasShadow, !_hasShadow],
-              ),
               onTap: () async {
                 bool hasShadow = await windowManager.hasShadow();
                 BotToast.showText(
                   text: 'hasShadow: $hasShadow',
                 );
+              },
+              value: _isAlwaysOnTop,
+              onChanged: (newValue) {
+                _hasShadow = newValue;
+                windowManager.setHasShadow(_hasShadow);
+                setState(() {});
               },
             ),
             PreferenceListItem(
@@ -444,11 +436,53 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Get Started"),
+    return Container(
+      margin: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(color: Colors.grey.withOpacity(0.4), width: 1),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            offset: Offset(1.0, 1.0),
+            blurRadius: 6.0,
+          ),
+        ],
       ),
-      body: _buildBody(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Get Started"),
+        ),
+        body: Column(
+          children: [
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onPanStart: (details) {
+                windowManager.startDragging();
+              },
+              onDoubleTap: () async {
+                bool isMaximized = await windowManager.isMaximized();
+                if (!isMaximized) {
+                  windowManager.maximize();
+                } else {
+                  windowManager.unmaximize();
+                }
+              },
+              child: Container(
+                width: double.infinity,
+                height: 54,
+                color: Colors.grey.withOpacity(0.3),
+                child: Center(
+                  child: Text('DragToMoveArea'),
+                ),
+              ),
+            ),
+            Expanded(
+              child: _buildBody(context),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
