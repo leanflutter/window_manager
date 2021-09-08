@@ -467,10 +467,7 @@ namespace {
 
         DWORD dwExStyle = GetWindowLong(GetMainWindow(), GWL_EXSTYLE);
 
-        flutter::EncodableMap resultMap = flutter::EncodableMap();
-        resultMap[flutter::EncodableValue("isAlwaysOnTop")] = flutter::EncodableValue((dwExStyle & WS_EX_TOPMOST) != 0);
-
-        result->Success(flutter::EncodableValue(resultMap));
+        result->Success(flutter::EncodableValue((dwExStyle & WS_EX_TOPMOST) != 0));
     }
 
     void WindowManagerPlugin::SetAlwaysOnTop(
