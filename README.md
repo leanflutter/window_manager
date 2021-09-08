@@ -120,6 +120,7 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 | `setTitle`       | Changes the title of native window to title.                                                               | ✔️    | ✔️    | ✔️      |
 | `hasShadow`      | Returns `bool` - Whether the window has a shadow.                                                          | ➖    | ✔️    | ➖      |
 | `setHasShadow`   | Sets whether the window should have a shadow.                                                              | ➖    | ✔️    | ➖      |
+| `startDragging`  |                                                                                                            | ➖    | ✔️    | ✔️      |
 | `terminate`      |                                                                                                            | ✔️    | ✔️    | ✔️      |
 
 ### WindowListener

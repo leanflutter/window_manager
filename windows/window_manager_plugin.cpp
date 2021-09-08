@@ -116,6 +116,9 @@ namespace {
         void WindowManagerPlugin::SetTitle(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+        void WindowManagerPlugin::StartDragging(
+            const flutter::MethodCall<flutter::EncodableValue>& method_call,
+            std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
         void WindowManagerPlugin::Terminate(
             const flutter::MethodCall<flutter::EncodableValue>& method_call,
             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
@@ -507,6 +510,16 @@ namespace {
         result->Success(flutter::EncodableValue(true));
     }
 
+    void WindowManagerPlugin::StartDragging(
+        const flutter::MethodCall<flutter::EncodableValue>& method_call,
+        std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+
+        ReleaseCapture();
+        SendMessage(GetMainWindow(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+
+        result->Success(flutter::EncodableValue(true));
+    }
+
     void WindowManagerPlugin::Terminate(
         const flutter::MethodCall<flutter::EncodableValue>& method_call,
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
@@ -572,6 +585,9 @@ namespace {
         }
         else if (method_call.method_name().compare("setTitle") == 0) {
             SetTitle(method_call, std::move(result));
+        }
+        else if (method_call.method_name().compare("startDragging") == 0) {
+            StartDragging(method_call, std::move(result));
         }
         else if (method_call.method_name().compare("terminate") == 0) {
             Terminate(method_call, std::move(result));
