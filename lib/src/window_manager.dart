@@ -81,11 +81,13 @@ class WindowManager {
     String? titleBarStyle,
     bool? transparent,
     bool? hasShadow,
+    bool? isFrameless,
   }) {
     final Map<String, dynamic> arguments = {
       'titleBarStyle': titleBarStyle,
       'backgroundColor': transparent == true ? 'transparent' : "default",
       'hasShadow': hasShadow,
+      'isFrameless': isFrameless,
     }..removeWhere((key, value) => value == null);
     _channel.invokeMethod('setCustomFrame', arguments);
   }

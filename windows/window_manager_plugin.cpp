@@ -85,7 +85,34 @@ namespace {
         WPARAM wParam,
         LPARAM lParam) {
         std::optional<LRESULT> result;
-        if (message == WM_GETMINMAXINFO) {
+
+        if (message == WM_NCCALCSIZE) {
+            if (wParam) {
+                SetWindowLong(hWnd, 0, 0); 
+                return 1;
+            }
+            return 0;
+        } else if (message == WM_NCHITTEST) {
+            LONG width = 10;
+            POINT mouse = { LOWORD(lParam), HIWORD(lParam) };
+            RECT window;
+            GetWindowRect(hWnd, &window);
+            RECT rcFrame = { 0 };
+            AdjustWindowRectEx(&rcFrame, WS_OVERLAPPEDWINDOW & ~WS_CAPTION, FALSE, NULL);
+            USHORT x = 1;
+            USHORT y = 1;
+            bool fOnResizeBorder = false;
+            if (mouse.y >= window.top && mouse.y < window.top + width) x = 0;
+            else if (mouse.y < window.bottom && mouse.y >= window.bottom - width) x = 2;
+            if (mouse.x >= window.left && mouse.x < window.left + width) y = 0;
+            else if (mouse.x < window.right && mouse.x >= window.right - width) y = 2;
+            LRESULT hitTests[3][3] =  {
+                { HTTOPLEFT   , fOnResizeBorder ? HTTOP : HTCAPTION, HTTOPRIGHT },
+                { HTLEFT      , HTNOWHERE                          , HTRIGHT },
+                { HTBOTTOMLEFT, HTBOTTOM                           , HTBOTTOMRIGHT },
+            };
+            return hitTests[x][y];
+        } else if (message == WM_GETMINMAXINFO) {
             MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lParam);
             // For the special "unconstrained" values, leave the defaults.
             if (native_window->minimum_size.x != 0)
@@ -135,7 +162,12 @@ namespace {
         std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
         std::string method_name = method_call.method_name();
 
-        if (method_name.compare("show") == 0) {
+        if (method_name.compare("setCustomFrame") == 0) {
+            const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
+            native_window->SetCustomFrame(args);
+            result->Success(flutter::EncodableValue(true));
+        }
+        else if (method_name.compare("show") == 0) {
             native_window->Show();
             result->Success(flutter::EncodableValue(true));
         }

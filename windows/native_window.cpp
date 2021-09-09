@@ -11,6 +11,9 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <dwmapi.h>
+
+#pragma comment(lib, "dwmapi.lib")
 
 #define STATE_NORMAL                0
 #define STATE_MAXIMIZED             1
@@ -32,7 +35,7 @@ namespace {
         POINT maximum_size = { -1, -1 };
 
         HWND GetMainWindow();
-        
+        void NativeWindow::SetCustomFrame(const flutter::EncodableMap& args);
         void NativeWindow::Focus();
         void NativeWindow::Blur();
         void NativeWindow::Show();
@@ -46,14 +49,19 @@ namespace {
         void NativeWindow::Restore();
         bool NativeWindow::IsFullScreen();
         void NativeWindow::SetFullScreen(const flutter::EncodableMap& args);
+        void NativeWindow::SetBackgroundColor(const flutter::EncodableMap& args);
         flutter::EncodableMap NativeWindow::GetBounds(const flutter::EncodableMap& args);
         void NativeWindow::SetBounds(const flutter::EncodableMap& args);
         void NativeWindow::SetMinimumSize(const flutter::EncodableMap& args);
         void NativeWindow::SetMaximumSize(const flutter::EncodableMap& args);
         bool NativeWindow::IsAlwaysOnTop();
         void NativeWindow::SetAlwaysOnTop(const flutter::EncodableMap& args);
+        std::string NativeWindow::GetTitleBarStyle();
+        void NativeWindow::SetTitleBarStyle(const flutter::EncodableMap& args);
         std::string NativeWindow::GetTitle();
         void NativeWindow::SetTitle(const flutter::EncodableMap& args);
+        bool NativeWindow::HasShadow();
+        void NativeWindow::SetHasShadow(const flutter::EncodableMap& args);
         void NativeWindow::StartDragging();
         void NativeWindow::Terminate();
 
@@ -73,6 +81,28 @@ namespace {
 
     HWND NativeWindow::GetMainWindow() {
         return ::GetAncestor(registrar->GetView()->GetNativeWindow(), GA_ROOT);
+    }
+
+    void NativeWindow::SetCustomFrame(const flutter::EncodableMap& args) {
+        bool isFrameless = std::get<bool>(args.at(flutter::EncodableValue("isFrameless")));
+
+        if (isFrameless) {
+            HWND hWnd = GetMainWindow();
+
+            RECT rect;
+            MARGINS margins = { 0, 0, 0, 0 };
+
+            GetWindowRect(hWnd, &rect);
+            SetWindowLong(hWnd, GWL_STYLE, WS_POPUP | WS_CAPTION | WS_VISIBLE );
+            DwmExtendFrameIntoClientArea(hWnd, &margins);
+            SetWindowPos(
+              hWnd, nullptr,
+              rect.left, 
+              rect.top, 
+              rect.right - rect.left, 
+              rect.bottom - rect.top, 
+              SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
+        }
     }
 
     void NativeWindow::Focus() {
@@ -164,8 +194,6 @@ namespace {
         bool isFullScreen = std::get<bool>(args.at(flutter::EncodableValue("isFullScreen")));
 
         HWND mainWindow = GetMainWindow();
-        WINDOWPLACEMENT windowPlacement;
-        GetWindowPlacement(mainWindow, &windowPlacement);
 
         // https://github.com/alexmercerind/flutter-desktop-embedding/blob/da98a3b5a0e2b9425fbcb2a3e4b4ba50754abf93/plugins/window_size/windows/window_size_plugin.cpp#L258
         if (isFullScreen) {
@@ -281,9 +309,6 @@ namespace {
 
         std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
         SetWindowText(GetMainWindow(), converter.from_bytes(title).c_str());
-
-        int style = GetWindowLong(GetMainWindow(), GWL_STYLE);
-        SetWindowLong(GetMainWindow(), GWL_STYLE, (int)(style & ~(WS_CAPTION)));
     }
 
     void NativeWindow::StartDragging() {

@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
   bool _isMinimizable = true;
   bool _isClosable = true;
   bool _isAlwaysOnTop = false;
-  bool _transparent = true;
+  bool _transparent = false;
   bool _hasShadow = true;
   String _titleBarStyle = _kTitleBarStyles.first;
 
@@ -66,6 +66,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
       titleBarStyle: _titleBarStyle,
       transparent: _transparent,
       hasShadow: _hasShadow,
+      isFrameless: true,
     );
     setState(() {});
   }
