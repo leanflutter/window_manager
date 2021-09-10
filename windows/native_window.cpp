@@ -85,7 +85,6 @@ namespace {
 
     void NativeWindow::SetCustomFrame(const flutter::EncodableMap& args) {
         bool isFrameless = std::get<bool>(args.at(flutter::EncodableValue("isFrameless")));
-
         if (isFrameless) {
             HWND hWnd = GetMainWindow();
 
@@ -220,6 +219,59 @@ namespace {
                 g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top,
                 SWP_SHOWWINDOW);
             ::ShowWindow(mainWindow, SW_RESTORE);
+        }
+    }
+
+    void NativeWindow::SetBackgroundColor(const flutter::EncodableMap& args) {
+        int backgroundColorA = std::get<int>(args.at(flutter::EncodableValue("backgroundColorA")));
+        int backgroundColorR = std::get<int>(args.at(flutter::EncodableValue("backgroundColorR")));
+        int backgroundColorG = std::get<int>(args.at(flutter::EncodableValue("backgroundColorG")));
+        int backgroundColorB = std::get<int>(args.at(flutter::EncodableValue("backgroundColorB")));
+
+        bool isTransparent = backgroundColorA == 0 && backgroundColorR == 0 && backgroundColorG == 0 && backgroundColorB == 0;
+
+        HWND hWnd = GetMainWindow();
+        const HINSTANCE hModule = LoadLibrary(TEXT("user32.dll"));
+        if (hModule) {
+            typedef enum _ACCENT_STATE {
+                ACCENT_DISABLED = 0,
+                ACCENT_ENABLE_GRADIENT = 1,
+                ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
+                ACCENT_ENABLE_BLURBEHIND = 3,
+                ACCENT_ENABLE_ACRYLICBLURBEHIND = 4,
+                ACCENT_ENABLE_HOSTBACKDROP = 5,
+                ACCENT_INVALID_STATE = 6
+            } ACCENT_STATE;
+            struct ACCENTPOLICY
+            {
+                int nAccentState;
+                int nFlags;
+                int nColor;
+                int nAnimationId;
+            };
+            struct WINCOMPATTRDATA
+            {
+                int nAttribute;
+                PVOID pData;
+                ULONG ulDataSize;
+            };
+            typedef BOOL(WINAPI*pSetWindowCompositionAttribute)(HWND, WINCOMPATTRDATA*);
+            const pSetWindowCompositionAttribute SetWindowCompositionAttribute = (pSetWindowCompositionAttribute)GetProcAddress(hModule, "SetWindowCompositionAttribute");
+            if (SetWindowCompositionAttribute)  {
+                int32_t accent_state = isTransparent ? ACCENT_ENABLE_TRANSPARENTGRADIENT : ACCENT_ENABLE_GRADIENT;
+                ACCENTPOLICY policy = { 
+                    accent_state,
+                    2,
+                    ((backgroundColorA << 24) +
+                    (backgroundColorB << 16) +
+                    (backgroundColorG << 8) +
+                    (backgroundColorR)),
+                    0 
+                };
+                WINCOMPATTRDATA data = { 19, &policy, sizeof(policy) };
+                SetWindowCompositionAttribute(hWnd, &data);
+            }
+            FreeLibrary(hModule);
         }
     }
 

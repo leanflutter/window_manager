@@ -4,11 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:preference_list/preference_list.dart';
 import 'package:window_manager/window_manager.dart';
 
-const _kTitleBarStyles = [
-  'default',
-  'hidden',
-];
-
 const _kSizes = [
   Size(400, 400),
   Size(600, 600),
@@ -42,9 +37,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
   bool _isMinimizable = true;
   bool _isClosable = true;
   bool _isAlwaysOnTop = false;
-  bool _transparent = false;
   bool _hasShadow = true;
-  String _titleBarStyle = _kTitleBarStyles.first;
 
   @override
   void initState() {
@@ -61,58 +54,18 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
   void _init() {}
 
-  void _handleSetCustomFrame() {
-    windowManager.setCustomFrame(
-      titleBarStyle: _titleBarStyle,
-      transparent: _transparent,
-      hasShadow: _hasShadow,
-      isFrameless: true,
-    );
-    setState(() {});
-  }
-
   Widget _buildBody(BuildContext context) {
     return PreferenceList(
       children: <Widget>[
         PreferenceListSection(
-          title: Text('CUSTOM FRAME'),
-          children: [
-            PreferenceListItem(
-              title: Text('titleBarStyle'),
-              accessoryView: ToggleButtons(
-                children: <Widget>[
-                  for (var _titleBarStyle in _kTitleBarStyles)
-                    Text(' $_titleBarStyle '),
-                ],
-                onPressed: (int index) async {
-                  _titleBarStyle = _kTitleBarStyles[index];
-                  _handleSetCustomFrame();
-                },
-                isSelected:
-                    _kTitleBarStyles.map((e) => e == _titleBarStyle).toList(),
-              ),
-            ),
-            PreferenceListSwitchItem(
-              title: Text('transparent'),
-              value: _transparent,
-              onChanged: (newValue) {
-                _transparent = newValue;
-                _handleSetCustomFrame();
-              },
-            ),
-            PreferenceListSwitchItem(
-              title: Text('hasShadow'),
-              value: _hasShadow,
-              onChanged: (newValue) {
-                _hasShadow = newValue;
-                _handleSetCustomFrame();
-              },
-            ),
-          ],
-        ),
-        PreferenceListSection(
           title: Text('METHODS'),
           children: [
+            PreferenceListItem(
+              title: Text('setCustomFrame'),
+              onTap: () async {
+                windowManager.setCustomFrame(isFrameless: true);
+              },
+            ),
             PreferenceListItem(
               title: Text('focus / blur'),
               onTap: () async {
@@ -198,6 +151,37 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 windowManager.setFullScreen(_isFullScreen);
                 setState(() {});
               },
+            ),
+            PreferenceListItem(
+              title: Text('setBackgroundColor'),
+              accessoryView: Row(
+                children: [
+                  CupertinoButton(
+                    child: Text('transparent'),
+                    onPressed: () async {
+                      windowManager.setBackgroundColor(Colors.transparent);
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('red'),
+                    onPressed: () async {
+                      windowManager.setBackgroundColor(Colors.red);
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('green'),
+                    onPressed: () async {
+                      windowManager.setBackgroundColor(Colors.green);
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('blue'),
+                    onPressed: () async {
+                      windowManager.setBackgroundColor(Colors.blue);
+                    },
+                  ),
+                ],
+              ),
             ),
             PreferenceListItem(
               title: Text('setBounds / setBounds'),
@@ -416,7 +400,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
                   text: 'hasShadow: $hasShadow',
                 );
               },
-              value: _isAlwaysOnTop,
+              value: _hasShadow,
               onChanged: (newValue) {
                 _hasShadow = newValue;
                 windowManager.setHasShadow(_hasShadow);
@@ -437,53 +421,58 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        border: Border.all(color: Colors.grey.withOpacity(0.4), width: 1),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            offset: Offset(1.0, 1.0),
-            blurRadius: 6.0,
-          ),
-        ],
-      ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Get Started"),
-        ),
-        body: Column(
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onPanStart: (details) {
-                windowManager.startDragging();
-              },
-              onDoubleTap: () async {
-                bool isMaximized = await windowManager.isMaximized();
-                if (!isMaximized) {
-                  windowManager.maximize();
-                } else {
-                  windowManager.unmaximize();
-                }
-              },
-              child: Container(
-                width: double.infinity,
-                height: 54,
-                color: Colors.grey.withOpacity(0.3),
-                child: Center(
-                  child: Text('DragToMoveArea'),
-                ),
+    return Stack(
+      children: [
+        Container(
+          margin: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            border: Border.all(color: Colors.grey.withOpacity(0.4), width: 1),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                offset: Offset(1.0, 1.0),
+                blurRadius: 6.0,
               ),
+            ],
+          ),
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text("Get Started"),
             ),
-            Expanded(
-              child: _buildBody(context),
+            body: Column(
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onPanStart: (details) {
+                    windowManager.startDragging();
+                  },
+                  onDoubleTap: () async {
+                    bool isMaximized = await windowManager.isMaximized();
+                    if (!isMaximized) {
+                      windowManager.maximize();
+                    } else {
+                      windowManager.unmaximize();
+                    }
+                  },
+                  child: Container(
+                    margin: EdgeInsets.all(50),
+                    width: double.infinity,
+                    height: 54,
+                    color: Colors.grey.withOpacity(0.3),
+                    child: Center(
+                      child: Text('DragToMoveArea'),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: _buildBody(context),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 

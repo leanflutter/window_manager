@@ -78,15 +78,9 @@ class WindowManager {
   }
 
   void setCustomFrame({
-    String? titleBarStyle,
-    bool? transparent,
-    bool? hasShadow,
     bool? isFrameless,
   }) {
     final Map<String, dynamic> arguments = {
-      'titleBarStyle': titleBarStyle,
-      'backgroundColor': transparent == true ? 'transparent' : "default",
-      'hasShadow': hasShadow,
       'isFrameless': isFrameless,
     }..removeWhere((key, value) => value == null);
     _channel.invokeMethod('setCustomFrame', arguments);
@@ -159,6 +153,16 @@ class WindowManager {
       'isFullScreen': isFullScreen,
     };
     _channel.invokeMethod('setFullScreen', arguments);
+  }
+
+  void setBackgroundColor(Color backgroundColor) {
+    final Map<String, dynamic> arguments = {
+      'backgroundColorA': backgroundColor.alpha,
+      'backgroundColorR': backgroundColor.red,
+      'backgroundColorG': backgroundColor.green,
+      'backgroundColorB': backgroundColor.blue,
+    };
+    _channel.invokeMethod('setBackgroundColor', arguments);
   }
 
   Future<Rect> getBounds() async {

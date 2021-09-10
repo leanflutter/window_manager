@@ -212,6 +212,11 @@ namespace {
             native_window->SetFullScreen(args);
             result->Success(flutter::EncodableValue(true));
         }
+        else if (method_name.compare("setBackgroundColor") == 0) {
+            const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
+            native_window->SetBackgroundColor(args);
+            result->Success(flutter::EncodableValue(true));
+        }
         else if (method_name.compare("getBounds") == 0) {
             const flutter::EncodableMap& args = std::get<flutter::EncodableMap>(*method_call.arguments());
             flutter::EncodableMap value = native_window->GetBounds(args);
