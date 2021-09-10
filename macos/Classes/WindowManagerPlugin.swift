@@ -84,6 +84,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
             nativeWindow.setFullScreen(args)
             result(true)
             break
+        case "setBackgroundColor":
+            nativeWindow.setBackgroundColor(args)
+            result(true)
+            break
         case "getBounds":
             result(nativeWindow.getBounds())
             break

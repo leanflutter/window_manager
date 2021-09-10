@@ -30,14 +30,9 @@ public class NativeWindow: NSObject {
     }
     
     public func setCustomFrame(_ args: [String: Any]) {
-        if (args.keys.contains("titleBarStyle")) {
-            setTitleBarStyle(args)
-        }
-        if (args.keys.contains("backgroundColor")) {
-            setBackgroundColor(args)
-        }
-        if (args.keys.contains("hasShadow")) {
-            setHasShadow(args)
+        let isFrameless: Bool = args["isFrameless"] as! Bool
+        if (isFrameless) {
+            mainWindow.styleMask.remove(.titled)
         }
     }
     
@@ -108,13 +103,30 @@ public class NativeWindow: NSObject {
             }
         }
     }
-
+    
     public func setBackgroundColor(_ args: [String: Any]) {
-        let backgroundColor = args["backgroundColor"] as! String
-        if (backgroundColor == "transparent") {
+        let backgroundColorA = args["backgroundColorA"] as! Int
+        let backgroundColorR = args["backgroundColorR"] as! Int
+        let backgroundColorG = args["backgroundColorG"] as! Int
+        let backgroundColorB = args["backgroundColorB"] as! Int
+        
+        let isTransparent: Bool = backgroundColorA == 0
+            && backgroundColorR == 0
+            && backgroundColorG == 0
+            && backgroundColorB == 0;
+        
+        if (isTransparent) {
             mainWindow.backgroundColor = NSColor.clear
         } else {
-            mainWindow.backgroundColor = NSColor.windowBackgroundColor
+            let rgbR = CGFloat(backgroundColorR) / 255
+            let rgbG = CGFloat(backgroundColorG) / 255
+            let rgbB = CGFloat(backgroundColorB) / 255
+            let rgbA = CGFloat(backgroundColorA) / 255
+            
+            mainWindow.backgroundColor = NSColor(red: rgbR,
+                    green: rgbG,
+                    blue: rgbB,
+                    alpha: rgbA)
         }
     }
     
