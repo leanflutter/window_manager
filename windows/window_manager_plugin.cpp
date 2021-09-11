@@ -167,6 +167,10 @@ namespace {
             native_window->SetCustomFrame(args);
             result->Success(flutter::EncodableValue(true));
         }
+        else if (method_name.compare("focus") == 0) {
+            native_window->Focus();
+            result->Success(flutter::EncodableValue(true));
+        }
         else if (method_name.compare("show") == 0) {
             native_window->Show();
             result->Success(flutter::EncodableValue(true));
