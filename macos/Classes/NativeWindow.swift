@@ -124,9 +124,9 @@ public class NativeWindow: NSObject {
             let rgbA = CGFloat(backgroundColorA) / 255
             
             mainWindow.backgroundColor = NSColor(red: rgbR,
-                    green: rgbG,
-                    blue: rgbB,
-                    alpha: rgbA)
+                                                 green: rgbG,
+                                                 blue: rgbB,
+                                                 alpha: rgbA)
         }
     }
     
