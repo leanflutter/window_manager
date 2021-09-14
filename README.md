@@ -34,10 +34,6 @@ This plugin allows Flutter **desktop** apps to resizing and repositioning the wi
 | :---: | :---: | :-----: |
 |  ✔️   |  ✔️   |   ✔️    |
 
-> In fact, `window_manager` support the `web` platform to integrate flutter web to web page.
-
-See [demo](https://embed-window-manager-example.vercel.app/).
-
 ## Quick Start
 
 ### Installation
