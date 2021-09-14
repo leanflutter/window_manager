@@ -5,12 +5,18 @@
 #include <sys/utsname.h>
 
 #include <cstring>
+#include <cairo/cairo.h>
 
 #define WINDOW_MANAGER_PLUGIN(obj)                                     \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), window_manager_plugin_get_type(), \
                               WindowManagerPlugin))
 
 WindowManagerPlugin *plugin_instance;
+
+static double bg_color_r = 0.0;
+static double bg_color_g = 0.0; 
+static double bg_color_b = 0.0;
+static double bg_color_a = 0.0;
 
 struct _WindowManagerPlugin
 {
@@ -37,6 +43,18 @@ GtkWindow *get_window(WindowManagerPlugin *self)
 GdkWindow *get_gdk_window(WindowManagerPlugin *self)
 {
   return gtk_widget_get_window(GTK_WIDGET(get_window(self)));
+}
+
+static FlMethodResponse *set_custom_frame(WindowManagerPlugin *self,
+                                          FlValue *args)
+{
+  bool is_frameless = fl_value_get_bool(fl_value_lookup_string(args, "isFrameless"));
+  if (is_frameless)
+  {
+    gtk_window_set_decorated(get_window(self), false);
+  }
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
 static FlMethodResponse *focus(WindowManagerPlugin *self)
@@ -125,6 +143,25 @@ static FlMethodResponse *set_full_screen(WindowManagerPlugin *self,
     gtk_window_fullscreen(get_window(self));
   else
     gtk_window_unfullscreen(get_window(self));
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *set_background_color(WindowManagerPlugin *self,
+                                              FlValue *args)
+{
+  bg_color_r = ((double)fl_value_get_int(fl_value_lookup_string(args, "backgroundColorR")) / 255.0);
+  bg_color_g = ((double)fl_value_get_int(fl_value_lookup_string(args, "backgroundColorG")) / 255.0);
+  bg_color_b = ((double)fl_value_get_int(fl_value_lookup_string(args, "backgroundColorB")) / 255.0);
+  bg_color_a = ((double)fl_value_get_int(fl_value_lookup_string(args, "backgroundColorA")) / 255.0);
+
+  gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
+
+  gint width, height;
+  gtk_window_get_size(get_window(self), &width, &height);
+
+  // gtk_window_resize(get_window(self), static_cast<gint>(width), static_cast<gint>(height+1));
+  gtk_window_resize(get_window(self), static_cast<gint>(width), static_cast<gint>(height));
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
@@ -269,7 +306,11 @@ static void window_manager_plugin_handle_method_call(
 
   const gchar *method = fl_method_call_get_name(method_call);
   FlValue *args = fl_method_call_get_args(method_call);
-  if (strcmp(method, "focus") == 0)
+  if (strcmp(method, "setCustomFrame") == 0)
+  {
+    response = set_custom_frame(self, args);
+  }
+  else if (strcmp(method, "focus") == 0)
   {
     response = focus(self);
   }
@@ -321,6 +362,10 @@ static void window_manager_plugin_handle_method_call(
   {
     response = set_full_screen(self, args);
   }
+  else if (strcmp(method, "setBackgroundColor") == 0)
+  {
+    response = set_background_color(self, args);
+  } 
   else if (strcmp(method, "getBounds") == 0)
   {
     response = get_bounds(self);
@@ -432,6 +477,13 @@ void on_window_state_change(GtkWidget *widget, GdkEventWindowState *event, gpoin
   }
 }
 
+gboolean on_window_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
+  cairo_set_source_rgba(cr, bg_color_r, bg_color_g, bg_color_b, bg_color_a);
+  cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+  cairo_paint(cr);
+  return FALSE;
+}
+
 void window_manager_plugin_register_with_registrar(FlPluginRegistrar *registrar)
 {
   WindowManagerPlugin *plugin = WINDOW_MANAGER_PLUGIN(
@@ -449,6 +501,7 @@ void window_manager_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   g_signal_connect(get_window(plugin), "show", G_CALLBACK(on_window_show), NULL);
   g_signal_connect(get_window(plugin), "hide", G_CALLBACK(on_window_hide), NULL);
   g_signal_connect(get_window(plugin), "window-state-event", G_CALLBACK(on_window_state_change), NULL);
+  g_signal_connect(get_window(plugin), "draw", G_CALLBACK(on_window_draw), NULL);
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   plugin->channel =
