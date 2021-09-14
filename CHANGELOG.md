@@ -1,3 +1,7 @@
+## 0.0.4
+
+- Implemented `setCustomFrame`, `setBackgroundColor` Methods.
+
 ## 0.0.3
 
 - Implemented `isMinimized`, `minimize`, `restore` Methods.
