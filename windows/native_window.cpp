@@ -28,6 +28,8 @@ namespace {
         virtual ~NativeWindow();
 
         int last_state = STATE_NORMAL;
+
+        bool is_frameless = false;
         
         // The minimum size set by the platform channel.
         POINT minimum_size = { 0, 0 };
@@ -86,6 +88,7 @@ namespace {
     void NativeWindow::SetCustomFrame(const flutter::EncodableMap& args) {
         bool isFrameless = std::get<bool>(args.at(flutter::EncodableValue("isFrameless")));
         if (isFrameless) {
+            is_frameless = isFrameless;
             HWND hWnd = GetMainWindow();
 
             RECT rect;

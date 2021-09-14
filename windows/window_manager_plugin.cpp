@@ -87,18 +87,17 @@ namespace {
         std::optional<LRESULT> result;
 
         if (message == WM_NCCALCSIZE) {
-            if (wParam) {
+            if (wParam && native_window->is_frameless) {
                 SetWindowLong(hWnd, 0, 0); 
                 return 1;
             }
-            return 0;
         } else if (message == WM_NCHITTEST) {
             LONG width = 10;
             POINT mouse = { LOWORD(lParam), HIWORD(lParam) };
             RECT window;
             GetWindowRect(hWnd, &window);
             RECT rcFrame = { 0 };
-            AdjustWindowRectEx(&rcFrame, WS_OVERLAPPEDWINDOW & ~WS_CAPTION, FALSE, NULL);
+            // AdjustWindowRectEx(&rcFrame, WS_OVERLAPPEDWINDOW & ~WS_CAPTION, FALSE, NULL);
             USHORT x = 1;
             USHORT y = 1;
             bool fOnResizeBorder = false;

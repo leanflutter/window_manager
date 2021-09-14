@@ -438,7 +438,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
           ),
           child: Scaffold(
             appBar: AppBar(
-              title: const Text("Get Started"),
+              title: const Text("window_manager_example"),
             ),
             body: Column(
               children: [
