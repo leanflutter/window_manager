@@ -1,163 +1,181 @@
 import Cocoa
 import FlutterMacOS
 
-public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
-    private var registrar: FlutterPluginRegistrar!;
-    private var channel: FlutterMethodChannel!
-    
-    private var _nativeWindow: NativeWindow?
-    private var nativeWindow: NativeWindow {
-        get {
-            if (_nativeWindow == nil) {
-                _nativeWindow = NativeWindow(registrar: self.registrar)
-            }
-            return _nativeWindow!;
-        }
-    }
-    
+public class WindowManagerPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "window_manager", binaryMessenger: registrar.messenger)
-        let instance = WindowManagerPlugin()
-        instance.registrar = registrar
-        instance.channel = channel
+        let instance = WindowManagerPlugin(registrar, channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
     
-    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if (nativeWindow.mainWindow.delegate == nil) {
-            nativeWindow.mainWindow.delegate = self;
+    private var registrar: FlutterPluginRegistrar!;
+    private var channel: FlutterMethodChannel!
+    
+    private var mainWindow: NSWindow {
+        get {
+            return (self.registrar.view?.window)!;
         }
-        
+    }
+    
+    private var _inited: Bool = false
+    private var windowManager: WindowManager = WindowManager()
+    
+    public init(_ registrar: FlutterPluginRegistrar, _ channel: FlutterMethodChannel) {
+        super.init()
+        self.registrar = registrar
+        self.channel = channel
+    }
+
+    private func ensureInitialized() {
+        if (!_inited) {
+            windowManager.mainWindow = mainWindow
+            windowManager.onEvent = {
+                (eventName: String) in
+                self._emitEvent(eventName)
+            }
+            _inited = true
+        }
+    }
+
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let methodName: String = call.method
         let args: [String: Any] = call.arguments as? [String: Any] ?? [:]
         
         switch (methodName) {
-        case "setCustomFrame":
-            nativeWindow.setCustomFrame(args)
+        case "ensureInitialized":
+            ensureInitialized()
+            result(true)
+            break
+        case "waitUntilReadyToShow":
+            windowManager.waitUntilReadyToShow()
             result(true)
             break
         case "focus":
-            nativeWindow.focus()
+            windowManager.focus()
             result(true)
             break
         case "blur":
-            nativeWindow.blur()
+            windowManager.blur()
             result(true)
             break
         case "show":
-            nativeWindow.show()
+            windowManager.show()
             result(true)
             break
         case "hide":
-            nativeWindow.hide()
+            windowManager.hide()
             result(true)
             break
         case "isVisible":
-            result(nativeWindow.isVisible())
+            result(windowManager.isVisible())
             break
         case "isMaximized":
-            result(nativeWindow.isMaximized())
+            result(windowManager.isMaximized())
             break
         case "maximize":
-            nativeWindow.maximize()
+            windowManager.maximize()
             result(true)
             break
         case "unmaximize":
-            nativeWindow.unmaximize()
+            windowManager.unmaximize()
             result(true)
             break
         case "isMinimized":
-            result(nativeWindow.isMinimized())
+            result(windowManager.isMinimized())
             break
         case "minimize":
-            nativeWindow.minimize()
+            windowManager.minimize()
             result(true)
             break
         case "restore":
-            nativeWindow.restore()
+            windowManager.restore()
             result(true)
             break
         case "isFullScreen":
-            result(nativeWindow.isFullScreen())
+            result(windowManager.isFullScreen())
             break
         case "setFullScreen":
-            nativeWindow.setFullScreen(args)
+            windowManager.setFullScreen(args)
             result(true)
             break
         case "setBackgroundColor":
-            nativeWindow.setBackgroundColor(args)
+            windowManager.setBackgroundColor(args)
+            result(true)
+            break
+        case "center":
+            windowManager.center()
             result(true)
             break
         case "getBounds":
-            result(nativeWindow.getBounds())
+            result(windowManager.getBounds())
             break
         case "setBounds":
-            nativeWindow.setBounds(args)
+            windowManager.setBounds(args)
             result(true)
             break
         case "setMinimumSize":
-            nativeWindow.setMinimumSize(args)
+            windowManager.setMinimumSize(args)
             result(true)
             break
         case "setMaximumSize":
-            nativeWindow.setMaximumSize(args)
+            windowManager.setMaximumSize(args)
             result(true)
             break
         case "isResizable":
-            result(nativeWindow.isResizable())
+            result(windowManager.isResizable())
             break
         case "setResizable":
-            nativeWindow.setResizable(args)
+            windowManager.setResizable(args)
             result(true)
             break
         case "isMovable":
-            result(nativeWindow.isMovable())
+            result(windowManager.isMovable())
             break
         case "setMovable":
-            nativeWindow.setMovable(args)
+            windowManager.setMovable(args)
             result(true)
             break
         case "isMinimizable":
-            result(nativeWindow.isMinimizable())
+            result(windowManager.isMinimizable())
             break
         case "setMinimizable":
-            nativeWindow.setMinimizable(args)
+            windowManager.setMinimizable(args)
             result(true)
             break
         case "isClosable":
-            result(nativeWindow.isClosable())
+            result(windowManager.isClosable())
             break
         case "setClosable":
-            nativeWindow.setClosable(args)
+            windowManager.setClosable(args)
             result(true)
             break
         case "isAlwaysOnTop":
-            result(nativeWindow.isAlwaysOnTop())
+            result(windowManager.isAlwaysOnTop())
             break
         case "setAlwaysOnTop":
-            nativeWindow.setAlwaysOnTop(args)
+            windowManager.setAlwaysOnTop(args)
             result(true)
             break
         case "getTitle":
-            result(nativeWindow.getTitle())
+            result(windowManager.getTitle())
             break
         case "setTitle":
-            nativeWindow.setTitle(args)
+            windowManager.setTitle(args)
             result(true)
             break
         case "hasShadow":
-            result(nativeWindow.hasShadow())
+            result(windowManager.hasShadow())
             break
         case "setHasShadow":
-            nativeWindow.setHasShadow(args)
+            windowManager.setHasShadow(args)
             result(true)
             break
         case "startDragging":
-            nativeWindow.startDragging()
+            windowManager.startDragging()
             result(true)
             break
         case "terminate":
-            nativeWindow.terminate()
+            windowManager.terminate()
             result(true)
             break
         default:
@@ -165,35 +183,30 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin, NSWindowDelegate {
         }
     }
     
-    // NSWindowDelegate
-    public func windowDidBecomeMain(_ notification: Notification) {
-        _emitEvent("focus");
-    }
-    
-    public func windowDidResignMain(_ notification: Notification){
-        _emitEvent("blur");
-    }
-    
-    public func windowDidMiniaturize(_ notification: Notification) {
-        _emitEvent("minimize");
-    }
-    
-    public func windowDidDeminiaturize(_ notification: Notification) {
-        _emitEvent("restore");
-    }
-    
-    public func windowDidEnterFullScreen(_ notification: Notification){
-        _emitEvent("enter-full-screen");
-    }
-    
-    public func windowDidExitFullScreen(_ notification: Notification){
-        _emitEvent("leave-full-screen");
-    }
-    
     public func _emitEvent(_ eventName: String) {
         let args: NSDictionary = [
             "eventName": eventName,
         ]
         channel.invokeMethod("onEvent", arguments: args, result: nil)
+    }
+}
+
+open class CustomWindowConfigureOption {
+    public var isFrameless: Bool
+    public var visibleAtLaunch: Bool
+    
+    public init(isFrameless: Bool, visibleAtLaunch: Bool = false) {
+        self.isFrameless = isFrameless
+        self.visibleAtLaunch = visibleAtLaunch
+    }
+}
+
+public func customWindowConfigure(_ window: NSWindow, _ option: CustomWindowConfigureOption) -> Void {
+    let windowManager: WindowManager = WindowManager()
+    windowManager.mainWindow = window
+
+    window.setIsVisible(option.visibleAtLaunch)
+    if (option.isFrameless) {
+        windowManager.setAsFrameless()
     }
 }

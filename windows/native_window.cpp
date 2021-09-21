@@ -58,8 +58,6 @@ namespace {
         void NativeWindow::SetMaximumSize(const flutter::EncodableMap& args);
         bool NativeWindow::IsAlwaysOnTop();
         void NativeWindow::SetAlwaysOnTop(const flutter::EncodableMap& args);
-        std::string NativeWindow::GetTitleBarStyle();
-        void NativeWindow::SetTitleBarStyle(const flutter::EncodableMap& args);
         std::string NativeWindow::GetTitle();
         void NativeWindow::SetTitle(const flutter::EncodableMap& args);
         bool NativeWindow::HasShadow();

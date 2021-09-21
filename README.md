@@ -19,6 +19,9 @@ This plugin allows Flutter **desktop** apps to resizing and repositioning the wi
   - [Quick Start](#quick-start)
     - [Installation](#installation)
     - [Usage](#usage)
+      - [Listening events](#listening-events)
+      - [Custom window](#custom-window)
+        - [macOS](#macos)
   - [Who's using it?](#whos-using-it)
   - [Discussion](#discussion)
   - [API](#api)
@@ -58,12 +61,143 @@ dependencies:
 ### Usage
 
 ```dart
-Size windowSize = await WindowManager.instance.getSize();
-await WindowManager.instance.setSize(Size(400, 600));
-await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
+import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Must add this line.
+  await WindowManager.instance.ensureInitialized();
+
+  // Use it only when `visibleAtLaunch` is `false` the window
+  WindowManager.instance.waitUntilReadyToShow().then((_) async{
+    await WindowManager.instance.setSize(Size(600, 600));
+    await WindowManager.instance.setPosition(Offset.zero);
+    WindowManager.instance.show();
+  });
+
+  runApp(MyApp());
+}
+
 ```
 
 > Please see the example app of this plugin for a full example.
+
+#### Listening events
+
+```dart
+import 'package:flutter/cupertino.dart';
+import 'package:window_manager/window_manager.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with WindowListener {
+  @override
+  void initState() {
+    WindowManager.instance.addListener(this);
+    _init();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WindowManager.instance.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ...
+  }
+
+  @override
+  void onWindowEvent(String eventName) {
+    print('[WindowManager] onWindowEvent: $eventName');
+  }
+
+  @override
+  void onWindowFocus() {
+    // do something
+  }
+
+  @override
+  void onWindowBlur() {
+    // do something
+  }
+
+  @override
+  void onWindowMaximize() {
+    // do something
+  }
+
+  @override
+  void onWindowUnmaximize() {
+    // do something
+  }
+
+  @override
+  void onWindowMinimize() {
+    // do something
+  }
+
+  @override
+  void onWindowRestore() {
+    // do something
+  }
+
+  @override
+  void onWindowEnterFullScreen() {
+    // do something
+  }
+
+  @override
+  void onWindowLeaveFullScreen() {
+    // do something
+  }
+}
+```
+
+#### Custom window
+
+##### macOS
+
+```diff
+import Cocoa
+import FlutterMacOS
+import window_manager
+
+class MainFlutterWindow: NSWindow {
++    private var _configured: Bool = false
+
+    override func awakeFromNib() {
+        let flutterViewController = FlutterViewController.init()
+        let windowFrame = self.frame
+        self.contentViewController = flutterViewController
+        self.setFrame(windowFrame, display: true)
+
+        RegisterGeneratedPlugins(registry: flutterViewController)
+
+        super.awakeFromNib()
+    }
+
++    override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
++        super.order(place, relativeTo: otherWin)
++        if (!_configured) {
++            // [WindowManager] Custom your window
++            let option = CustomWindowConfigureOption(
++                isFrameless: true,
++                visibleAtLaunch: false
++            );
++            customWindowConfigure(self, option)
++            _configured = true
++        }
++    }
+}
+
+```
 
 ## Who's using it?
 
@@ -83,47 +217,45 @@ await WindowManager.instance.setAlwaysOnTop(_isAlwaysOnTop);
 
 ### WindowManager
 
-| Method               | Description                                                                                                | Linux | macOS | Windows |
-| -------------------- | ---------------------------------------------------------------------------------------------------------- | ----- | ----- | ------- |
-| `setCustomFrame`     | -                                                                                                          | ✔️    | ✔️    | ✔️      |
-| `focus`              | Focuses on the window.                                                                                     | ✔️    | ✔️    | ➖      |
-| `blur`               | Removes focus from the window.                                                                             | ➖    | ✔️    | ➖      |
-| `show`               | Shows and gives focus to the window.                                                                       | ✔️    | ✔️    | ✔️      |
-| `hide`               | Hides the window.                                                                                          | ✔️    | ✔️    | ✔️      |
-| `isVisible`          | Returns `bool` - Whether the window is visible to the user.                                                | ✔️    | ✔️    | ✔️      |
-| `isMaximized`        | Returns `bool` - Whether the window is maximized.                                                          | ✔️    | ✔️    | ✔️      |
-| `maximize`           | Maximizes the window.                                                                                      | ✔️    | ✔️    | ✔️      |
-| `unmaximize`         | Unmaximizes the window.                                                                                    | ✔️    | ✔️    | ✔️      |
-| `isMinimized`        | Returns `bool` - Whether the window is minimized.                                                          | ✔️    | ✔️    | ✔️      |
-| `minimize`           | Minimizes the window.                                                                                      | ✔️    | ✔️    | ✔️      |
-| `restore`            | Restores the window from minimized state to its previous state.                                            | ✔️    | ✔️    | ✔️      |
-| `isFullScreen`       | Returns `bool` - Whether the window is in fullscreen mode.                                                 | ✔️    | ✔️    | ✔️      |
-| `setFullScreen`      | Sets whether the window should be in fullscreen mode.                                                      | ✔️    | ✔️    | ✔️      |
-| `setBackgroundColor` | -                                                                                                          | ✔️    | ✔️    | ✔️      |
-| `getBounds`          | Returns `Rect` - The bounds of the window as Object.                                                       | ✔️    | ✔️    | ✔️      |
-| `setBounds`          | Resizes and moves the window to the supplied bounds.                                                       | ✔️    | ✔️    | ✔️      |
-| `getPosition`        | Returns `Offset` - Contains the window's current position.                                                 | ✔️    | ✔️    | ✔️      |
-| `setPosition`        | Moves window to `x` and `y`.                                                                               | ✔️    | ✔️    | ✔️      |
-| `getSize`            | Returns `Size` - Contains the window's width and height.                                                   | ✔️    | ✔️    | ✔️      |
-| `setSize`            | Resizes the window to `width` and `height`.                                                                | ✔️    | ✔️    | ✔️      |
-| `setMinimumSize`     | Sets the minimum size of window to `width` and `height`.                                                   | ✔️    | ✔️    | ✔️      |
-| `setMaximumSize`     | Sets the maximum size of window to `width` and `height`.                                                   | ✔️    | ✔️    | ✔️      |
-| `isResizable`        | Returns `bool` - Whether the window can be manually resized by the user.                                   | ➖    | ✔️    | ➖      |
-| `setResizable`       | Sets whether the window can be manually resized by the user.                                               | ➖    | ✔️    | ➖      |
-| `isMovable`          | Returns `bool` - Whether the window can be moved by user. On Linux always returns `true`.                  | ➖    | ✔️    | ➖      |
-| `setMovable`         | Sets whether the window can be moved by user. On Linux does nothing.                                       | ➖    | ✔️    | ➖      |
-| `isMinimizable`      | Returns `bool` - Whether the window can be manually minimized by the user. On Linux always returns `true`. | ➖    | ✔️    | ➖      |
-| `setMinimizable`     | Sets whether the window can be manually minimized by user. On Linux does nothing.                          | ➖    | ✔️    | ➖      |
-| `isClosable`         | Returns `bool` - Whether the window can be manually closed by user. On Linux always returns `true`.        | ➖    | ✔️    | ➖      |
-| `setClosable`        | Sets whether the window can be manually closed by user. On Linux does nothing.                             | ➖    | ✔️    | ➖      |
-| `isAlwaysOnTop`      | Returns `bool` - Whether the window is always on top of other windows.                                     | ✔️    | ✔️    | ✔️      |
-| `setAlwaysOnTop`     | Sets whether the window should show always on top of other windows.                                        | ✔️    | ✔️    | ✔️      |
-| `getTitle`           | Returns `String` - The title of the native window.                                                         | ✔️    | ✔️    | ✔️      |
-| `setTitle`           | Changes the title of native window to title.                                                               | ✔️    | ✔️    | ✔️      |
-| `hasShadow`          | Returns `bool` - Whether the window has a shadow.                                                          | ➖    | ✔️    | ➖      |
-| `setHasShadow`       | Sets whether the window should have a shadow.                                                              | ➖    | ✔️    | ➖      |
-| `startDragging`      | -                                                                                                          | ➖    | ✔️    | ✔️      |
-| `terminate`          |                                                                                                            | ✔️    | ✔️    | ✔️      |
+| Method           | Description                                                                                                | Linux | macOS | Windows |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- | ----- | ----- | ------- |
+| `focus`          | Focuses on the window.                                                                                     | ✔️    | ✔️    | ➖      |
+| `blur`           | Removes focus from the window.                                                                             | ➖    | ✔️    | ➖      |
+| `show`           | Shows and gives focus to the window.                                                                       | ✔️    | ✔️    | ✔️      |
+| `hide`           | Hides the window.                                                                                          | ✔️    | ✔️    | ✔️      |
+| `isVisible`      | Returns `bool` - Whether the window is visible to the user.                                                | ✔️    | ✔️    | ✔️      |
+| `isMaximized`    | Returns `bool` - Whether the window is maximized.                                                          | ✔️    | ✔️    | ✔️      |
+| `maximize`       | Maximizes the window.                                                                                      | ✔️    | ✔️    | ✔️      |
+| `unmaximize`     | Unmaximizes the window.                                                                                    | ✔️    | ✔️    | ✔️      |
+| `isMinimized`    | Returns `bool` - Whether the window is minimized.                                                          | ✔️    | ✔️    | ✔️      |
+| `minimize`       | Minimizes the window.                                                                                      | ✔️    | ✔️    | ✔️      |
+| `restore`        | Restores the window from minimized state to its previous state.                                            | ✔️    | ✔️    | ✔️      |
+| `isFullScreen`   | Returns `bool` - Whether the window is in fullscreen mode.                                                 | ✔️    | ✔️    | ✔️      |
+| `setFullScreen`  | Sets whether the window should be in fullscreen mode.                                                      | ✔️    | ✔️    | ✔️      |
+| `getBounds`      | Returns `Rect` - The bounds of the window as Object.                                                       | ✔️    | ✔️    | ✔️      |
+| `setBounds`      | Resizes and moves the window to the supplied bounds.                                                       | ✔️    | ✔️    | ✔️      |
+| `getPosition`    | Returns `Offset` - Contains the window's current position.                                                 | ✔️    | ✔️    | ✔️      |
+| `setPosition`    | Moves window to `x` and `y`.                                                                               | ✔️    | ✔️    | ✔️      |
+| `getSize`        | Returns `Size` - Contains the window's width and height.                                                   | ✔️    | ✔️    | ✔️      |
+| `setSize`        | Resizes the window to `width` and `height`.                                                                | ✔️    | ✔️    | ✔️      |
+| `setMinimumSize` | Sets the minimum size of window to `width` and `height`.                                                   | ✔️    | ✔️    | ✔️      |
+| `setMaximumSize` | Sets the maximum size of window to `width` and `height`.                                                   | ✔️    | ✔️    | ✔️      |
+| `isResizable`    | Returns `bool` - Whether the window can be manually resized by the user.                                   | ➖    | ✔️    | ➖      |
+| `setResizable`   | Sets whether the window can be manually resized by the user.                                               | ➖    | ✔️    | ➖      |
+| `isMovable`      | Returns `bool` - Whether the window can be moved by user. On Linux always returns `true`.                  | ➖    | ✔️    | ➖      |
+| `setMovable`     | Sets whether the window can be moved by user. On Linux does nothing.                                       | ➖    | ✔️    | ➖      |
+| `isMinimizable`  | Returns `bool` - Whether the window can be manually minimized by the user. On Linux always returns `true`. | ➖    | ✔️    | ➖      |
+| `setMinimizable` | Sets whether the window can be manually minimized by user. On Linux does nothing.                          | ➖    | ✔️    | ➖      |
+| `isClosable`     | Returns `bool` - Whether the window can be manually closed by user. On Linux always returns `true`.        | ➖    | ✔️    | ➖      |
+| `setClosable`    | Sets whether the window can be manually closed by user. On Linux does nothing.                             | ➖    | ✔️    | ➖      |
+| `isAlwaysOnTop`  | Returns `bool` - Whether the window is always on top of other windows.                                     | ✔️    | ✔️    | ✔️      |
+| `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.                                        | ✔️    | ✔️    | ✔️      |
+| `getTitle`       | Returns `String` - The title of the native window.                                                         | ✔️    | ✔️    | ✔️      |
+| `setTitle`       | Changes the title of native window to title.                                                               | ✔️    | ✔️    | ✔️      |
+| `hasShadow`      | Returns `bool` - Whether the window has a shadow.                                                          | ➖    | ✔️    | ➖      |
+| `setHasShadow`   | Sets whether the window should have a shadow.                                                              | ➖    | ✔️    | ➖      |
+| `startDragging`  | -                                                                                                          | ➖    | ✔️    | ✔️      |
+| `terminate`      |                                                                                                            | ✔️    | ✔️    | ✔️      |
 
 ### WindowListener
 

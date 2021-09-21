@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -17,28 +18,21 @@ const kWindowEventEnterFullScreen = 'enter-full-screen';
 const kWindowEventLeaveFullScreen = 'leave-full-screen';
 
 class WindowManager {
-  WindowManager._();
+  WindowManager._() {
+    _channel.setMethodCallHandler(_methodCallHandler);
+  }
 
   /// The shared instance of [WindowManager].
   static final WindowManager instance = WindowManager._();
 
   final MethodChannel _channel = const MethodChannel('window_manager');
 
-  bool _inited = false;
-
   ObserverList<WindowListener>? _listeners = ObserverList<WindowListener>();
-
-  void _init() {
-    _channel.setMethodCallHandler(_methodCallHandler);
-    _inited = true;
-  }
 
   Future<void> _methodCallHandler(MethodCall call) async {
     if (_listeners == null) return;
 
-    final List<WindowListener> localListeners =
-        List<WindowListener>.from(_listeners!);
-    for (final WindowListener listener in localListeners) {
+    for (final WindowListener listener in listeners) {
       if (!_listeners!.contains(listener)) {
         return;
       }
@@ -61,29 +55,33 @@ class WindowManager {
     }
   }
 
+  List<WindowListener> get listeners {
+    final List<WindowListener> localListeners =
+        List<WindowListener>.from(_listeners!);
+    return localListeners;
+  }
+
   bool get hasListeners {
     return _listeners!.isNotEmpty;
   }
 
   void addListener(WindowListener listener) {
-    if (!_inited) this._init();
-
     _listeners!.add(listener);
   }
 
   void removeListener(WindowListener listener) {
-    if (!_inited) this._init();
-
     _listeners!.remove(listener);
   }
 
-  void setCustomFrame({
-    bool? isFrameless,
-  }) {
-    final Map<String, dynamic> arguments = {
-      'isFrameless': isFrameless,
-    }..removeWhere((key, value) => value == null);
-    _channel.invokeMethod('setCustomFrame', arguments);
+  Future<void> ensureInitialized() {
+    if (Platform.isMacOS) {
+      return _channel.invokeMethod('ensureInitialized');
+    }
+    return Future.value();
+  }
+
+  Future<void> waitUntilReadyToShow() {
+    return _channel.invokeMethod('waitUntilReadyToShow');
   }
 
   // 聚焦于窗口
@@ -163,6 +161,12 @@ class WindowManager {
       'backgroundColorB': backgroundColor.blue,
     };
     _channel.invokeMethod('setBackgroundColor', arguments);
+  }
+
+  Future<void> center() async {
+    final Map<String, dynamic> arguments = {};
+
+    await _channel.invokeMethod('center', arguments);
   }
 
   Future<Rect> getBounds() async {

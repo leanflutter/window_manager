@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:bot_toast/bot_toast.dart';
+import 'package:window_manager/window_manager.dart';
 
 import './pages/home.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await WindowManager.instance.ensureInitialized();
+
+  // Use it only when `visibleAtLaunch` is `false` the window
+  WindowManager.instance.waitUntilReadyToShow().then((_) async{
+    print('waitUntilReadyToShow');
+    await Future.delayed(Duration(seconds: 3));
+    print('delayed 3 seconds');
+    await WindowManager.instance.setSize(Size(600, 600));
+    await WindowManager.instance.setPosition(Offset.zero);
+
+    WindowManager.instance.show();
+  });
 
   runApp(MyApp());
 }

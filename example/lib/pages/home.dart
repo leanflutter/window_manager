@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -60,12 +62,6 @@ class _HomePageState extends State<HomePage> with WindowListener {
         PreferenceListSection(
           title: Text('METHODS'),
           children: [
-            PreferenceListItem(
-              title: Text('setCustomFrame'),
-              onTap: () async {
-                windowManager.setCustomFrame(isFrameless: true);
-              },
-            ),
             PreferenceListItem(
               title: Text('focus / blur'),
               onTap: () async {
@@ -184,6 +180,12 @@ class _HomePageState extends State<HomePage> with WindowListener {
               ),
             ),
             PreferenceListItem(
+              title: Text('center'),
+              onTap: () {
+                windowManager.center();
+              },
+            ),
+            PreferenceListItem(
               title: Text('setBounds / setBounds'),
               accessoryView: ToggleButtons(
                 children: <Widget>[
@@ -279,9 +281,9 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 },
               ),
               onTap: () async {
-                Offset position = await windowManager.getPosition();
+                Size size = await windowManager.getSize();
                 BotToast.showText(
-                  text: '${position.toString()}',
+                  text: '${size.toString()}',
                 );
               },
             ),
@@ -430,7 +432,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
             border: Border.all(color: Colors.grey.withOpacity(0.4), width: 1),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withOpacity(0.2),
                 offset: Offset(1.0, 1.0),
                 blurRadius: 6.0,
               ),
@@ -456,7 +458,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
                     }
                   },
                   child: Container(
-                    margin: EdgeInsets.all(50),
+                    margin: EdgeInsets.all(0),
                     width: double.infinity,
                     height: 54,
                     color: Colors.grey.withOpacity(0.3),

@@ -15,25 +15,39 @@ extension NSRect {
     }
 }
 
-public class NativeWindow: NSObject {
-    var registrar: FlutterPluginRegistrar!;
+public class WindowManager: NSObject, NSWindowDelegate {
+    public var onEvent:((String) -> Void)?
     
-    init(registrar: FlutterPluginRegistrar) {
-        super.init()
-        self.registrar = registrar;
-    }
-    
+    private var _mainWindow: NSWindow?
     public var mainWindow: NSWindow {
         get {
-            return (registrar.view?.window)!;
+            return _mainWindow!
+        }
+        set {
+            _mainWindow = newValue
+            _mainWindow?.delegate = self
+        }
+    }
+
+    override public init() {
+        super.init()
+    }
+
+    public func setAsFrameless() {
+        mainWindow.styleMask.insert(.fullSizeContentView)
+        mainWindow.titleVisibility = .hidden
+        mainWindow.isOpaque = true
+        mainWindow.hasShadow = false
+        mainWindow.backgroundColor = NSColor.clear
+
+        if (mainWindow.styleMask.contains(.titled)) {
+            let titleBarView: NSView = (mainWindow.standardWindowButton(.closeButton)?.superview)!.superview!
+            titleBarView.isHidden = true
         }
     }
     
-    public func setCustomFrame(_ args: [String: Any]) {
-        let isFrameless: Bool = args["isFrameless"] as! Bool
-        if (isFrameless) {
-            mainWindow.styleMask.remove(.titled)
-        }
+    public func waitUntilReadyToShow() {
+        // nothing
     }
     
     public func focus() {
@@ -46,12 +60,17 @@ public class NativeWindow: NSObject {
     }
     
     public func show() {
-        mainWindow.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        mainWindow.setIsVisible(true)
+        DispatchQueue.main.async {
+            self.mainWindow.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
     
     public func hide() {
-        mainWindow.orderOut(mainWindow)
+        DispatchQueue.main.async {
+            self.mainWindow.orderOut(nil)
+        }
     }
     
     public func isVisible() -> Bool {
@@ -130,6 +149,19 @@ public class NativeWindow: NSObject {
         }
     }
     
+    public func center() {
+        let screenFrame = NSScreen.main!.frame
+        var frameRect: NSRect = mainWindow.frame;
+        
+        let width: CGFloat = frameRect.size.width
+        let height: CGFloat = frameRect.size.height
+        
+        frameRect.topLeft.x = CGFloat((screenFrame.width - width) / 2)
+        frameRect.topLeft.y = CGFloat((screenFrame.height - height) / 2)
+        
+        mainWindow.setFrame(frameRect, display: true)
+    }
+    
     public func getBounds() -> NSDictionary {
         let frameRect: NSRect = mainWindow.frame;
         
@@ -143,19 +175,15 @@ public class NativeWindow: NSObject {
     }
     
     public func setBounds(_ args: [String: Any]) {
-        let animate = args["animate"] as! Bool
+        let animate = args["animate"] as? Bool ?? false
         
         var frameRect = mainWindow.frame
-        if (args["width"] != nil) {
+        if (args["width"] != nil && args["height"] != nil) {
             frameRect.size.width = CGFloat(truncating: args["width"] as! NSNumber)
-        }
-        if (args["height"] != nil) {
             frameRect.size.height = CGFloat(truncating: args["height"] as! NSNumber)
         }
-        if (args["x"] != nil) {
+        if (args["x"] != nil && args["y"] != nil) {
             frameRect.topLeft.x = CGFloat(args["x"] as! Float)
-        }
-        if (args["y"] != nil) {
             frameRect.topLeft.y = CGFloat(args["y"] as! Float)
         }
         
@@ -239,20 +267,6 @@ public class NativeWindow: NSObject {
         mainWindow.level = isAlwaysOnTop ? .floating : .normal
     }
     
-    public func getTitleBarStyle() -> String {
-        return mainWindow.styleMask.contains(.titled) ?"default": "hidden"
-    }
-    
-    public func setTitleBarStyle(_ args: [String: Any]) {
-        let titleBarStyle: String = args["titleBarStyle"] as! String
-        
-        if (titleBarStyle == "hidden") {
-            mainWindow.styleMask.remove(.titled)
-        } else {
-            mainWindow.styleMask.insert(.titled)
-        }
-    }
-    
     public func getTitle() -> String {
         return mainWindow.title
     }
@@ -281,5 +295,37 @@ public class NativeWindow: NSObject {
     
     public func terminate() {
         NSApplication.shared.terminate(nil)
+    }
+    
+    // NSWindowDelegate
+    
+    public func windowDidBecomeMain(_ notification: Notification) {
+        _emitEvent("focus");
+    }
+    
+    public func windowDidResignMain(_ notification: Notification){
+        _emitEvent("blur");
+    }
+    
+    public func windowDidMiniaturize(_ notification: Notification) {
+        _emitEvent("minimize");
+    }
+    
+    public func windowDidDeminiaturize(_ notification: Notification) {
+        _emitEvent("restore");
+    }
+    
+    public func windowDidEnterFullScreen(_ notification: Notification){
+        _emitEvent("enter-full-screen");
+    }
+    
+    public func windowDidExitFullScreen(_ notification: Notification){
+        _emitEvent("leave-full-screen");
+    }
+    
+    public func _emitEvent(_ eventName: String) {
+        if (onEvent != nil) {
+            onEvent!(eventName)
+        }
     }
 }
