@@ -1,6 +1,26 @@
 import Cocoa
 import FlutterMacOS
 
+extension NSWindow {
+    private struct AssociatedKeys {
+        static var configured: Bool = false
+    }
+    var configured: Bool {
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKeys.configured) as? Bool ?? false
+        }
+        set(value) {
+            objc_setAssociatedObject(self, &AssociatedKeys.configured, value, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    public func hiddenWindowAtLaunch() {
+        if (!configured) {
+            setIsVisible(false)
+            configured = true
+        }
+    }
+}
+
 extension NSRect {
     var topLeft: CGPoint {
         set {

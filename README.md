@@ -20,7 +20,7 @@ This plugin allows Flutter **desktop** apps to resizing and repositioning the wi
     - [Installation](#installation)
     - [Usage](#usage)
       - [Listening events](#listening-events)
-      - [Custom window](#custom-window)
+      - [Hidden at launch](#hidden-at-launch)
         - [macOS](#macos)
   - [Who's using it?](#whos-using-it)
   - [Discussion](#discussion)
@@ -69,8 +69,10 @@ void main() async {
   // Must add this line.
   await WindowManager.instance.ensureInitialized();
 
-  // Use it only when `visibleAtLaunch` is `false` the window
+  // Use it only after calling `hiddenWindowAtLaunch`
   WindowManager.instance.waitUntilReadyToShow().then((_) async{
+    // Set to frameless window
+    await WindowManager.instance.setAsFrameless();
     await WindowManager.instance.setSize(Size(600, 600));
     await WindowManager.instance.setPosition(Offset.zero);
     WindowManager.instance.show();
@@ -160,18 +162,16 @@ class _HomePageState extends State<HomePage> with WindowListener {
 }
 ```
 
-#### Custom window
+#### Hidden at launch
 
 ##### macOS
 
 ```diff
 import Cocoa
 import FlutterMacOS
-import window_manager
++import window_manager
 
 class MainFlutterWindow: NSWindow {
-+    private var _configured: Bool = false
-
     override func awakeFromNib() {
         let flutterViewController = FlutterViewController.init()
         let windowFrame = self.frame
@@ -185,15 +185,7 @@ class MainFlutterWindow: NSWindow {
 
 +    override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
 +        super.order(place, relativeTo: otherWin)
-+        if (!_configured) {
-+            // [WindowManager] Custom your window
-+            let option = CustomWindowConfigureOption(
-+                isFrameless: true,
-+                visibleAtLaunch: false
-+            );
-+            customWindowConfigure(self, option)
-+            _configured = true
-+        }
++        hiddenWindowAtLaunch()
 +    }
 }
 

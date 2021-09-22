@@ -8,8 +8,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await WindowManager.instance.ensureInitialized();
 
-  // Use it only when `visibleAtLaunch` is `false` the window
+  // Use it only after calling `hiddenWindowAtLaunch`
   WindowManager.instance.waitUntilReadyToShow().then((_) async{
+    await WindowManager.instance.setAsFrameless();
     print('waitUntilReadyToShow');
     await Future.delayed(Duration(seconds: 3));
     print('delayed 3 seconds');

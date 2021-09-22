@@ -50,6 +50,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.waitUntilReadyToShow()
             result(true)
             break
+        case "setAsFrameless":
+            windowManager.setAsFrameless()
+            result(true)
+            break
         case "focus":
             windowManager.focus()
             result(true)
@@ -188,25 +192,5 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             "eventName": eventName,
         ]
         channel.invokeMethod("onEvent", arguments: args, result: nil)
-    }
-}
-
-open class CustomWindowConfigureOption {
-    public var isFrameless: Bool
-    public var visibleAtLaunch: Bool
-    
-    public init(isFrameless: Bool, visibleAtLaunch: Bool = false) {
-        self.isFrameless = isFrameless
-        self.visibleAtLaunch = visibleAtLaunch
-    }
-}
-
-public func customWindowConfigure(_ window: NSWindow, _ option: CustomWindowConfigureOption) -> Void {
-    let windowManager: WindowManager = WindowManager()
-    windowManager.mainWindow = window
-
-    window.setIsVisible(option.visibleAtLaunch)
-    if (option.isFrameless) {
-        windowManager.setAsFrameless()
     }
 }

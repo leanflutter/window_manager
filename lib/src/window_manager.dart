@@ -84,6 +84,10 @@ class WindowManager {
     return _channel.invokeMethod('waitUntilReadyToShow');
   }
 
+  Future<void> setAsFrameless() {
+    return _channel.invokeMethod('setAsFrameless');
+  }
+
   // 聚焦于窗口
   void focus({bool inactive = false}) {
     _channel.invokeMethod('focus');
