@@ -16,7 +16,7 @@
 
 namespace
 {
-unsigned int custom_window_flag = 0x00;
+bool is_hidden_window_at_launch = false;
 std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>,
                 std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
     channel = nullptr;
@@ -196,11 +196,12 @@ void WindowManagerPlugin::HandleMethodCall(const flutter::MethodCall<flutter::En
     }
     else if (method_name.compare("waitUntilReadyToShow") == 0)
     {
-        if (custom_window_flag & WMP_FRAMELESS)
-        {
-            window_manager->SetAsFrameless();
-        }
         window_manager->WaitUntilReadyToShow();
+        result->Success(flutter::EncodableValue(true));
+    }
+    else if (method_name.compare("setAsFrameless") == 0)
+    {
+        window_manager->SetAsFrameless();
         result->Success(flutter::EncodableValue(true));
     }
     else if (method_name.compare("focus") == 0)
@@ -340,7 +341,7 @@ void WindowManagerPluginRegisterWithRegistrar(FlutterDesktopPluginRegistrarRef r
         flutter::PluginRegistrarManager::GetInstance()->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
 }
 
-void CustomWindowConfigure(unsigned int flags)
+void HiddenWindowAtLaunch()
 {
-    custom_window_flag = flags;
+    is_hidden_window_at_launch = true;
 }

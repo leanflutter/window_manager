@@ -21,7 +21,7 @@ FLUTTER_PLUGIN_EXPORT void WindowManagerPluginRegisterWithRegistrar(
 #define WMP_FRAMELESS 0x01
 #define WMP_HIDDEN_AT_LAUNCH 0x02
 
-FLUTTER_PLUGIN_EXPORT void CustomWindowConfigure(unsigned int flags);
+FLUTTER_PLUGIN_EXPORT void HiddenWindowAtLaunch();
 
 #if defined(__cplusplus)
 }  // extern "C"
