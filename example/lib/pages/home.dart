@@ -39,6 +39,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
   bool _isMinimizable = true;
   bool _isClosable = true;
   bool _isAlwaysOnTop = false;
+  bool _isSkipTaskbar = false;
   bool _hasShadow = true;
 
   @override
@@ -392,6 +393,17 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 title =
                     'window_manager_example - ${DateTime.now().millisecondsSinceEpoch}';
                 await windowManager.setTitle(title);
+              },
+            ),
+            PreferenceListItem(
+              title: Text('setSkipTaskbar'),
+              onTap: () async {
+                setState(() {
+                  _isSkipTaskbar = !_isSkipTaskbar;
+                });
+                await windowManager.setSkipTaskbar(_isSkipTaskbar);
+                await Future.delayed(Duration(seconds: 3));
+                windowManager.show();
               },
             ),
             PreferenceListSwitchItem(

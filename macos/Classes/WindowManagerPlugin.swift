@@ -167,6 +167,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setTitle(args)
             result(true)
             break
+        case "setSkipTaskbar":
+            windowManager.setSkipTaskbar(args)
+            result(true)
+            break
         case "hasShadow":
             result(windowManager.hasShadow())
             break

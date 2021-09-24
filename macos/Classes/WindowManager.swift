@@ -296,6 +296,11 @@ public class WindowManager: NSObject, NSWindowDelegate {
         mainWindow.title = title;
     }
     
+    public func setSkipTaskbar(_ args: [String: Any]) {
+        let isSkipTaskbar: Bool = args["isSkipTaskbar"] as! Bool
+        NSApplication.shared.setActivationPolicy(isSkipTaskbar ? .accessory : .regular)
+    }
+    
     public func hasShadow() -> Bool {
         return mainWindow.hasShadow
     }
@@ -319,6 +324,14 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     // NSWindowDelegate
     
+    public func windowDidResize(_ notification: Notification) {
+        _emitEvent("resize")
+    }
+
+    public func windowDidMove(_ notification: Notification) {
+        _emitEvent("move")
+    }
+
     public func windowDidBecomeMain(_ notification: Notification) {
         _emitEvent("focus");
     }

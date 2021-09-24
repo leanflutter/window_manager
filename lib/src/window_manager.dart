@@ -14,6 +14,8 @@ const kWindowEventMaximize = 'maximize';
 const kWindowEventUnmaximize = 'unmaximize';
 const kWindowEventMinimize = 'minimize';
 const kWindowEventRestore = 'restore';
+const kWindowEventResize = 'resize';
+const kWindowEventMove = 'move';
 const kWindowEventEnterFullScreen = 'enter-full-screen';
 const kWindowEventLeaveFullScreen = 'leave-full-screen';
 
@@ -48,6 +50,8 @@ class WindowManager {
         kWindowEventUnmaximize: listener.onWindowUnmaximize,
         kWindowEventMinimize: listener.onWindowMinimize,
         kWindowEventRestore: listener.onWindowRestore,
+        kWindowEventResize: listener.onWindowResize,
+        kWindowEventMove: listener.onWindowMove,
         kWindowEventEnterFullScreen: listener.onWindowEnterFullScreen,
         kWindowEventLeaveFullScreen: listener.onWindowLeaveFullScreen,
       };
@@ -88,17 +92,17 @@ class WindowManager {
     return _channel.invokeMethod('setAsFrameless');
   }
 
-  // 聚焦于窗口
+  /// Focuses on the window.
   void focus({bool inactive = false}) {
     _channel.invokeMethod('focus');
   }
 
-  // 取消窗口的聚焦
+  /// Removes focus from the window.
   void blur({bool inactive = false}) {
     _channel.invokeMethod('blur');
   }
 
-  // 显示并聚焦于窗口
+  /// Shows and gives focus to the window.
   void show({bool inactive = false}) {
     final Map<String, dynamic> arguments = {
       'inactive': inactive,
@@ -106,50 +110,52 @@ class WindowManager {
     _channel.invokeMethod('show', arguments);
   }
 
-  // 隐藏窗口
+  /// Hides the window.
   void hide() {
     _channel.invokeMethod('hide');
   }
 
-  // 返回 bool - 判断窗口是否可见
+  /// Returns bool - Whether the window is visible to the user.
   Future<bool> isVisible() async {
     return await _channel.invokeMethod('isVisible');
   }
 
+  /// Returns bool - Whether the window is maximized.
   Future<bool> isMaximized() async {
     return await _channel.invokeMethod('isMaximized');
   }
 
-  // 最大化窗口。 如果窗口尚未显示，该方法也会将其显示 (但不会聚焦)。
+  /// Maximizes the window.
   void maximize() {
     _channel.invokeMethod('maximize');
   }
 
-  // 取消窗口最大化
+  /// Unmaximizes the window.
   void unmaximize() {
     _channel.invokeMethod('unmaximize');
   }
 
+  /// Returns bool - Whether the window is minimized.
   Future<bool> isMinimized() async {
     return await _channel.invokeMethod('isMinimized');
   }
 
-  // 最小化窗口。 在某些平台上, 最小化的窗口将显示在Dock中。
+  /// Minimizes the window. On some platforms the minimized window will be shown in the Dock.
   void minimize() {
     _channel.invokeMethod('minimize');
   }
 
-  // 将窗口从最小化状态恢复到以前的状态。
+  /// Restores the window from minimized state to its previous state.
   void restore() {
     _channel.invokeMethod('restore');
   }
 
-  // 返回 bool - 窗口当前是否已全屏
+  /// Returns bool - Whether the window is in fullscreen mode.
   Future<bool> isFullScreen() async {
     return await _channel.invokeMethod('isFullScreen');
   }
 
-  // 设置窗口是否应处于全屏模式。
+  /// Sets whether the window should be in fullscreen mode.
   void setFullScreen(bool isFullScreen) {
     final Map<String, dynamic> arguments = {
       'isFullScreen': isFullScreen,
@@ -157,6 +163,7 @@ class WindowManager {
     _channel.invokeMethod('setFullScreen', arguments);
   }
 
+  /// Sets the background color of the window.
   void setBackgroundColor(Color backgroundColor) {
     final Map<String, dynamic> arguments = {
       'backgroundColorA': backgroundColor.alpha,
@@ -167,12 +174,14 @@ class WindowManager {
     _channel.invokeMethod('setBackgroundColor', arguments);
   }
 
+  /// Moves window to the center of the screen.
   Future<void> center() async {
     final Map<String, dynamic> arguments = {};
 
     await _channel.invokeMethod('center', arguments);
   }
 
+  /// Returns Rect - The bounds of the window as Object.
   Future<Rect> getBounds() async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
@@ -187,6 +196,7 @@ class WindowManager {
     );
   }
 
+  /// Resizes and moves the window to the supplied bounds.
   Future<void> setBounds(Rect bounds, {animate = false}) async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
@@ -199,11 +209,13 @@ class WindowManager {
     await _channel.invokeMethod('setBounds', arguments);
   }
 
+  /// Returns Offset - Contains the window's current position.
   Future<Offset> getPosition() async {
     Rect bounds = await this.getBounds();
     return bounds.topLeft;
   }
 
+  /// Moves window to position.
   Future<void> setPosition(Offset position, {animate = false}) async {
     Rect oldBounds = await this.getBounds();
     Rect newBounds = Rect.fromLTWH(
@@ -215,11 +227,13 @@ class WindowManager {
     await this.setBounds(newBounds, animate: animate);
   }
 
+  /// Returns Size - Contains the window's width and height.
   Future<Size> getSize() async {
     Rect bounds = await this.getBounds();
     return bounds.size;
   }
 
+  /// Resizes the window to width and height.
   Future<void> setSize(Size size, {animate = false}) async {
     Rect oldBounds = await this.getBounds();
     Rect newBounds = Rect.fromLTWH(
@@ -291,10 +305,12 @@ class WindowManager {
     _channel.invokeMethod('setClosable', arguments);
   }
 
+  /// Returns bool - Whether the window is always on top of other windows.
   Future<bool> isAlwaysOnTop() async {
     return await _channel.invokeMethod('isAlwaysOnTop');
   }
 
+  /// Sets whether the window should show always on top of other windows. After setting this, the window is still a normal window, not a toolbox window which can not be focused on.
   void setAlwaysOnTop(bool isAlwaysOnTop) {
     final Map<String, dynamic> arguments = {
       'isAlwaysOnTop': isAlwaysOnTop,
@@ -302,10 +318,12 @@ class WindowManager {
     _channel.invokeMethod('setAlwaysOnTop', arguments);
   }
 
+  /// Returns String - The title of the native window.
   Future<String> getTitle() async {
     return await _channel.invokeMethod('getTitle');
   }
 
+  /// Changes the title of native window to title.
   Future<void> setTitle(String title) async {
     final Map<String, dynamic> arguments = {
       'title': title,
@@ -313,10 +331,20 @@ class WindowManager {
     await _channel.invokeMethod('setTitle', arguments);
   }
 
+  /// Makes the window not show in the taskbar / dock.
+  Future<void> setSkipTaskbar(bool isSkipTaskbar) async {
+    final Map<String, dynamic> arguments = {
+      'isSkipTaskbar': isSkipTaskbar,
+    };
+    await _channel.invokeMethod('setSkipTaskbar', arguments);
+  }
+
+  /// Returns bool - Whether the window has a shadow.
   Future<bool> hasShadow() async {
     return await _channel.invokeMethod('hasShadow');
   }
 
+  /// Sets whether the window should have a shadow.
   Future<void> setHasShadow(bool hasShadow) async {
     final Map<String, dynamic> arguments = {
       'hasShadow': hasShadow,

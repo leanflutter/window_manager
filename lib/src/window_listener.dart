@@ -6,6 +6,8 @@ abstract class WindowListener {
   void onWindowUnmaximize() {}
   void onWindowMinimize() {}
   void onWindowRestore() {}
+  void onWindowResize() {}
+  void onWindowMove() {}
   void onWindowEnterFullScreen() {}
   void onWindowLeaveFullScreen() {}
 }
