@@ -317,6 +317,12 @@ void WindowManagerPlugin::HandleMethodCall(const flutter::MethodCall<flutter::En
         window_manager->SetTitle(args);
         result->Success(flutter::EncodableValue(true));
     }
+    else if (method_name.compare("setSkipTaskbar") == 0)
+    {
+        const flutter::EncodableMap &args = std::get<flutter::EncodableMap>(*method_call.arguments());
+        window_manager->SetSkipTaskbar(args);
+        result->Success(flutter::EncodableValue(true));
+    }
     else if (method_name.compare("startDragging") == 0)
     {
         window_manager->StartDragging();

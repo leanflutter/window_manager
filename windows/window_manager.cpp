@@ -3,6 +3,8 @@
 // This must be included before many other Windows headers.
 #include <windows.h>
 
+#include <shobjidl_core.h>
+
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
@@ -65,6 +67,7 @@ class WindowManager
     void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap &args);
     std::string WindowManager::GetTitle();
     void WindowManager::SetTitle(const flutter::EncodableMap &args);
+    void WindowManager::SetSkipTaskbar(const flutter::EncodableMap &args);
     bool WindowManager::HasShadow();
     void WindowManager::SetHasShadow(const flutter::EncodableMap &args);
     void WindowManager::StartDragging();
@@ -391,6 +394,29 @@ void WindowManager::SetTitle(const flutter::EncodableMap &args)
 
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     SetWindowText(GetMainWindow(), converter.from_bytes(title).c_str());
+}
+
+void WindowManager::SetSkipTaskbar(const flutter::EncodableMap &args)
+{
+    bool is_skip_taskbar = std::get<bool>(args.at(flutter::EncodableValue("isSkipTaskbar")));
+
+    HWND hWnd = GetMainWindow();
+
+    LPVOID lp = NULL;
+    CoInitialize(lp);
+
+    HRESULT hr;
+    ITaskbarList *pTaskbarList;
+    hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList, (void **)&pTaskbarList);
+    if (SUCCEEDED(hr))
+    {
+        pTaskbarList->HrInit();
+        if (!is_skip_taskbar)
+            pTaskbarList->AddTab(hWnd);
+        else
+            pTaskbarList->DeleteTab(hWnd);
+        pTaskbarList->Release();
+    }
 }
 
 void WindowManager::StartDragging()

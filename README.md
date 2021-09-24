@@ -244,6 +244,7 @@ class MainFlutterWindow: NSWindow {
 | `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.                                        | ✔️    | ✔️    | ✔️      |
 | `getTitle`       | Returns `String` - The title of the native window.                                                         | ✔️    | ✔️    | ✔️      |
 | `setTitle`       | Changes the title of native window to title.                                                               | ✔️    | ✔️    | ✔️      |
+| `setSkipTaskbar` | Makes the window not show in the taskbar / dock.                                                           | ➖    | ✔️    | ✔️      |
 | `hasShadow`      | Returns `bool` - Whether the window has a shadow.                                                          | ➖    | ✔️    | ➖      |
 | `setHasShadow`   | Sets whether the window should have a shadow.                                                              | ➖    | ✔️    | ➖      |
 | `startDragging`  | -                                                                                                          | ➖    | ✔️    | ✔️      |
