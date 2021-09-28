@@ -279,6 +279,14 @@ static FlMethodResponse *set_title(WindowManagerPlugin *self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse *set_skip_taskbar(WindowManagerPlugin *self,
+                                          FlValue *args)
+{
+  bool isSkipTaskbar = fl_value_get_bool(fl_value_lookup_string(args, "isSkipTaskbar"));
+  gtk_window_set_skip_taskbar_hint(get_window(self), isSkipTaskbar);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
 static FlMethodResponse *start_dragging(WindowManagerPlugin *self)
 {
   auto window = get_window(self);
@@ -418,7 +426,7 @@ static void window_manager_plugin_handle_method_call(
   }
   else if (strcmp(method, "setSkipTaskbar") == 0)
   {
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+    response = set_skip_taskbar(self, args);
   }
   else if (strcmp(method, "startDragging") == 0)
   {
