@@ -14,7 +14,7 @@
 WindowManagerPlugin *plugin_instance;
 
 static double bg_color_r = 0.0;
-static double bg_color_g = 0.0; 
+static double bg_color_g = 0.0;
 static double bg_color_b = 0.0;
 static double bg_color_a = 0.0;
 
@@ -45,14 +45,23 @@ GdkWindow *get_gdk_window(WindowManagerPlugin *self)
   return gtk_widget_get_window(GTK_WIDGET(get_window(self)));
 }
 
-static FlMethodResponse *set_custom_frame(WindowManagerPlugin *self,
+static FlMethodResponse *set_as_frameless(WindowManagerPlugin *self,
                                           FlValue *args)
 {
-  bool is_frameless = fl_value_get_bool(fl_value_lookup_string(args, "isFrameless"));
-  if (is_frameless)
-  {
-    gtk_window_set_decorated(get_window(self), false);
-  }
+  bg_color_r = 0;
+  bg_color_g = 0;
+  bg_color_b = 0;
+  bg_color_a = 0;
+
+  gtk_window_set_decorated(get_window(self), false);
+
+  gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
+
+  gint width, height;
+  gtk_window_get_size(get_window(self), &width, &height);
+
+  // gtk_window_resize(get_window(self), static_cast<gint>(width), static_cast<gint>(height+1));
+  gtk_window_resize(get_window(self), static_cast<gint>(width), static_cast<gint>(height));
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
@@ -306,9 +315,18 @@ static void window_manager_plugin_handle_method_call(
 
   const gchar *method = fl_method_call_get_name(method_call);
   FlValue *args = fl_method_call_get_args(method_call);
-  if (strcmp(method, "setCustomFrame") == 0)
+
+  if (strcmp(method, "ensureInitialized") == 0)
   {
-    response = set_custom_frame(self, args);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+  }
+  else if (strcmp(method, "waitUntilReadyToShow") == 0)
+  {
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+  }
+  else if (strcmp(method, "setAsFrameless") == 0)
+  {
+    response = set_as_frameless(self, args);
   }
   else if (strcmp(method, "focus") == 0)
   {
@@ -365,7 +383,7 @@ static void window_manager_plugin_handle_method_call(
   else if (strcmp(method, "setBackgroundColor") == 0)
   {
     response = set_background_color(self, args);
-  } 
+  }
   else if (strcmp(method, "getBounds") == 0)
   {
     response = get_bounds(self);
@@ -397,6 +415,10 @@ static void window_manager_plugin_handle_method_call(
   else if (strcmp(method, "setTitle") == 0)
   {
     response = set_title(self, args);
+  }
+  else if (strcmp(method, "setSkipTaskbar") == 0)
+  {
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
   }
   else if (strcmp(method, "startDragging") == 0)
   {
@@ -477,7 +499,8 @@ void on_window_state_change(GtkWidget *widget, GdkEventWindowState *event, gpoin
   }
 }
 
-gboolean on_window_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
+gboolean on_window_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
+{
   cairo_set_source_rgba(cr, bg_color_r, bg_color_g, bg_color_b, bg_color_a);
   cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint(cr);

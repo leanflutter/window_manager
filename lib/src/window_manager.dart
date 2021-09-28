@@ -78,10 +78,7 @@ class WindowManager {
   }
 
   Future<void> ensureInitialized() {
-    if (Platform.isMacOS || Platform.isWindows) {
-      return _channel.invokeMethod('ensureInitialized');
-    }
-    return Future.value();
+    return _channel.invokeMethod('ensureInitialized');
   }
 
   Future<void> waitUntilReadyToShow() {
