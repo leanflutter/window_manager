@@ -144,6 +144,14 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
             _EmitEvent("blur");
         }
     }
+    else if (message == WM_MOVING)
+    {
+        _EmitEvent("move");
+    }
+    else if (message == WM_SIZING)
+    {
+        _EmitEvent("resize");
+    }
     else if (message == WM_SIZE)
     {
         LONG_PTR gwlStyle = GetWindowLongPtr(window_manager->GetMainWindow(), GWL_STYLE);
