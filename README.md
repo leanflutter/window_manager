@@ -195,6 +195,7 @@ class MainFlutterWindow: NSWindow {
 
 - [AuthPass](https://authpass.app/) - Password Manager based on Flutter for all platforms. Keepass 2.x (kdbx 3.x) compatible.
 - [Biyi (比译)](https://biyidev.com/) - A convenient translation and dictionary app written in dart / Flutter.
+- [BlueBubbles](https://github.com/BlueBubblesApp/bluebubbles-app) - BlueBubbles is an ecosystem of apps bringing iMessage to Android, Windows, and Linux
 - [Yukino](https://github.com/yukino-app/yukino/tree/flutter-rewrite) - Yukino lets you read manga or stream anime ad-free from multiple sources.
 
 ## Discussion
@@ -244,10 +245,10 @@ class MainFlutterWindow: NSWindow {
 | `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.                                        | ✔️    | ✔️    | ✔️      |
 | `getTitle`       | Returns `String` - The title of the native window.                                                         | ✔️    | ✔️    | ✔️      |
 | `setTitle`       | Changes the title of native window to title.                                                               | ✔️    | ✔️    | ✔️      |
-| `setSkipTaskbar` | Makes the window not show in the taskbar / dock.                                                           | ➖    | ✔️    | ✔️      |
+| `setSkipTaskbar` | Makes the window not show in the taskbar / dock.                                                           | ✔️    | ✔️    | ✔️      |
 | `hasShadow`      | Returns `bool` - Whether the window has a shadow.                                                          | ➖    | ✔️    | ➖      |
 | `setHasShadow`   | Sets whether the window should have a shadow.                                                              | ➖    | ✔️    | ➖      |
-| `startDragging`  | -                                                                                                          | ➖    | ✔️    | ✔️      |
+| `startDragging`  | -                                                                                                          | ✔️    | ✔️    | ✔️      |
 | `terminate`      |                                                                                                            | ✔️    | ✔️    | ✔️      |
 
 ### WindowListener
