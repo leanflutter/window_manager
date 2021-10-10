@@ -24,7 +24,10 @@ struct _WindowManagerPlugin
   FlPluginRegistrar *registrar;
   FlMethodChannel *channel;
   GdkGeometry window_geometry;
+  bool _is_frameless = false;
+  bool _is_maximized = false;
   bool _is_minimized = false;
+  bool _is_fullscreen = false;
   bool _is_always_on_top = false;
 };
 
@@ -48,6 +51,7 @@ GdkWindow *get_gdk_window(WindowManagerPlugin *self)
 static FlMethodResponse *set_as_frameless(WindowManagerPlugin *self,
                                           FlValue *args)
 {
+  self->_is_frameless = true;
   bg_color_r = 0;
   bg_color_g = 0;
   bg_color_b = 0;
@@ -121,7 +125,6 @@ static FlMethodResponse *is_minimized(WindowManagerPlugin *self)
 static FlMethodResponse *minimize(WindowManagerPlugin *self)
 {
   gtk_window_iconify(get_window(self));
-  self->_is_minimized = true;
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
@@ -129,7 +132,6 @@ static FlMethodResponse *restore(WindowManagerPlugin *self)
 {
   gtk_window_deiconify(get_window(self));
   gtk_window_present(get_window(self));
-  self->_is_minimized = false;
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
@@ -137,10 +139,7 @@ static FlMethodResponse *is_full_screen(WindowManagerPlugin *self)
 {
   bool is_full_screen = (bool)(gdk_window_get_state(get_gdk_window(self)) & GDK_WINDOW_STATE_FULLSCREEN);
 
-  g_autoptr(FlValue) result_data = fl_value_new_map();
-  fl_value_set_string_take(result_data, "isFullScreen", fl_value_new_bool(is_full_screen));
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(result_data));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(is_full_screen)));
 }
 
 static FlMethodResponse *set_full_screen(WindowManagerPlugin *self,
@@ -472,57 +471,95 @@ void _emit_event(const char *event_name)
                                   nullptr, nullptr, nullptr);
 }
 
-void on_window_focus(GtkWidget *widget, GdkEvent *event, gpointer data)
+gboolean on_window_focus(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   _emit_event("focus");
+  return false;
 }
 
-void on_window_blur(GtkWidget *widget, GdkEvent *event, gpointer data)
+gboolean on_window_blur(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   _emit_event("blur");
+  return false;
 }
-void on_window_show(GtkWidget *widget, GdkEvent *event, gpointer data)
+
+gboolean on_window_show(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   _emit_event("show");
+  return false;
 }
 
-void on_window_hide(GtkWidget *widget, GdkEvent *event, gpointer data)
+gboolean on_window_hide(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   _emit_event("hide");
+  return false;
 }
 
-void on_window_resize(GtkWidget *widget, GdkEvent *event, gpointer data)
+gboolean on_window_resize(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   _emit_event("resize");
+  return false;
 }
 
-void on_window_move(GtkWidget *widget, GdkEvent *event, gpointer data)
+gboolean on_window_move(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   _emit_event("move");
+  return false;
 }
 
-void on_window_state_change(GtkWidget *widget, GdkEventWindowState *event, gpointer data)
+gboolean on_window_state_change(GtkWidget *widget, GdkEventWindowState *event, gpointer data)
 {
   if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED)
   {
-    _emit_event("maximize");
+    if (!plugin_instance->_is_maximized)
+    {
+      plugin_instance->_is_maximized = true;
+      _emit_event("maximize");
+    }
   }
-  else if (event->new_window_state & GDK_WINDOW_STATE_ICONIFIED)
+  if (event->new_window_state & GDK_WINDOW_STATE_ICONIFIED)
   {
-    _emit_event("minimize");
+    if (!plugin_instance->_is_minimized)
+    {
+      plugin_instance->_is_minimized = true;
+      _emit_event("minimize");
+    }
   }
-  else if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
+  if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)
   {
-    _emit_event("enter-full-screen");
+    if (!plugin_instance->_is_fullscreen)
+    {
+      plugin_instance->_is_fullscreen = true;
+      _emit_event("enter-full-screen");
+    }
   }
+  if (plugin_instance->_is_maximized && !(event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED))
+  {
+    plugin_instance->_is_maximized = false;
+    _emit_event("unmaximize");
+  }
+  if (plugin_instance->_is_minimized && !(event->new_window_state & GDK_WINDOW_STATE_ICONIFIED))
+  {
+    plugin_instance->_is_minimized = false;
+    _emit_event("restore");
+  }
+  if (plugin_instance->_is_fullscreen && !(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN))
+  {
+    plugin_instance->_is_fullscreen = false;
+    _emit_event("leave-full-screen");
+  }
+  return false;
 }
 
 gboolean on_window_draw(GtkWidget *widget, cairo_t *cr, gpointer data)
 {
-  cairo_set_source_rgba(cr, bg_color_r, bg_color_g, bg_color_b, bg_color_a);
-  cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-  cairo_paint(cr);
-  return FALSE;
+  if (plugin_instance->_is_frameless)
+  {
+    cairo_set_source_rgba(cr, bg_color_r, bg_color_g, bg_color_b, bg_color_a);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(cr);
+  }
+  return false;
 }
 
 void window_manager_plugin_register_with_registrar(FlPluginRegistrar *registrar)
