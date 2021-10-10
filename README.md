@@ -151,6 +151,16 @@ class _HomePageState extends State<HomePage> with WindowListener {
   }
 
   @override
+  void onWindowResize() {
+    // do something
+  }
+
+  @override
+  void onWindowMove() {
+    // do something
+  }
+
+  @override
   void onWindowEnterFullScreen() {
     // do something
   }
