@@ -261,8 +261,8 @@ class MainFlutterWindow: NSWindow {
 | `onWindowUnmaximize`      | Emitted when the window exits from a maximized state.       | ➖     | ➖     | ✔️       |
 | `onWindowMinimize`        | Emitted when the window is minimized.                       | ✔️     | ✔️     | ✔️       |
 | `onWindowRestore`         | Emitted when the window is restored from a minimized state. | ➖     | ✔️     | ✔️       |
-| `onWindowResize`          | Emitted after the window has been resized.                  | ➖     | ✔️     | ✔️       |
-| `onWindowMove`            | Emitted when the window is being moved to a new position.   | ➖     | ✔️     | ✔️       |
+| `onWindowResize`          | Emitted after the window has been resized.                  | ✔️     | ✔️     | ✔️       |
+| `onWindowMove`            | Emitted when the window is being moved to a new position.   | ✔️     | ✔️     | ✔️       |
 | `onWindowEnterFullScreen` | Emitted when the window enters a full-screen state.         | ✔️     | ✔️     | ✔️       |
 | `onWindowLeaveFullScreen` | Emitted when the window leaves a full-screen state.         | ➖     | ✔️     | ✔️       |
 

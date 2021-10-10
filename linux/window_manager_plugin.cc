@@ -491,6 +491,16 @@ void on_window_hide(GtkWidget *widget, GdkEvent *event, gpointer data)
   _emit_event("hide");
 }
 
+void on_window_resize(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  _emit_event("resize");
+}
+
+void on_window_move(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  _emit_event("move");
+}
+
 void on_window_state_change(GtkWidget *widget, GdkEventWindowState *event, gpointer data)
 {
   if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED)
@@ -531,6 +541,8 @@ void window_manager_plugin_register_with_registrar(FlPluginRegistrar *registrar)
   g_signal_connect(get_window(plugin), "focus-out-event", G_CALLBACK(on_window_blur), NULL);
   g_signal_connect(get_window(plugin), "show", G_CALLBACK(on_window_show), NULL);
   g_signal_connect(get_window(plugin), "hide", G_CALLBACK(on_window_hide), NULL);
+  g_signal_connect(get_window(plugin), "check-resize", G_CALLBACK(on_window_resize), NULL);
+  g_signal_connect(get_window(plugin), "configure-event", G_CALLBACK(on_window_move), NULL);
   g_signal_connect(get_window(plugin), "window-state-event", G_CALLBACK(on_window_state_change), NULL);
   g_signal_connect(get_window(plugin), "draw", G_CALLBACK(on_window_draw), NULL);
 
