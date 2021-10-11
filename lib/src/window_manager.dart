@@ -76,39 +76,43 @@ class WindowManager {
     _listeners!.remove(listener);
   }
 
-  Future<void> ensureInitialized() {
-    return _channel.invokeMethod('ensureInitialized');
+  Future<void> ensureInitialized() async {
+    await _channel.invokeMethod('ensureInitialized');
   }
 
-  Future<void> waitUntilReadyToShow() {
-    return _channel.invokeMethod('waitUntilReadyToShow');
+  Future<void> waitUntilReadyToShow() async {
+    await _channel.invokeMethod('waitUntilReadyToShow');
   }
 
-  Future<void> setAsFrameless() {
-    return _channel.invokeMethod('setAsFrameless');
+  Future<void> setAsFrameless() async {
+    await _channel.invokeMethod('setAsFrameless');
   }
 
   /// Focuses on the window.
-  void focus({bool inactive = false}) {
-    _channel.invokeMethod('focus');
+  Future<void> focus({bool inactive = false}) async {
+    await _channel.invokeMethod('focus');
   }
 
   /// Removes focus from the window.
-  void blur({bool inactive = false}) {
-    _channel.invokeMethod('blur');
+  Future<void> blur({bool inactive = false}) async {
+    await _channel.invokeMethod('blur');
   }
 
   /// Shows and gives focus to the window.
-  void show({bool inactive = false}) {
+  Future<void> show({bool inactive = false}) async {
+    bool isMinimized = await this.isMinimized();
+    if (isMinimized) {
+      await this.restore();
+    }
     final Map<String, dynamic> arguments = {
       'inactive': inactive,
     };
-    _channel.invokeMethod('show', arguments);
+    await _channel.invokeMethod('show', arguments);
   }
 
   /// Hides the window.
-  void hide() {
-    _channel.invokeMethod('hide');
+  Future<void> hide() async {
+    await _channel.invokeMethod('hide');
   }
 
   /// Returns bool - Whether the window is visible to the user.
@@ -122,13 +126,13 @@ class WindowManager {
   }
 
   /// Maximizes the window.
-  void maximize() {
-    _channel.invokeMethod('maximize');
+  Future<void> maximize() async {
+    await _channel.invokeMethod('maximize');
   }
 
   /// Unmaximizes the window.
-  void unmaximize() {
-    _channel.invokeMethod('unmaximize');
+  Future<void> unmaximize() async {
+    await _channel.invokeMethod('unmaximize');
   }
 
   /// Returns bool - Whether the window is minimized.
@@ -137,13 +141,13 @@ class WindowManager {
   }
 
   /// Minimizes the window. On some platforms the minimized window will be shown in the Dock.
-  void minimize() {
-    _channel.invokeMethod('minimize');
+  Future<void> minimize() async {
+    await _channel.invokeMethod('minimize');
   }
 
   /// Restores the window from minimized state to its previous state.
-  void restore() {
-    _channel.invokeMethod('restore');
+  Future<void> restore() async {
+    await _channel.invokeMethod('restore');
   }
 
   /// Returns bool - Whether the window is in fullscreen mode.
@@ -152,22 +156,22 @@ class WindowManager {
   }
 
   /// Sets whether the window should be in fullscreen mode.
-  void setFullScreen(bool isFullScreen) {
+  Future<void> setFullScreen(bool isFullScreen) async {
     final Map<String, dynamic> arguments = {
       'isFullScreen': isFullScreen,
     };
-    _channel.invokeMethod('setFullScreen', arguments);
+    await _channel.invokeMethod('setFullScreen', arguments);
   }
 
   /// Sets the background color of the window.
-  void setBackgroundColor(Color backgroundColor) {
+  Future<void> setBackgroundColor(Color backgroundColor) async {
     final Map<String, dynamic> arguments = {
       'backgroundColorA': backgroundColor.alpha,
       'backgroundColorR': backgroundColor.red,
       'backgroundColorG': backgroundColor.green,
       'backgroundColorB': backgroundColor.blue,
     };
-    _channel.invokeMethod('setBackgroundColor', arguments);
+    await _channel.invokeMethod('setBackgroundColor', arguments);
   }
 
   /// Moves window to the center of the screen.
@@ -296,9 +300,11 @@ class WindowManager {
     return await _channel.invokeMethod('isClosable');
   }
 
-  void setClosable(bool isClosable) {
-    final Map<String, dynamic> arguments = {'isClosable': isClosable};
-    _channel.invokeMethod('setClosable', arguments);
+  Future<void> setClosable(bool isClosable) async {
+    final Map<String, dynamic> arguments = {
+      'isClosable': isClosable,
+    };
+    await _channel.invokeMethod('setClosable', arguments);
   }
 
   /// Returns bool - Whether the window is always on top of other windows.
@@ -307,11 +313,11 @@ class WindowManager {
   }
 
   /// Sets whether the window should show always on top of other windows. After setting this, the window is still a normal window, not a toolbox window which can not be focused on.
-  void setAlwaysOnTop(bool isAlwaysOnTop) {
+  Future<void> setAlwaysOnTop(bool isAlwaysOnTop) async {
     final Map<String, dynamic> arguments = {
       'isAlwaysOnTop': isAlwaysOnTop,
     };
-    _channel.invokeMethod('setAlwaysOnTop', arguments);
+    await _channel.invokeMethod('setAlwaysOnTop', arguments);
   }
 
   /// Returns String - The title of the native window.

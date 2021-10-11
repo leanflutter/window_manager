@@ -48,6 +48,8 @@ public class WindowManager: NSObject, NSWindowDelegate {
             _mainWindow?.delegate = self
         }
     }
+    
+    private var _isMaximized: Bool = false
 
     override public init() {
         super.init()
@@ -326,6 +328,14 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     public func windowDidResize(_ notification: Notification) {
         _emitEvent("resize")
+        if (!_isMaximized && mainWindow.isZoomed) {
+            _isMaximized = true
+            _emitEvent("maximize")
+        }
+        if (_isMaximized && !mainWindow.isZoomed) {
+            _isMaximized = false
+            _emitEvent("unmaximize")
+        }
     }
 
     public func windowDidMove(_ notification: Notification) {

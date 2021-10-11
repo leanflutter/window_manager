@@ -11,16 +11,9 @@ void main() async {
   // Use it only after calling `hiddenWindowAtLaunch`
   WindowManager.instance.waitUntilReadyToShow().then((_) async {
     await WindowManager.instance.setAsFrameless();
-    print('waitUntilReadyToShow');
-    await Future.delayed(Duration(seconds: 3));
-    print('delayed 3 seconds');
-    await WindowManager.instance.setSize(Size(600, 600));
-    await WindowManager.instance.setPosition(Offset.zero);
-
-    WindowManager.instance.show();
-
-    await Future.delayed(Duration(seconds: 1));
-    await WindowManager.instance.setSkipTaskbar(true);
+    await WindowManager.instance.setSize(Size(800, 600));
+    await WindowManager.instance.center();
+    await WindowManager.instance.show();
   });
 
   runApp(MyApp());
