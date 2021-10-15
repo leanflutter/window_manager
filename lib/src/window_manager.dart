@@ -362,3 +362,5 @@ class WindowManager {
     await _channel.invokeMethod('terminate');
   }
 }
+
+final windowManager = WindowManager.instance;

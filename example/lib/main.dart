@@ -6,14 +6,14 @@ import './pages/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await WindowManager.instance.ensureInitialized();
+  await windowManager.ensureInitialized();
 
   // Use it only after calling `hiddenWindowAtLaunch`
-  WindowManager.instance.waitUntilReadyToShow().then((_) async {
-    await WindowManager.instance.setAsFrameless();
-    await WindowManager.instance.setSize(Size(800, 600));
-    await WindowManager.instance.center();
-    await WindowManager.instance.show();
+  windowManager.waitUntilReadyToShow().then((_) async {
+    await windowManager.setAsFrameless();
+    await windowManager.setSize(Size(800, 600));
+    await windowManager.center();
+    await windowManager.show();
   });
 
   runApp(MyApp());

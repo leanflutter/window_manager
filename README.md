@@ -67,15 +67,15 @@ import 'package:window_manager/window_manager.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Must add this line.
-  await WindowManager.instance.ensureInitialized();
+  await windowManager.ensureInitialized();
 
   // Use it only after calling `hiddenWindowAtLaunch`
-  WindowManager.instance.waitUntilReadyToShow().then((_) async{
+  windowManager.waitUntilReadyToShow().then((_) async{
     // Set to frameless window
-    await WindowManager.instance.setAsFrameless();
-    await WindowManager.instance.setSize(Size(600, 600));
-    await WindowManager.instance.setPosition(Offset.zero);
-    WindowManager.instance.show();
+    await windowManager.setAsFrameless();
+    await windowManager.setSize(Size(600, 600));
+    await windowManager.setPosition(Offset.zero);
+    windowManager.show();
   });
 
   runApp(MyApp());
@@ -99,14 +99,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WindowListener {
   @override
   void initState() {
-    WindowManager.instance.addListener(this);
+    windowManager.addListener(this);
     _init();
     super.initState();
   }
 
   @override
   void dispose() {
-    WindowManager.instance.removeListener(this);
+    windowManager.removeListener(this);
     super.dispose();
   }
 

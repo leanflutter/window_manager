@@ -14,14 +14,14 @@ class DragToMoveArea extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onPanStart: (details) {
-        WindowManager.instance.startDragging();
+        windowManager.startDragging();
       },
       onDoubleTap: () async {
-        bool isMaximized = await WindowManager.instance.isMaximized();
+        bool isMaximized = await windowManager.isMaximized();
         if (!isMaximized) {
-          WindowManager.instance.maximize();
+          windowManager.maximize();
         } else {
-          WindowManager.instance.unmaximize();
+          windowManager.unmaximize();
         }
       },
       child: child,

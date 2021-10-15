@@ -22,8 +22,6 @@ const _kMaxSizes = [
   Size(800, 800),
 ];
 
-final windowManager = WindowManager.instance;
-
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
