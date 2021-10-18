@@ -1,3 +1,11 @@
+## 0.0.5
+
+- Implemented `setAsFrameless` Method.
+- Implemented `setSkipTaskbar` Method.
+- Implemented `focus`, `blur`, `maximize`, `unmaximize`, `minimize`, `restore`, `resize`, `move`, `enter-full-screen`, `leave-full-screen` Events.
+- [macos] Implemented `hiddenWindowAtLaunch` Method.
+- Fixed #10 
+
 ## 0.0.4
 
 - Implemented `setCustomFrame`, `setBackgroundColor` Methods.
