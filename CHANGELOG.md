@@ -1,3 +1,7 @@
+## 0.0.6
+
+- Removed `terminate` Method.
+
 ## 0.0.5
 
 - Implemented `setAsFrameless` Method.

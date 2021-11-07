@@ -307,12 +307,6 @@ static FlMethodResponse *start_dragging(WindowManagerPlugin *self)
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
-static FlMethodResponse *terminate(WindowManagerPlugin *self)
-{
-  gtk_window_close(get_window(self));
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
-}
-
 // Called when a method call is received from Flutter.
 static void window_manager_plugin_handle_method_call(
     WindowManagerPlugin *self,
@@ -430,10 +424,6 @@ static void window_manager_plugin_handle_method_call(
   else if (strcmp(method, "startDragging") == 0)
   {
     response = start_dragging(self);
-  }
-  else if (strcmp(method, "terminate") == 0)
-  {
-    response = terminate(self);
   }
   else
   {

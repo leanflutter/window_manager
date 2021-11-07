@@ -336,11 +336,6 @@ void WindowManagerPlugin::HandleMethodCall(const flutter::MethodCall<flutter::En
         window_manager->StartDragging();
         result->Success(flutter::EncodableValue(true));
     }
-    else if (method_name.compare("terminate") == 0)
-    {
-        window_manager->Terminate();
-        result->Success(flutter::EncodableValue(true));
-    }
     else
     {
         result->NotImplemented();

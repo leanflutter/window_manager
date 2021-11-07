@@ -357,10 +357,6 @@ class WindowManager {
   Future<void> startDragging() async {
     await _channel.invokeMethod('startDragging');
   }
-
-  Future<void> terminate() async {
-    await _channel.invokeMethod('terminate');
-  }
 }
 
 final windowManager = WindowManager.instance;

@@ -320,10 +320,6 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
     }
     
-    public func terminate() {
-        NSApplication.shared.terminate(nil)
-    }
-    
     // NSWindowDelegate
     
     public func windowDidResize(_ notification: Notification) {

@@ -259,7 +259,6 @@ class MainFlutterWindow: NSWindow {
 | `hasShadow`      | Returns `bool` - Whether the window has a shadow.                                                          | ➖    | ✔️    | ➖      |
 | `setHasShadow`   | Sets whether the window should have a shadow.                                                              | ➖    | ✔️    | ➖      |
 | `startDragging`  | -                                                                                                          | ✔️    | ✔️    | ✔️      |
-| `terminate`      |                                                                                                            | ✔️    | ✔️    | ✔️      |
 
 ### WindowListener
 

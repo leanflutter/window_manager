@@ -71,7 +71,6 @@ class WindowManager
     bool WindowManager::HasShadow();
     void WindowManager::SetHasShadow(const flutter::EncodableMap &args);
     void WindowManager::StartDragging();
-    void WindowManager::Terminate();
 
   private:
     bool g_is_window_fullscreen = false;
@@ -425,8 +424,4 @@ void WindowManager::StartDragging()
     SendMessage(GetMainWindow(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
 }
 
-void WindowManager::Terminate()
-{
-    ExitProcess(1);
-}
 } // namespace

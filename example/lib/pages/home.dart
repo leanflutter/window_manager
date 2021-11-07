@@ -419,12 +419,6 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 setState(() {});
               },
             ),
-            PreferenceListItem(
-              title: Text('terminate'),
-              onTap: () async {
-                await windowManager.terminate();
-              },
-            ),
           ],
         ),
       ],

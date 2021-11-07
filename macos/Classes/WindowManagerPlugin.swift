@@ -182,10 +182,6 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.startDragging()
             result(true)
             break
-        case "terminate":
-            windowManager.terminate()
-            result(true)
-            break
         default:
             result(FlutterMethodNotImplemented)
         }
