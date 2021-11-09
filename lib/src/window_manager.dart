@@ -174,13 +174,6 @@ class WindowManager {
     await _channel.invokeMethod('setBackgroundColor', arguments);
   }
 
-  /// Moves window to the center of the screen.
-  Future<void> center() async {
-    final Map<String, dynamic> arguments = {};
-
-    await _channel.invokeMethod('center', arguments);
-  }
-
   /// Returns Rect - The bounds of the window as Object.
   Future<Rect> getBounds() async {
     final Map<String, dynamic> arguments = {

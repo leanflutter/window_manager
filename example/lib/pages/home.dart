@@ -179,12 +179,6 @@ class _HomePageState extends State<HomePage> with WindowListener {
               ),
             ),
             PreferenceListItem(
-              title: Text('center'),
-              onTap: () {
-                windowManager.center();
-              },
-            ),
-            PreferenceListItem(
               title: Text('setBounds / setBounds'),
               accessoryView: ToggleButtons(
                 children: <Widget>[

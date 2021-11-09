@@ -106,10 +106,6 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setBackgroundColor(args)
             result(true)
             break
-        case "center":
-            windowManager.center()
-            result(true)
-            break
         case "getBounds":
             result(windowManager.getBounds())
             break

@@ -171,19 +171,6 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
     }
     
-    public func center() {
-        let screenFrame = NSScreen.main!.frame
-        var frameRect: NSRect = mainWindow.frame;
-        
-        let width: CGFloat = frameRect.size.width
-        let height: CGFloat = frameRect.size.height
-        
-        frameRect.topLeft.x = CGFloat((screenFrame.width - width) / 2)
-        frameRect.topLeft.y = CGFloat((screenFrame.height - height) / 2)
-        
-        mainWindow.setFrame(frameRect, display: true)
-    }
-    
     public func getBounds() -> NSDictionary {
         let frameRect: NSRect = mainWindow.frame;
         
