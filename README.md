@@ -103,7 +103,6 @@ class _HomePageState extends State<HomePage> with WindowListener {
   @override
   void initState() {
     windowManager.addListener(this);
-    _init();
     super.initState();
   }
 

@@ -10,7 +10,7 @@ void main() async {
 
   // Use it only after calling `hiddenWindowAtLaunch`
   windowManager.waitUntilReadyToShow().then((_) async {
-    await windowManager.setAsFrameless();
+    // await windowManager.setAsFrameless();
     await windowManager.setSize(Size(800, 600));
     await windowManager.show();
   });

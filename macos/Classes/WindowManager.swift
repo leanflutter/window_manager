@@ -50,26 +50,30 @@ public class WindowManager: NSObject, NSWindowDelegate {
     }
     
     private var _isMaximized: Bool = false
-
+    
     override public init() {
         super.init()
     }
-
+    
+    public func waitUntilReadyToShow() {
+        // nothing
+    }
+    
     public func setAsFrameless() {
         mainWindow.styleMask.insert(.fullSizeContentView)
         mainWindow.titleVisibility = .hidden
         mainWindow.isOpaque = true
         mainWindow.hasShadow = false
         mainWindow.backgroundColor = NSColor.clear
-
+        
         if (mainWindow.styleMask.contains(.titled)) {
             let titleBarView: NSView = (mainWindow.standardWindowButton(.closeButton)?.superview)!.superview!
             titleBarView.isHidden = true
         }
     }
     
-    public func waitUntilReadyToShow() {
-        // nothing
+    public func close() {
+        mainWindow.close()
     }
     
     public func focus() {
@@ -152,9 +156,9 @@ public class WindowManager: NSObject, NSWindowDelegate {
         let backgroundColorB = args["backgroundColorB"] as! Int
         
         let isTransparent: Bool = backgroundColorA == 0
-            && backgroundColorR == 0
-            && backgroundColorG == 0
-            && backgroundColorB == 0;
+        && backgroundColorR == 0
+        && backgroundColorG == 0
+        && backgroundColorB == 0;
         
         if (isTransparent) {
             mainWindow.backgroundColor = NSColor.clear
@@ -171,29 +175,49 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
     }
     
-    public func getBounds() -> NSDictionary {
+    public func getPosition() -> NSDictionary {
         let frameRect: NSRect = mainWindow.frame;
         
         let data: NSDictionary = [
             "x": frameRect.topLeft.x,
             "y": frameRect.topLeft.y,
+        ]
+        return data;
+    }
+    
+    public func setPosition(_ args: [String: Any]) {
+        let animate = args["animate"] as? Bool ?? false
+        
+        var frameRect = mainWindow.frame
+        if (args["x"] != nil && args["y"] != nil) {
+            frameRect.topLeft.x = CGFloat(args["x"] as! Float)
+            frameRect.topLeft.y = CGFloat(args["y"] as! Float)
+        }
+        
+        if (animate) {
+            mainWindow.animator().setFrame(frameRect, display: true, animate: true)
+        } else {
+            mainWindow.setFrame(frameRect, display: true)
+        }
+    }
+    
+    public func getSize() -> NSDictionary {
+        let frameRect: NSRect = mainWindow.frame;
+        
+        let data: NSDictionary = [
             "width": frameRect.size.width,
             "height": frameRect.size.height,
         ]
         return data;
     }
     
-    public func setBounds(_ args: [String: Any]) {
+    public func setSize(_ args: [String: Any]) {
         let animate = args["animate"] as? Bool ?? false
         
         var frameRect = mainWindow.frame
         if (args["width"] != nil && args["height"] != nil) {
             frameRect.size.width = CGFloat(truncating: args["width"] as! NSNumber)
             frameRect.size.height = CGFloat(truncating: args["height"] as! NSNumber)
-        }
-        if (args["x"] != nil && args["y"] != nil) {
-            frameRect.topLeft.x = CGFloat(args["x"] as! Float)
-            frameRect.topLeft.y = CGFloat(args["y"] as! Float)
         }
         
         if (animate) {
@@ -309,6 +333,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     // NSWindowDelegate
     
+    public func windowShouldClose(_ sender: NSWindow) -> Bool {
+        return true;
+    }
+    
     public func windowDidResize(_ notification: Notification) {
         _emitEvent("resize")
         if (!_isMaximized && mainWindow.isZoomed) {
@@ -320,11 +348,11 @@ public class WindowManager: NSObject, NSWindowDelegate {
             _emitEvent("unmaximize")
         }
     }
-
+    
     public func windowDidMove(_ notification: Notification) {
         _emitEvent("move")
     }
-
+    
     public func windowDidBecomeMain(_ notification: Notification) {
         _emitEvent("focus");
     }

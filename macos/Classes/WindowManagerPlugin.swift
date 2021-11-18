@@ -25,7 +25,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         self.registrar = registrar
         self.channel = channel
     }
-
+    
     private func ensureInitialized() {
         if (!_inited) {
             windowManager.mainWindow = mainWindow
@@ -36,7 +36,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             _inited = true
         }
     }
-
+    
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let methodName: String = call.method
         let args: [String: Any] = call.arguments as? [String: Any] ?? [:]
@@ -106,11 +106,18 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setBackgroundColor(args)
             result(true)
             break
-        case "getBounds":
-            result(windowManager.getBounds())
+        case "getPosition":
+            result(windowManager.getPosition())
             break
-        case "setBounds":
-            windowManager.setBounds(args)
+        case "setPosition":
+            windowManager.setPosition(args)
+            result(true)
+            break
+        case "getSize":
+            result(windowManager.getSize())
+            break
+        case "setSize":
+            windowManager.setSize(args)
             result(true)
             break
         case "setMinimumSize":

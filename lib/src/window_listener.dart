@@ -1,5 +1,4 @@
 abstract class WindowListener {
-  void onWindowEvent(String eventName) {}
   void onWindowFocus() {}
   void onWindowBlur() {}
   void onWindowMaximize() {}
@@ -10,4 +9,5 @@ abstract class WindowListener {
   void onWindowMove() {}
   void onWindowEnterFullScreen() {}
   void onWindowLeaveFullScreen() {}
+  void onWindowEvent(String eventName) {}
 }

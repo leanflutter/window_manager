@@ -80,12 +80,12 @@ class WindowManager {
     await _channel.invokeMethod('ensureInitialized');
   }
 
-  Future<void> waitUntilReadyToShow() async {
-    await _channel.invokeMethod('waitUntilReadyToShow');
-  }
-
   Future<void> setAsFrameless() async {
     await _channel.invokeMethod('setAsFrameless');
+  }
+
+  Future<void> waitUntilReadyToShow() async {
+    await _channel.invokeMethod('waitUntilReadyToShow');
   }
 
   /// Focuses on the window.
@@ -176,66 +176,57 @@ class WindowManager {
 
   /// Returns Rect - The bounds of the window as Object.
   Future<Rect> getBounds() async {
-    final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
-    };
-    final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('getBounds', arguments);
-    return Rect.fromLTWH(
-      resultData['x'],
-      resultData['y'],
-      resultData['width'],
-      resultData['height'],
-    );
+    Offset position = await getPosition();
+    Size size = await getSize();
+    return Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
   }
 
   /// Resizes and moves the window to the supplied bounds.
   Future<void> setBounds(Rect bounds, {animate = false}) async {
-    final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
-      'x': bounds.topLeft.dx,
-      'y': bounds.topLeft.dy,
-      'width': bounds.size.width,
-      'height': bounds.size.height,
-      'animate': animate,
-    }..removeWhere((key, value) => value == null);
-    await _channel.invokeMethod('setBounds', arguments);
+    await setPosition(bounds.topLeft);
+    await setSize(bounds.size);
   }
 
   /// Returns Offset - Contains the window's current position.
   Future<Offset> getPosition() async {
-    Rect bounds = await this.getBounds();
-    return bounds.topLeft;
+    final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
+    };
+    final Map<dynamic, dynamic> resultData =
+        await _channel.invokeMethod('getPosition', arguments);
+    return Offset(resultData['x'], resultData['y']);
   }
 
   /// Moves window to position.
   Future<void> setPosition(Offset position, {animate = false}) async {
-    Rect oldBounds = await this.getBounds();
-    Rect newBounds = Rect.fromLTWH(
-      position.dx,
-      position.dy,
-      oldBounds.width,
-      oldBounds.height,
-    );
-    await this.setBounds(newBounds, animate: animate);
+    final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
+      'x': position.dx,
+      'y': position.dy,
+      'animate': animate,
+    }..removeWhere((key, value) => value == null);
+    await _channel.invokeMethod('setPosition', arguments);
   }
 
   /// Returns Size - Contains the window's width and height.
   Future<Size> getSize() async {
-    Rect bounds = await this.getBounds();
-    return bounds.size;
+    final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
+    };
+    final Map<dynamic, dynamic> resultData =
+        await _channel.invokeMethod('getSize', arguments);
+    return Size(resultData['width'], resultData['height']);
   }
 
   /// Resizes the window to width and height.
   Future<void> setSize(Size size, {animate = false}) async {
-    Rect oldBounds = await this.getBounds();
-    Rect newBounds = Rect.fromLTWH(
-      oldBounds.left,
-      oldBounds.top,
-      size.width,
-      size.height,
-    );
-    await this.setBounds(newBounds, animate: animate);
+    final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
+      'width': size.width,
+      'height': size.height,
+      'animate': animate,
+    }..removeWhere((key, value) => value == null);
+    await _channel.invokeMethod('setSize', arguments);
   }
 
   Future<void> setMinimumSize(Size size) async {
