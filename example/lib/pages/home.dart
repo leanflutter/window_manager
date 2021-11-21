@@ -339,26 +339,30 @@ class _HomePageState extends State<HomePage> with WindowListener {
             PreferenceListSwitchItem(
               title: Text('isMinimizable / setMinimizable'),
               onTap: () async {
-                bool isMinimizable = await windowManager.isClosable();
-                BotToast.showText(text: 'isMinimizable: $isMinimizable');
+                _isMinimizable = await windowManager.isMinimizable();
+                setState(() {});
+                BotToast.showText(text: 'isMinimizable: $_isMinimizable');
               },
               value: _isMinimizable,
-              onChanged: (newValue) {
-                _isMinimizable = newValue;
-                windowManager.setMinimizable(_isMinimizable);
+              onChanged: (newValue) async {
+                await windowManager.setMinimizable(newValue);
+                _isMinimizable = await windowManager.isMinimizable();
+                print('isMinimizable: $_isMinimizable');
                 setState(() {});
               },
             ),
             PreferenceListSwitchItem(
               title: Text('isClosable / setClosable'),
               onTap: () async {
-                bool isClosable = await windowManager.isClosable();
-                BotToast.showText(text: 'isClosable: $isClosable');
+                _isClosable = await windowManager.isClosable();
+                setState(() {});
+                BotToast.showText(text: 'isClosable: $_isClosable');
               },
               value: _isClosable,
-              onChanged: (newValue) {
-                _isClosable = newValue;
-                windowManager.setClosable(_isClosable);
+              onChanged: (newValue) async {
+                await windowManager.setClosable(newValue);
+                _isClosable = await windowManager.isClosable();
+                print('isClosable: $_isClosable');
                 setState(() {});
               },
             ),

@@ -315,6 +315,28 @@ void WindowManagerPlugin::HandleMethodCall(const flutter::MethodCall<flutter::En
         window_manager->SetMaximumSize(args);
         result->Success(flutter::EncodableValue(true));
     }
+    else if (method_name.compare("isMinimizable") == 0)
+    {
+        bool value = window_manager->IsMinimizable();
+        result->Success(flutter::EncodableValue(value));
+    }
+    else if (method_name.compare("setMinimizable") == 0)
+    {
+        const flutter::EncodableMap &args = std::get<flutter::EncodableMap>(*method_call.arguments());
+        window_manager->SetMinimizable(args);
+        result->Success(flutter::EncodableValue(true));
+    }
+    else if (method_name.compare("isClosable") == 0)
+    {
+        bool value = window_manager->IsClosable();
+        result->Success(flutter::EncodableValue(value));
+    }
+    else if (method_name.compare("setClosable") == 0)
+    {
+        const flutter::EncodableMap &args = std::get<flutter::EncodableMap>(*method_call.arguments());
+        window_manager->SetClosable(args);
+        result->Success(flutter::EncodableValue(true));
+    }
     else if (method_name.compare("isAlwaysOnTop") == 0)
     {
         bool value = window_manager->IsAlwaysOnTop();

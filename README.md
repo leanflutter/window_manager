@@ -287,10 +287,10 @@ class MainFlutterWindow: NSWindow {
 | `setResizable`   | Sets whether the window can be manually resized by the user.                                               | ✔️     | ✔️     | ➖       |
 | `isMovable`      | Returns `bool` - Whether the window can be moved by user. On Linux always returns `true`.                  | ➖     | ✔️     | ➖       |
 | `setMovable`     | Sets whether the window can be moved by user. On Linux does nothing.                                       | ➖     | ✔️     | ➖       |
-| `isMinimizable`  | Returns `bool` - Whether the window can be manually minimized by the user. On Linux always returns `true`. | ➖     | ✔️     | ➖       |
-| `setMinimizable` | Sets whether the window can be manually minimized by user. On Linux does nothing.                          | ➖     | ✔️     | ➖       |
-| `isClosable`     | Returns `bool` - Whether the window can be manually closed by user. On Linux always returns `true`.        | ✔️     | ✔️     | ➖       |
-| `setClosable`    | Sets whether the window can be manually closed by user. On Linux does nothing.                             | ✔️     | ✔️     | ➖       |
+| `isMinimizable`  | Returns `bool` - Whether the window can be manually minimized by the user. On Linux always returns `true`. | ➖     | ✔️     | ✔️       |
+| `setMinimizable` | Sets whether the window can be manually minimized by user. On Linux does nothing.                          | ➖     | ✔️     | ✔️       |
+| `isClosable`     | Returns `bool` - Whether the window can be manually closed by user. On Linux always returns `true`.        | ✔️     | ✔️     | ✔️       |
+| `setClosable`    | Sets whether the window can be manually closed by user. On Linux does nothing.                             | ✔️     | ✔️     | ✔️       |
 | `isAlwaysOnTop`  | Returns `bool` - Whether the window is always on top of other windows.                                     | ✔️     | ✔️     | ✔️       |
 | `setAlwaysOnTop` | Sets whether the window should show always on top of other windows.                                        | ✔️     | ✔️     | ✔️       |
 | `getTitle`       | Returns `String` - The title of the native window.                                                         | ✔️     | ✔️     | ✔️       |

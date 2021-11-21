@@ -65,6 +65,10 @@ class WindowManager
     void WindowManager::SetSize(const flutter::EncodableMap &args);
     void WindowManager::SetMinimumSize(const flutter::EncodableMap &args);
     void WindowManager::SetMaximumSize(const flutter::EncodableMap &args);
+    bool WindowManager::IsMinimizable();
+    void WindowManager::SetMinimizable(const flutter::EncodableMap &args);
+    bool WindowManager::IsClosable();
+    void WindowManager::SetClosable(const flutter::EncodableMap &args);
     bool WindowManager::IsAlwaysOnTop();
     void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap &args);
     std::string WindowManager::GetTitle();
@@ -397,6 +401,37 @@ void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap &args)
 {
     bool isAlwaysOnTop = std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnTop")));
     SetWindowPos(GetMainWindow(), isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+}
+
+bool WindowManager::IsMinimizable()
+{
+    HWND hWnd = GetMainWindow();
+    DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
+    return (gwlStyle & WS_MINIMIZEBOX) != 0;
+}
+
+void WindowManager::SetMinimizable(const flutter::EncodableMap &args)
+{
+    HWND hWnd = GetMainWindow();
+    bool isMinimizable = std::get<bool>(args.at(flutter::EncodableValue("isMinimizable")));
+    DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
+    gwlStyle = isMinimizable ? gwlStyle | WS_MINIMIZEBOX : gwlStyle & ~WS_MINIMIZEBOX;
+    SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
+}
+bool WindowManager::IsClosable()
+{
+    HWND hWnd = GetMainWindow();
+    DWORD gclStyle = GetClassLong(hWnd, GCL_STYLE);
+    return !((gclStyle & CS_NOCLOSE) != 0);
+}
+
+void WindowManager::SetClosable(const flutter::EncodableMap &args)
+{
+    HWND hWnd = GetMainWindow();
+    bool isClosable = std::get<bool>(args.at(flutter::EncodableValue("isClosable")));
+    DWORD gclStyle = GetClassLong(hWnd, GCL_STYLE);
+    gclStyle = isClosable ? gclStyle & ~CS_NOCLOSE : gclStyle | CS_NOCLOSE;
+    SetClassLong(hWnd, GCL_STYLE, gclStyle);
 }
 
 std::string WindowManager::GetTitle()

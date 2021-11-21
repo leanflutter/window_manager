@@ -270,7 +270,7 @@ class WindowManager {
   }
 
   Future<bool> isMinimizable() async {
-    return await _channel.invokeMethod('isResizable');
+    return await _channel.invokeMethod('isMinimizable');
   }
 
   setMinimizable(isMinimizable) {
