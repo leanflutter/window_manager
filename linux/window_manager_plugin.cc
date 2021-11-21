@@ -187,7 +187,7 @@ static FlMethodResponse *get_position(WindowManagerPlugin *self)
 }
 
 static FlMethodResponse *set_position(WindowManagerPlugin *self,
-                                    FlValue *args)
+                                      FlValue *args)
 {
   const float x = fl_value_get_float(fl_value_lookup_string(args, "x"));
   const float y = fl_value_get_float(fl_value_lookup_string(args, "y"));
@@ -210,7 +210,7 @@ static FlMethodResponse *get_size(WindowManagerPlugin *self)
 }
 
 static FlMethodResponse *set_size(WindowManagerPlugin *self,
-                                    FlValue *args)
+                                  FlValue *args)
 {
   const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
   const float height = fl_value_get_float(fl_value_lookup_string(args, "height"));
@@ -259,6 +259,35 @@ static FlMethodResponse *set_maximum_size(WindowManagerPlugin *self,
       &self->window_geometry,
       static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
 
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse *is_resizable(WindowManagerPlugin *self)
+{
+  bool is_resizable = gtk_window_get_resizable(get_window(self));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(is_resizable)));
+}
+
+static FlMethodResponse *set_resizable(WindowManagerPlugin *self,
+                                       FlValue *args)
+{
+  bool is_resizable = fl_value_get_bool(fl_value_lookup_string(args, "isResizable"));
+  gtk_window_set_resizable(get_window(self), is_resizable);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+
+static FlMethodResponse *is_closable(WindowManagerPlugin *self)
+{
+  bool is_closable = gtk_window_get_deletable(get_window(self));
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(is_closable)));
+}
+
+static FlMethodResponse *set_closable(WindowManagerPlugin *self,
+                                       FlValue *args)
+{
+  bool is_closable = fl_value_get_bool(fl_value_lookup_string(args, "isClosable"));
+  gtk_window_set_deletable(get_window(self), is_closable);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
@@ -424,6 +453,22 @@ static void window_manager_plugin_handle_method_call(
   else if (strcmp(method, "setMaximumSize") == 0)
   {
     response = set_maximum_size(self, args);
+  }
+  else if (strcmp(method, "isResizable") == 0)
+  {
+    response = is_resizable(self);
+  }
+  else if (strcmp(method, "setResizable") == 0)
+  {
+    response = set_resizable(self, args);
+  }
+  else if (strcmp(method, "isClosable") == 0)
+  {
+    response = is_closable(self);
+  }
+  else if (strcmp(method, "setClosable") == 0)
+  {
+    response = set_closable(self, args);
   }
   else if (strcmp(method, "isAlwaysOnTop") == 0)
   {
