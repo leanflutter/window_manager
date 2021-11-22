@@ -283,8 +283,8 @@ class MainFlutterWindow: NSWindow {
 | `setSize`        | Resizes the window to `width` and `height`.                                                                | ✔️     | ✔️     | ✔️       |
 | `setMinimumSize` | Sets the minimum size of window to `width` and `height`.                                                   | ✔️     | ✔️     | ✔️       |
 | `setMaximumSize` | Sets the maximum size of window to `width` and `height`.                                                   | ✔️     | ✔️     | ✔️       |
-| `isResizable`    | Returns `bool` - Whether the window can be manually resized by the user.                                   | ✔️     | ✔️     | ➖       |
-| `setResizable`   | Sets whether the window can be manually resized by the user.                                               | ✔️     | ✔️     | ➖       |
+| `isResizable`    | Returns `bool` - Whether the window can be manually resized by the user.                                   | ✔️     | ✔️     | ✔️       |
+| `setResizable`   | Sets whether the window can be manually resized by the user.                                               | ✔️     | ✔️     | ✔️       |
 | `isMovable`      | Returns `bool` - Whether the window can be moved by user. On Linux always returns `true`.                  | ➖     | ✔️     | ➖       |
 | `setMovable`     | Sets whether the window can be moved by user. On Linux does nothing.                                       | ➖     | ✔️     | ➖       |
 | `isMinimizable`  | Returns `bool` - Whether the window can be manually minimized by the user. On Linux always returns `true`. | ➖     | ✔️     | ✔️       |

@@ -1,5 +1,7 @@
 ## 0.1.0
 
+- Implemented `isResizable`, `setResizable` Methods.
+- Implemented `isClosable`, `setClosable` Methods.
 - Removed `terminate` Method.
 
 ## 0.0.5

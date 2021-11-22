@@ -65,6 +65,8 @@ class WindowManager
     void WindowManager::SetSize(const flutter::EncodableMap &args);
     void WindowManager::SetMinimumSize(const flutter::EncodableMap &args);
     void WindowManager::SetMaximumSize(const flutter::EncodableMap &args);
+    bool WindowManager::IsResizable();
+    void WindowManager::SetResizable(const flutter::EncodableMap &args);
     bool WindowManager::IsMinimizable();
     void WindowManager::SetMinimizable(const flutter::EncodableMap &args);
     bool WindowManager::IsClosable();
@@ -391,16 +393,20 @@ void WindowManager::SetMaximumSize(const flutter::EncodableMap &args)
     }
 }
 
-bool WindowManager::IsAlwaysOnTop()
+bool WindowManager::IsResizable()
 {
-    DWORD dwExStyle = GetWindowLong(GetMainWindow(), GWL_EXSTYLE);
-    return (dwExStyle & WS_EX_TOPMOST) != 0;
+    HWND hWnd = GetMainWindow();
+    DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
+    return (gwlStyle & WS_THICKFRAME) != 0;
 }
 
-void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap &args)
+void WindowManager::SetResizable(const flutter::EncodableMap &args)
 {
-    bool isAlwaysOnTop = std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnTop")));
-    SetWindowPos(GetMainWindow(), isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+    HWND hWnd = GetMainWindow();
+    bool isResizable = std::get<bool>(args.at(flutter::EncodableValue("isResizable")));
+    DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
+    gwlStyle = isResizable ? gwlStyle | WS_THICKFRAME : gwlStyle & ~WS_THICKFRAME;
+    SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
 }
 
 bool WindowManager::IsMinimizable()
@@ -418,6 +424,7 @@ void WindowManager::SetMinimizable(const flutter::EncodableMap &args)
     gwlStyle = isMinimizable ? gwlStyle | WS_MINIMIZEBOX : gwlStyle & ~WS_MINIMIZEBOX;
     SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
 }
+
 bool WindowManager::IsClosable()
 {
     HWND hWnd = GetMainWindow();
@@ -432,6 +439,18 @@ void WindowManager::SetClosable(const flutter::EncodableMap &args)
     DWORD gclStyle = GetClassLong(hWnd, GCL_STYLE);
     gclStyle = isClosable ? gclStyle & ~CS_NOCLOSE : gclStyle | CS_NOCLOSE;
     SetClassLong(hWnd, GCL_STYLE, gclStyle);
+}
+
+bool WindowManager::IsAlwaysOnTop()
+{
+    DWORD dwExStyle = GetWindowLong(GetMainWindow(), GWL_EXSTYLE);
+    return (dwExStyle & WS_EX_TOPMOST) != 0;
+}
+
+void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap &args)
+{
+    bool isAlwaysOnTop = std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnTop")));
+    SetWindowPos(GetMainWindow(), isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 }
 
 std::string WindowManager::GetTitle()
