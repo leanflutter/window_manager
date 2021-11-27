@@ -3,6 +3,7 @@
 - Implemented `isResizable`, `setResizable` Methods.
 - Implemented `isClosable`, `setClosable` Methods.
 - Removed `terminate` Method.
+- [windows] Implemented `isMinimizable`, `setMinimizable` Methods.
 
 ## 0.0.5
 
