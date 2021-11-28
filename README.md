@@ -48,7 +48,7 @@ Add this to your package's pubspec.yaml file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.1.0
+  window_manager: ^0.1.1
 ```
 
 Or

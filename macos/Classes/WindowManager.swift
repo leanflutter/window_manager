@@ -216,8 +216,13 @@ public class WindowManager: NSObject, NSWindowDelegate {
         
         var frameRect = mainWindow.frame
         if (args["width"] != nil && args["height"] != nil) {
-            frameRect.size.width = CGFloat(truncating: args["width"] as! NSNumber)
-            frameRect.size.height = CGFloat(truncating: args["height"] as! NSNumber)
+            let width: CGFloat = CGFloat(truncating: args["width"] as! NSNumber)
+            let height: CGFloat = CGFloat(truncating: args["height"] as! NSNumber)
+            
+            frameRect.origin.y += (frameRect.size.height - height)
+            frameRect.size.width = width
+            frameRect.size.height = height
+            
         }
         
         if (animate) {

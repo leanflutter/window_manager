@@ -1,3 +1,7 @@
+## 0.1.1
+
+- [macos] Fixed `setSize` coordinate error.
+
 ## 0.1.0
 
 - Implemented `isResizable`, `setResizable` Methods.
