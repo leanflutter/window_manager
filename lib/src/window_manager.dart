@@ -317,6 +317,18 @@ class WindowManager {
     await _channel.invokeMethod('setTitle', arguments);
   }
 
+  /// Changes the title bar style of native window.
+  Future<void> setTitleBarStyle(
+    String titleBarStyle, {
+    bool windowButtonVisibility = true,
+  }) async {
+    final Map<String, dynamic> arguments = {
+      'titleBarStyle': titleBarStyle,
+      'windowButtonVisibility': windowButtonVisibility,
+    };
+    await _channel.invokeMethod('setTitleBarStyle', arguments);
+  }
+
   /// Makes the window not show in the taskbar / dock.
   Future<void> setSkipTaskbar(bool isSkipTaskbar) async {
     final Map<String, dynamic> arguments = {
@@ -340,6 +352,25 @@ class WindowManager {
 
   Future<void> startDragging() async {
     await _channel.invokeMethod('startDragging');
+  }
+
+  Future<bool> isSubWindow() async {
+    return await _channel.invokeMethod('isSubWindow');
+  }
+
+  Future<void> createSubWindow({
+    required String title,
+    required Offset position,
+    required Size size,
+  }) async {
+    final Map<String, dynamic> arguments = {
+      'title': title,
+      'x': position.dx,
+      'y': position.dy,
+      'width': size.width,
+      'height': size.height,
+    };
+    await _channel.invokeMethod('createSubWindow', arguments);
   }
 }
 

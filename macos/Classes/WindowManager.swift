@@ -314,6 +314,25 @@ public class WindowManager: NSObject, NSWindowDelegate {
         mainWindow.title = title;
     }
     
+    public func setTitleBarStyle(_ args: [String: Any]) {
+        let titleBarStyle: String = args["titleBarStyle"] as! String
+        let windowButtonVisibility: Bool = args["windowButtonVisibility"] as! Bool
+        
+        if (titleBarStyle == "hidden") {
+            mainWindow.titleVisibility = .hidden
+            mainWindow.titlebarAppearsTransparent = true
+            mainWindow.styleMask.insert(.fullSizeContentView)
+        } else {
+            mainWindow.titleVisibility = .visible
+            mainWindow.titlebarAppearsTransparent = false
+            mainWindow.styleMask.remove(.fullSizeContentView)
+        }
+        
+        mainWindow.standardWindowButton(.closeButton)?.isHidden = !windowButtonVisibility
+        mainWindow.standardWindowButton(.miniaturizeButton)?.isHidden = !windowButtonVisibility
+        mainWindow.standardWindowButton(.zoomButton)?.isHidden = !windowButtonVisibility
+    }
+    
     public func setSkipTaskbar(_ args: [String: Any]) {
         let isSkipTaskbar: Bool = args["isSkipTaskbar"] as! Bool
         NSApplication.shared.setActivationPolicy(isSkipTaskbar ? .accessory : .regular)
@@ -334,6 +353,43 @@ public class WindowManager: NSObject, NSWindowDelegate {
             let window: NSWindow  = self.mainWindow
             window.performDrag(with: window.currentEvent!)
         }
+    }
+    
+    public func isSubWindow() -> Bool {
+        let identifier: String = mainWindow.identifier?.rawValue ?? "";
+        return identifier == "subwindow"
+    }
+    
+    public func createSubWindow(_ args: [String: Any]) {
+        let title: String = args["title"] as! String
+        
+        var frameRect: NSRect = NSRect.zero
+        if (args["x"] != nil && args["y"] != nil) {
+            frameRect.topLeft.x = CGFloat(args["x"] as! Float)
+            frameRect.topLeft.y = CGFloat(args["y"] as! Float)
+        }
+        if (args["width"] != nil && args["width"] != nil) {
+            frameRect.size.width = CGFloat(args["width"] as! Float)
+            frameRect.size.height = CGFloat(args["height"] as! Float)
+        }
+        
+        let flutterViewController = FlutterViewController.init()
+        WindowManagerPlugin.RegisterGeneratedPlugins!(flutterViewController)
+        
+        let window = SubWindow()
+        window.identifier = NSUserInterfaceItemIdentifier("subwindow")
+        window.styleMask = NSWindow.StyleMask(rawValue: 0xf)
+        window.backingType = .buffered
+        
+        window.title = title
+        window.setFrameOrigin(frameRect.origin)
+        window.setContentSize(frameRect.size)
+        
+        let windowController = NSWindowController()
+        windowController.contentViewController = flutterViewController
+        windowController.shouldCascadeWindows = true
+        windowController.window = window
+        windowController.showWindow(self)
     }
     
     // NSWindowDelegate

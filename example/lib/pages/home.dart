@@ -53,7 +53,9 @@ class _HomePageState extends State<HomePage> with WindowListener {
     super.dispose();
   }
 
-  void _init() {}
+  void _init() async {
+    setState(() {});
+  }
 
   Widget _buildBody(BuildContext context) {
     return PreferenceList(
@@ -390,6 +392,34 @@ class _HomePageState extends State<HomePage> with WindowListener {
                     'window_manager_example - ${DateTime.now().millisecondsSinceEpoch}';
                 await windowManager.setTitle(title);
               },
+            ),
+            PreferenceListItem(
+              title: Text('setTitleBarStyle'),
+              accessoryView: Row(
+                children: [
+                  CupertinoButton(
+                    child: Text('default'),
+                    onPressed: () async {
+                      windowManager.setTitleBarStyle(
+                        'default',
+                        windowButtonVisibility: true,
+                      );
+                      setState(() {});
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('hidden'),
+                    onPressed: () async {
+                      windowManager.setTitleBarStyle(
+                        'hidden',
+                        windowButtonVisibility: false,
+                      );
+                      setState(() {});
+                    },
+                  ),
+                ],
+              ),
+              onTap: () {},
             ),
             PreferenceListItem(
               title: Text('setSkipTaskbar'),
