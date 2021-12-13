@@ -92,6 +92,23 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
             SetWindowLong(hWnd, 0, 0);
             return 1;
         }
+
+        if (wParam && window_manager->title_bar_style == "hidden")
+        {
+            WINDOWPLACEMENT wPos;
+            wPos.length = sizeof(wPos);
+            GetWindowPlacement(hWnd, &wPos);
+            RECT borderThickness;
+            SetRectEmpty(&borderThickness);
+            AdjustWindowRectEx(&borderThickness, GetWindowLongPtr(hWnd, GWL_STYLE) & ~WS_CAPTION, FALSE, NULL);
+            NCCALCSIZE_PARAMS *sz = reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
+            // Add 1 pixel to the top border to make the window resizable from the top border
+            sz->rgrc[0].top -= 1;
+            sz->rgrc[0].right -= borderThickness.right;
+            sz->rgrc[0].bottom -= borderThickness.bottom;
+
+            return (WVR_HREDRAW | WVR_VREDRAW);
+        }
     }
     else if (message == WM_NCHITTEST)
     {
@@ -368,6 +385,12 @@ void WindowManagerPlugin::HandleMethodCall(const flutter::MethodCall<flutter::En
     {
         const flutter::EncodableMap &args = std::get<flutter::EncodableMap>(*method_call.arguments());
         window_manager->SetTitle(args);
+        result->Success(flutter::EncodableValue(true));
+    }
+    else if (method_name.compare("setTitleBarStyle") == 0)
+    {
+        const flutter::EncodableMap &args = std::get<flutter::EncodableMap>(*method_call.arguments());
+        window_manager->SetTitleBarStyle(args);
         result->Success(flutter::EncodableValue(true));
     }
     else if (method_name.compare("setSkipTaskbar") == 0)

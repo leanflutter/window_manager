@@ -36,6 +36,7 @@ class WindowManager
     int last_state = STATE_NORMAL;
 
     bool is_frameless = false;
+    std::string title_bar_style = "default";
 
     // The minimum size set by the platform channel.
     POINT minimum_size = {0, 0};
@@ -75,6 +76,7 @@ class WindowManager
     void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap &args);
     std::string WindowManager::GetTitle();
     void WindowManager::SetTitle(const flutter::EncodableMap &args);
+    void WindowManager::SetTitleBarStyle(const flutter::EncodableMap &args);
     void WindowManager::SetSkipTaskbar(const flutter::EncodableMap &args);
     bool WindowManager::HasShadow();
     void WindowManager::SetHasShadow(const flutter::EncodableMap &args);
@@ -469,6 +471,31 @@ void WindowManager::SetTitle(const flutter::EncodableMap &args)
 
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     SetWindowText(GetMainWindow(), converter.from_bytes(title).c_str());
+}
+
+void WindowManager::SetTitleBarStyle(const flutter::EncodableMap &args)
+{
+    std::string titleBarStyle = std::get<std::string>(args.at(flutter::EncodableValue("titleBarStyle")));
+
+    this->title_bar_style = titleBarStyle;
+
+    HWND hWnd = GetMainWindow();
+    DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
+    if (titleBarStyle == "hidden")
+    {
+        gwlStyle = gwlStyle & ~WS_CAPTION;
+        SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
+    }
+    else
+    {
+        gwlStyle = gwlStyle | WS_CAPTION;
+        SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
+    }
+
+    RECT rect;
+    GetWindowRect(hWnd, &rect);
+    SetWindowPos(hWnd, nullptr, rect.left, rect.top, 0, 0,
+                 SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
 }
 
 void WindowManager::SetSkipTaskbar(const flutter::EncodableMap &args)

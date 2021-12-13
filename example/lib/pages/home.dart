@@ -458,17 +458,17 @@ class _HomePageState extends State<HomePage> with WindowListener {
     return Stack(
       children: [
         Container(
-          margin: EdgeInsets.all(20),
+          margin: EdgeInsets.all(0),
           decoration: BoxDecoration(
-            color: Colors.transparent,
-            border: Border.all(color: Colors.grey.withOpacity(0.4), width: 1),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                offset: Offset(1.0, 1.0),
-                blurRadius: 6.0,
-              ),
-            ],
+            color: Colors.white,
+            // border: Border.all(color: Colors.grey.withOpacity(0.4), width: 1),
+            // boxShadow: <BoxShadow>[
+            //   BoxShadow(
+            //     color: Colors.black.withOpacity(0.2),
+            //     offset: Offset(1.0, 1.0),
+            //     blurRadius: 6.0,
+            //   ),
+            // ],
           ),
           child: Scaffold(
             appBar: AppBar(
