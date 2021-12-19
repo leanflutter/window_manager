@@ -181,8 +181,7 @@ void WindowManager::Unmaximize()
 
     if (windowPlacement.showCmd != SW_NORMAL)
     {
-        windowPlacement.showCmd = SW_NORMAL;
-        SetWindowPlacement(mainWindow, &windowPlacement);
+        PostMessage(mainWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
     }
 }
 
