@@ -172,7 +172,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
     else if (message == WM_SIZE)
     {
         LONG_PTR gwlStyle = GetWindowLongPtr(window_manager->GetMainWindow(), GWL_STYLE);
-        if ((gwlStyle & WS_POPUP) != 0 && wParam == SIZE_MAXIMIZED)
+        if ((gwlStyle & (WS_CAPTION | WS_THICKFRAME)) == 0 && wParam == SIZE_MAXIMIZED)
         {
             _EmitEvent("enter-full-screen");
             window_manager->last_state = STATE_FULLSCREEN_ENTERED;

@@ -260,6 +260,7 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap &args)
                        monitor_info.rcMonitor.right - monitor_info.rcMonitor.left,
                        monitor_info.rcMonitor.bottom - monitor_info.rcMonitor.top,
                        SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        ::SendMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
     }
     else
     {
