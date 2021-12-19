@@ -85,6 +85,9 @@ class WindowManager
   private:
     bool g_is_window_fullscreen = false;
     RECT g_frame_before_fullscreen;
+    bool g_maximized_before_fullscreen;
+    LONG g_style_before_fullscreen;
+    LONG g_ex_style_before_fullscreen;
 };
 
 WindowManager::WindowManager()
@@ -233,29 +236,49 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap &args)
 
     HWND mainWindow = GetMainWindow();
 
-    // https://github.com/alexmercerind/flutter-desktop-embedding/blob/da98a3b5a0e2b9425fbcb2a3e4b4ba50754abf93/plugins/window_size/windows/window_size_plugin.cpp#L258
+    // Inspired by how Chromium does this
+    // https://src.chromium.org/viewvc/chrome/trunk/src/ui/views/win/fullscreen_handler.cc?revision=247204&view=markup
+
+    // Save current window state if not already fullscreen.
+    if (!g_is_window_fullscreen)
+    {
+        // Save current window information.
+        g_maximized_before_fullscreen = !!::IsZoomed(mainWindow);
+        g_style_before_fullscreen = GetWindowLong(mainWindow, GWL_STYLE);
+        g_ex_style_before_fullscreen = GetWindowLong(mainWindow, GWL_EXSTYLE);
+        ::GetWindowRect(mainWindow, &g_frame_before_fullscreen);
+    }
+
     if (isFullScreen)
     {
-        HMONITOR monitor = ::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST);
-        MONITORINFO info;
-        info.cbSize = sizeof(MONITORINFO);
-        ::GetMonitorInfo(monitor, &info);
-        ::SetWindowLongPtr(mainWindow, GWL_STYLE, WS_POPUP | WS_VISIBLE);
-        ::GetWindowRect(mainWindow, &g_frame_before_fullscreen);
-        ::SetWindowPos(mainWindow, NULL, info.rcMonitor.left, info.rcMonitor.top,
-                       info.rcMonitor.right - info.rcMonitor.left, info.rcMonitor.bottom - info.rcMonitor.top,
-                       SWP_SHOWWINDOW);
-        ::ShowWindow(mainWindow, SW_MAXIMIZE);
+        // Set new window style and size.
+        ::SetWindowLong(mainWindow, GWL_STYLE, g_style_before_fullscreen & ~(WS_CAPTION | WS_THICKFRAME));
+        ::SetWindowLong(mainWindow, GWL_EXSTYLE,
+                        g_ex_style_before_fullscreen &
+                            ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+
+        MONITORINFO monitor_info;
+        monitor_info.cbSize = sizeof(monitor_info);
+        ::GetMonitorInfo(::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST), &monitor_info);
+        ::SetWindowPos(mainWindow, NULL, monitor_info.rcMonitor.left, monitor_info.rcMonitor.top,
+                       monitor_info.rcMonitor.right - monitor_info.rcMonitor.left,
+                       monitor_info.rcMonitor.bottom - monitor_info.rcMonitor.top,
+                       SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     }
     else
     {
-        g_is_window_fullscreen = false;
-        ::SetWindowLongPtr(mainWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+        ::SetWindowLong(mainWindow, GWL_STYLE, g_style_before_fullscreen);
+        ::SetWindowLong(mainWindow, GWL_EXSTYLE, g_ex_style_before_fullscreen);
+
         ::SetWindowPos(mainWindow, NULL, g_frame_before_fullscreen.left, g_frame_before_fullscreen.top,
                        g_frame_before_fullscreen.right - g_frame_before_fullscreen.left,
-                       g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top, SWP_SHOWWINDOW);
-        ::ShowWindow(mainWindow, SW_RESTORE);
+                       g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top,
+                       SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        if (g_maximized_before_fullscreen)
+            ::SendMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
     }
+
+    g_is_window_fullscreen = isFullScreen;
 }
 
 void WindowManager::SetBackgroundColor(const flutter::EncodableMap &args)
