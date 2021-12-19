@@ -83,7 +83,7 @@ void WindowManagerPlugin::_EmitEvent(std::string eventName)
 
 std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    std::optional<LRESULT> result;
+    std::optional<LRESULT> result = std::nullopt;
 
     if (message == WM_NCCALCSIZE)
     {
