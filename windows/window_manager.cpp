@@ -169,8 +169,7 @@ void WindowManager::Maximize()
 
     if (windowPlacement.showCmd != SW_MAXIMIZE)
     {
-        windowPlacement.showCmd = SW_MAXIMIZE;
-        SetWindowPlacement(mainWindow, &windowPlacement);
+        PostMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
     }
 }
 
@@ -204,8 +203,7 @@ void WindowManager::Minimize()
 
     if (windowPlacement.showCmd != SW_SHOWMINIMIZED)
     {
-        windowPlacement.showCmd = SW_SHOWMINIMIZED;
-        SetWindowPlacement(mainWindow, &windowPlacement);
+        PostMessage(mainWindow, WM_SYSCOMMAND, SC_MINIMIZE, 0);
     }
 }
 
@@ -217,8 +215,7 @@ void WindowManager::Restore()
 
     if (windowPlacement.showCmd != SW_NORMAL)
     {
-        windowPlacement.showCmd = SW_NORMAL;
-        SetWindowPlacement(mainWindow, &windowPlacement);
+        PostMessage(mainWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
     }
 }
 
