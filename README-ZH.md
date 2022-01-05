@@ -8,11 +8,11 @@
 [discord-image]: https://img.shields.io/discord/884679008049037342.svg
 [discord-url]: https://discord.gg/zPa6EZ2jqb
 
-This plugin allows Flutter **desktop** apps to resizing and repositioning the window.
+这个插件允许 Flutter **桌面** 应用调整窗口的大小和位置。
 
 ---
 
-English | [简体中文](./README-ZH.md)
+[English](./README.md) | 简体中文
 
 ---
 
@@ -20,42 +20,42 @@ English | [简体中文](./README-ZH.md)
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [window_manager](#window_manager)
-  - [Platform Support](#platform-support)
-  - [Quick Start](#quick-start)
-    - [Installation](#installation)
-    - [Usage](#usage)
-      - [Listening events](#listening-events)
-      - [Quit on close](#quit-on-close)
+  - [平台支持](#平台支持)
+  - [快速开始](#快速开始)
+    - [安装](#安装)
+    - [用法](#用法)
+      - [监听事件](#监听事件)
+      - [关闭时退出](#关闭时退出)
         - [macOS](#macos)
         - [Windows](#windows)
-      - [Hidden at launch](#hidden-at-launch)
+      - [在启动时隐藏](#在启动时隐藏)
         - [macOS](#macos-1)
-  - [Who's using it?](#whos-using-it)
+  - [谁在用使用它？](#谁在用使用它)
   - [API](#api)
     - [WindowManager](#windowmanager)
     - [WindowListener](#windowlistener)
-  - [License](#license)
+  - [许可证](#许可证)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Platform Support
+## 平台支持
 
 | Linux | macOS | Windows |
 | :---: | :---: | :-----: |
 |   ✔️   |   ✔️   |    ✔️    |
 
-## Quick Start
+## 快速开始
 
-### Installation
+### 安装
 
-Add this to your package's pubspec.yaml file:
+将此添加到你的软件包的 pubspec.yaml 文件：
 
 ```yaml
 dependencies:
   window_manager: ^0.1.1
 ```
 
-Or
+或
 
 ```yaml
 dependencies:
@@ -65,7 +65,7 @@ dependencies:
       ref: main
 ```
 
-### Usage
+### 用法
 
 ```dart
 import 'package:flutter/material.dart';
@@ -73,12 +73,12 @@ import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Must add this line.
+  // 必须加上这一行。
   await windowManager.ensureInitialized();
 
   // Use it only after calling `hiddenWindowAtLaunch`
   windowManager.waitUntilReadyToShow().then((_) async{
-    // Set to frameless window
+    // 设置为无边框窗口
     await windowManager.setAsFrameless();
     await windowManager.setSize(Size(600, 600));
     await windowManager.setPosition(Offset.zero);
@@ -90,9 +90,9 @@ void main() async {
 
 ```
 
-> Please see the example app of this plugin for a full example.
+> 请看这个插件的示例应用，以了解完整的例子。
 
-#### Listening events
+#### 监听事件
 
 ```dart
 import 'package:flutter/cupertino.dart';
@@ -177,9 +177,9 @@ class _HomePageState extends State<HomePage> with WindowListener {
   }
 }
 ```
-#### Quit on close
+#### 关闭时退出
 
-If you need to use the hide method, you need to disable `QuitOnClose`.
+如果你需要使用 `hide` 方法，你需要禁用 `QuitOnClose`。
 
 ##### macOS
 
@@ -216,7 +216,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 }
 ```
 
-#### Hidden at launch
+#### 在启动时隐藏
 
 ##### macOS
 
@@ -245,10 +245,10 @@ class MainFlutterWindow: NSWindow {
 
 ```
 
-## Who's using it?
+## 谁在用使用它？
 
-- [AuthPass](https://authpass.app/) - Password Manager based on Flutter for all platforms. Keepass 2.x (kdbx 3.x) compatible.
-- [Biyi (比译)](https://biyidev.com/) - A convenient translation and dictionary app written in dart / Flutter.
+- [AuthPass](https://authpass.app/) - 基于Flutter的密码管理器，适用于所有平台。兼容Keepass 2.x（kdbx 3.x）。
+- [Biyi (比译)](https://biyidev.com/) - 一个便捷的翻译和词典应用程序。
 - [BlueBubbles](https://github.com/BlueBubblesApp/bluebubbles-app) - BlueBubbles is an ecosystem of apps bringing iMessage to Android, Windows, and Linux
 - [Yukino](https://github.com/yukino-app/yukino/tree/flutter-rewrite) - Yukino lets you read manga or stream anime ad-free from multiple sources.
 
@@ -311,6 +311,6 @@ class MainFlutterWindow: NSWindow {
 | `onWindowEnterFullScreen` | Emitted when the window enters a full-screen state.         | ✔️     | ✔️     | ✔️       |
 | `onWindowLeaveFullScreen` | Emitted when the window leaves a full-screen state.         | ✔️     | ✔️     | ✔️       |
 
-## License
+## 许可证
 
 [MIT](./LICENSE)
