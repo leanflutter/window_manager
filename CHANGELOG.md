@@ -1,3 +1,10 @@
+## 0.1.2
+
+- [macos] Add setTitleBarStyle method.
+- [windows] Add setTitleBarStyle method (**Experiment**).
+- [windows] #24 Updated windows fullscreen handling.
+- [windows] #26 Make `maximize`, `unmaximize`, `minimize`, `restore` methods have native animation effects.
+
 ## 0.1.1
 
 - [macos] Fixed `setSize` coordinate error.
