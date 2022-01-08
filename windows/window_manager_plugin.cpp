@@ -39,7 +39,7 @@ class WindowManagerPlugin : public flutter::Plugin
 
     void WindowManagerPlugin::_EmitEvent(std::string eventName);
     // Called for top-level WindowProc delegation.
-    std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+    std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
     // Called when a method is called on this plugin's channel from Dart.
     void HandleMethodCall(const flutter::MethodCall<flutter::EncodableValue> &method_call,
                           std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
@@ -64,8 +64,8 @@ WindowManagerPlugin::WindowManagerPlugin(flutter::PluginRegistrarWindows *regist
 {
     window_manager = new WindowManager();
     window_proc_id =
-        registrar->RegisterTopLevelWindowProcDelegate([this](HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) {
-            return HandleWindowProc(hwnd, message, wparam, lparam);
+        registrar->RegisterTopLevelWindowProcDelegate([this](HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+            return HandleWindowProc(hWnd, message, wParam, lParam);
         });
 }
 
@@ -85,7 +85,12 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
 {
     std::optional<LRESULT> result = std::nullopt;
 
-    if (message == WM_NCCALCSIZE)
+    if (message == WM_NCACTIVATE || message == WM_NCPAINT)
+    {
+        if (window_manager->title_bar_style == "hidden")
+            return 1;
+    }
+    else if (message == WM_NCCALCSIZE)
     {
         if (wParam && window_manager->is_frameless)
         {
@@ -104,37 +109,11 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
             NCCALCSIZE_PARAMS *sz = reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
             // Add 1 pixel to the top border to make the window resizable from the top border
             sz->rgrc[0].top -= 1;
-            sz->rgrc[0].right -= borderThickness.right;
-            sz->rgrc[0].bottom -= borderThickness.bottom;
+            sz->rgrc[0].right -= (borderThickness.right - 3);
+            sz->rgrc[0].bottom -= (borderThickness.bottom - 3);
 
             return (WVR_HREDRAW | WVR_VREDRAW);
         }
-    }
-    else if (message == WM_NCHITTEST)
-    {
-        LONG width = 10;
-        POINT mouse = {LOWORD(lParam), HIWORD(lParam)};
-        RECT window;
-        GetWindowRect(hWnd, &window);
-        RECT rcFrame = {0};
-        // AdjustWindowRectEx(&rcFrame, WS_OVERLAPPEDWINDOW & ~WS_CAPTION, FALSE, NULL);
-        USHORT x = 1;
-        USHORT y = 1;
-        bool fOnResizeBorder = false;
-        if (mouse.y >= window.top && mouse.y < window.top + width)
-            x = 0;
-        else if (mouse.y < window.bottom && mouse.y >= window.bottom - width)
-            x = 2;
-        if (mouse.x >= window.left && mouse.x < window.left + width)
-            y = 0;
-        else if (mouse.x < window.right && mouse.x >= window.right - width)
-            y = 2;
-        LRESULT hitTests[3][3] = {
-            {HTTOPLEFT, fOnResizeBorder ? HTTOP : HTCAPTION, HTTOPRIGHT},
-            {HTLEFT, HTNOWHERE, HTRIGHT},
-            {HTBOTTOMLEFT, HTBOTTOM, HTBOTTOMRIGHT},
-        };
-        return hitTests[x][y];
     }
     else if (message == WM_GETMINMAXINFO)
     {
