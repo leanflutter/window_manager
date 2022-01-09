@@ -1,3 +1,7 @@
+## 0.1.3
+
+- [windows] #31 Optimize setTitleBarStyle method.
+
 ## 0.1.2
 
 - [macos] Add setTitleBarStyle method.
