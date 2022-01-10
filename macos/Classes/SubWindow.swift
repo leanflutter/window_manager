@@ -8,5 +8,4 @@ public class SubWindow: NSWindow {
 
         super.awakeFromNib()
     }
-    
 }

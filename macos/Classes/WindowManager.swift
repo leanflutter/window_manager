@@ -361,16 +361,24 @@ public class WindowManager: NSObject, NSWindowDelegate {
     }
     
     public func createSubWindow(_ args: [String: Any]) {
-        let title: String = args["title"] as! String
+        let visibleFrame = NSScreen.main!.visibleFrame
         
         var frameRect: NSRect = NSRect.zero
+        if (args["width"] != nil && args["width"] != nil) {
+            frameRect.size.width = CGFloat(args["width"] as! Float)
+            frameRect.size.height = CGFloat(args["height"] as! Float)
+        }
         if (args["x"] != nil && args["y"] != nil) {
             frameRect.topLeft.x = CGFloat(args["x"] as! Float)
             frameRect.topLeft.y = CGFloat(args["y"] as! Float)
         }
-        if (args["width"] != nil && args["width"] != nil) {
-            frameRect.size.width = CGFloat(args["width"] as! Float)
-            frameRect.size.height = CGFloat(args["height"] as! Float)
+        
+        let center: Bool = args["center"] as! Bool
+        let title: String = args["title"] as! String
+        
+        if (center) {
+            frameRect.origin.x = (visibleFrame.width / 2) - (frameRect.size.width / 2)
+            frameRect.origin.y = (visibleFrame.height / 2) + (frameRect.size.height / 2)
         }
         
         let flutterViewController = FlutterViewController.init()

@@ -11,6 +11,8 @@ class MainFlutterWindow: NSWindow {
         
         RegisterGeneratedPlugins(registry: flutterViewController)
         
+        WindowManagerPlugin.RegisterGeneratedPlugins = RegisterGeneratedPlugins
+        
         super.awakeFromNib()
     }
 

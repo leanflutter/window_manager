@@ -447,6 +447,16 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 setState(() {});
               },
             ),
+            PreferenceListItem(
+              title: Text('createSubWindow'),
+              onTap: () async {
+                SubWindow subWindow = await SubWindow.create(
+                  size: Size(800, 600),
+                  center: true,
+                  title: 'title',
+                );
+              },
+            ),
           ],
         ),
       ],
