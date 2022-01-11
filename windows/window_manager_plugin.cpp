@@ -108,12 +108,39 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
             AdjustWindowRectEx(&borderThickness, GetWindowLongPtr(hWnd, GWL_STYLE) & ~WS_CAPTION, FALSE, NULL);
             NCCALCSIZE_PARAMS *sz = reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
             // Add 1 pixel to the top border to make the window resizable from the top border
-            sz->rgrc[0].top -= 1;
-            sz->rgrc[0].right -= (borderThickness.right - 3);
-            sz->rgrc[0].bottom -= (borderThickness.bottom - 3);
+            sz->rgrc[0].top += 1;
+            sz->rgrc[0].right -= borderThickness.right;
+            sz->rgrc[0].bottom -= borderThickness.bottom;
+            sz->rgrc[0].left -= borderThickness.left;
 
             return (WVR_HREDRAW | WVR_VREDRAW);
         }
+    }
+	  else if (message == WM_NCHITTEST)
+    {
+        LONG width = 10;
+        POINT mouse = {LOWORD(lParam), HIWORD(lParam)};
+        RECT window;
+        GetWindowRect(hWnd, &window);
+        RECT rcFrame = {0};
+        // AdjustWindowRectEx(&rcFrame, WS_OVERLAPPEDWINDOW & ~WS_CAPTION, FALSE, NULL);
+        USHORT x = 1;
+        USHORT y = 1;
+        bool fOnResizeBorder = true;
+        if (mouse.y >= window.top && mouse.y < window.top + width)
+            x = 0;
+        else if (mouse.y < window.bottom && mouse.y >= window.bottom - width)
+            x = 2;
+        if (mouse.x >= window.left && mouse.x < window.left + width)
+            y = 0;
+        else if (mouse.x < window.right && mouse.x >= window.right - width)
+            y = 2;
+        LRESULT hitTests[3][3] = {
+            {HTTOPLEFT, fOnResizeBorder ? HTTOP : HTCAPTION, HTTOPRIGHT},
+            {HTLEFT, HTNOWHERE, HTRIGHT},
+            {HTBOTTOMLEFT, HTBOTTOM, HTBOTTOMRIGHT},
+        };
+        return hitTests[x][y];
     }
     else if (message == WM_GETMINMAXINFO)
     {
