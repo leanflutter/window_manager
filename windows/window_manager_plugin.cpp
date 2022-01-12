@@ -85,7 +85,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
 {
     std::optional<LRESULT> result = std::nullopt;
 
-    if (message == WM_NCACTIVATE || message == WM_NCPAINT)
+    if (message == WM_NCPAINT)
     {
         if (window_manager->title_bar_style == "hidden")
             return 1;
@@ -116,7 +116,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
             return (WVR_HREDRAW | WVR_VREDRAW);
         }
     }
-	  else if (message == WM_NCHITTEST)
+    else if (message == WM_NCHITTEST)
     {
         LONG width = 10;
         POINT mouse = {LOWORD(lParam), HIWORD(lParam)};
@@ -166,6 +166,9 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
         {
             _EmitEvent("blur");
         }
+
+        if (window_manager->title_bar_style == "hidden")
+            return 1;
     }
     else if (message == WM_MOVING)
     {
