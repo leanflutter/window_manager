@@ -349,6 +349,19 @@ class WindowManager {
     await _channel.invokeMethod('setHasShadow', arguments);
   }
 
+  /// Returns double - between 0.0 (fully transparent) and 1.0 (fully opaque). On Linux, always returns 1.
+  Future<double> getOpacity() async {
+    return await _channel.invokeMethod('getOpacity');
+  }
+
+  /// Sets the opacity of the window.
+  Future<void> setOpacity(double opacity) async {
+    final Map<String, dynamic> arguments = {
+      'opacity': opacity,
+    };
+    await _channel.invokeMethod('setOpacity', arguments);
+  }
+
   Future<void> startDragging() async {
     await _channel.invokeMethod('startDragging');
   }

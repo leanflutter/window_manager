@@ -39,6 +39,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
   bool _isAlwaysOnTop = false;
   bool _isSkipTaskbar = false;
   bool _hasShadow = true;
+  double _opacity = 1;
 
   @override
   void initState() {
@@ -446,6 +447,35 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 windowManager.setHasShadow(_hasShadow);
                 setState(() {});
               },
+            ),
+            PreferenceListItem(
+              title: Text('getOpacity / setOpacity'),
+              onTap: () async {
+                double opacity = await windowManager.getOpacity();
+                BotToast.showText(
+                  text: 'opacity: $opacity',
+                );
+              },
+              accessoryView: Row(
+                children: [
+                  CupertinoButton(
+                    child: Text('1'),
+                    onPressed: () async {
+                      _opacity = 1;
+                      windowManager.setOpacity(_opacity);
+                      setState(() {});
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('0.5'),
+                    onPressed: () async {
+                      _opacity = 0.5;
+                      windowManager.setOpacity(_opacity);
+                      setState(() {});
+                    },
+                  ),
+                ],
+              ),
             ),
             PreferenceListItem(
               title: Text('createSubWindow'),

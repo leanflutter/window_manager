@@ -187,6 +187,13 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setHasShadow(args)
             result(true)
             break
+        case "getOpacity":
+            result(windowManager.getOpacity())
+            break
+        case "setOpacity":
+            windowManager.setOpacity(args)
+            result(true)
+            break
         case "startDragging":
             windowManager.startDragging()
             result(true)

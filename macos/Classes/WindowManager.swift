@@ -348,6 +348,15 @@ public class WindowManager: NSObject, NSWindowDelegate {
         mainWindow.invalidateShadow();
     }
     
+    public func getOpacity() -> CGFloat {
+        return mainWindow.alphaValue
+    }
+    
+    public func setOpacity(_ args: [String: Any]) {
+        let opacity: CGFloat = CGFloat(truncating: args["opacity"] as! NSNumber)
+        mainWindow.alphaValue = opacity
+    }
+    
     public func startDragging() {
         DispatchQueue.main.async {
             let window: NSWindow  = self.mainWindow
