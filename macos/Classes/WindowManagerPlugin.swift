@@ -180,6 +180,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setSkipTaskbar(args)
             result(true)
             break
+        case "setProgressBar":
+            windowManager.setProgressBar(args)
+            result(true)
+            break
         case "hasShadow":
             result(windowManager.hasShadow())
             break

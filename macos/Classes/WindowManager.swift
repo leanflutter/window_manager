@@ -338,6 +338,43 @@ public class WindowManager: NSObject, NSWindowDelegate {
         NSApplication.shared.setActivationPolicy(isSkipTaskbar ? .accessory : .regular)
     }
     
+    public func setProgressBar(_ args: [String: Any]) {
+        let progress: CGFloat = CGFloat(truncating: args["progress"] as! NSNumber)
+        
+        let dockTile: NSDockTile = NSApp.dockTile;
+    
+        let firstTime = dockTile.contentView == nil || dockTile.contentView?.subviews.count == 0
+        
+        if (firstTime) {
+            let imageView: NSImageView = NSImageView.init()
+            imageView.image = NSApp.applicationIconImage
+            dockTile.contentView = imageView
+            
+            let frame: NSRect = NSMakeRect(0.0, 0.0, dockTile.size.width, 15.0)
+            let progressIndicator: NSProgressIndicator = NSProgressIndicator.init(frame: frame)
+            progressIndicator.style = .bar
+            progressIndicator.isIndeterminate = false
+            progressIndicator.isBezeled = true
+            progressIndicator.minValue = 0
+            progressIndicator.maxValue = 1
+            progressIndicator.isHidden = false
+            dockTile.contentView?.addSubview(progressIndicator)
+        }
+        
+        let progressIndicator: NSProgressIndicator = dockTile.contentView!.subviews.last as! NSProgressIndicator
+        if (progress < 0) {
+            progressIndicator.isHidden = true
+        } else if (progress > 1) {
+            progressIndicator.isHidden = false
+            progressIndicator.isIndeterminate = true
+            progressIndicator.doubleValue = 1
+        } else {
+            progressIndicator.isHidden = false
+            progressIndicator.doubleValue = progress
+        }
+        dockTile.display()
+    }
+    
     public func hasShadow() -> Bool {
         return mainWindow.hasShadow
     }

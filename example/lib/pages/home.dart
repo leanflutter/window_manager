@@ -38,6 +38,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
   bool _isClosable = true;
   bool _isAlwaysOnTop = false;
   bool _isSkipTaskbar = false;
+  double _progress = 0;
   bool _hasShadow = true;
   double _opacity = 1;
 
@@ -431,6 +432,19 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 await windowManager.setSkipTaskbar(_isSkipTaskbar);
                 await Future.delayed(Duration(seconds: 3));
                 windowManager.show();
+              },
+            ),
+            PreferenceListItem(
+              title: Text('setProgressBar'),
+              onTap: () async {
+                for (var i = 0; i <= 100; i++) {
+                  setState(() {
+                    _progress = i / 100;
+                  });
+                  print(_progress);
+                  await windowManager.setProgressBar(_progress);
+                  await Future.delayed(Duration(milliseconds: 100));
+                }
               },
             ),
             PreferenceListSwitchItem(

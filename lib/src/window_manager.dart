@@ -336,6 +336,14 @@ class WindowManager {
     await _channel.invokeMethod('setSkipTaskbar', arguments);
   }
 
+  /// Sets progress value in progress bar. Valid range is [0, 1.0].
+  Future<void> setProgressBar(double progress) async {
+    final Map<String, dynamic> arguments = {
+      'progress': progress,
+    };
+    await _channel.invokeMethod('setProgressBar', arguments);
+  }
+
   /// Returns bool - Whether the window has a shadow.
   Future<bool> hasShadow() async {
     return await _channel.invokeMethod('hasShadow');
