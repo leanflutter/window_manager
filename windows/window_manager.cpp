@@ -37,6 +37,7 @@ class WindowManager
 
     bool is_frameless = false;
     std::string title_bar_style = "default";
+    double opacity = 1;
 
     // The minimum size set by the platform channel.
     POINT minimum_size = {0, 0};
@@ -80,6 +81,8 @@ class WindowManager
     void WindowManager::SetSkipTaskbar(const flutter::EncodableMap &args);
     bool WindowManager::HasShadow();
     void WindowManager::SetHasShadow(const flutter::EncodableMap &args);
+    double WindowManager::GetOpacity();
+    void WindowManager::SetOpacity(const flutter::EncodableMap &args);
     void WindowManager::StartDragging();
 
   private:
@@ -539,6 +542,20 @@ void WindowManager::SetSkipTaskbar(const flutter::EncodableMap &args)
             pTaskbarList->DeleteTab(hWnd);
         pTaskbarList->Release();
     }
+}
+
+double WindowManager::GetOpacity()
+{
+    return this->opacity;
+}
+
+void WindowManager::SetOpacity(const flutter::EncodableMap &args)
+{
+    this->opacity = std::get<double>(args.at(flutter::EncodableValue("opacity")));
+    HWND hWnd = GetMainWindow();
+    long gwlExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+    SetWindowLong(hWnd, GWL_EXSTYLE, gwlExStyle | WS_EX_LAYERED);
+    SetLayeredWindowAttributes(hWnd, 0, static_cast<int8_t>(255 * this->opacity), 0x02);
 }
 
 void WindowManager::StartDragging()

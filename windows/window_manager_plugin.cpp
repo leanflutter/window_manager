@@ -405,6 +405,17 @@ void WindowManagerPlugin::HandleMethodCall(const flutter::MethodCall<flutter::En
         window_manager->SetSkipTaskbar(args);
         result->Success(flutter::EncodableValue(true));
     }
+    else if (method_name.compare("getOpacity") == 0)
+    {
+        double value = window_manager->GetOpacity();
+        result->Success(flutter::EncodableValue(value));
+    }
+    else if (method_name.compare("setOpacity") == 0)
+    {
+        const flutter::EncodableMap &args = std::get<flutter::EncodableMap>(*method_call.arguments());
+        window_manager->SetOpacity(args);
+        result->Success(flutter::EncodableValue(true));
+    }
     else if (method_name.compare("startDragging") == 0)
     {
         window_manager->StartDragging();
