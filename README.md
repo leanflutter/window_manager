@@ -259,8 +259,8 @@ class MainFlutterWindow: NSWindow {
 
 | Method             | Description                                                                                                | Linux | macOS | Windows |
 | ------------------ | ---------------------------------------------------------------------------------------------------------- | ----- | ----- | ------- |
-| `focus`            | Focuses on the window.                                                                                     | ✔️     | ✔️     | ➖       |
-| `blur`             | Removes focus from the window.                                                                             | ➖     | ✔️     | ➖       |
+| `focus`            | Focuses on the window.                                                                                     | ✔️     | ✔️     | ✔️       |
+| `blur`             | Removes focus from the window.                                                                             | ➖     | ✔️     | ✔️       |
 | `show`             | Shows and gives focus to the window.                                                                       | ✔️     | ✔️     | ✔️       |
 | `hide`             | Hides the window.                                                                                          | ✔️     | ✔️     | ✔️       |
 | `isVisible`        | Returns `bool` - Whether the window is visible to the user.                                                | ✔️     | ✔️     | ✔️       |

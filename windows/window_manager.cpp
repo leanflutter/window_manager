@@ -134,11 +134,29 @@ void WindowManager::WaitUntilReadyToShow()
 
 void WindowManager::Focus()
 {
-    SetForegroundWindow(GetMainWindow());
+    HWND hWnd = GetMainWindow();
+    if (IsMinimized())
+    {
+        Restore();
+    }
+
+    ::SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+    SetForegroundWindow(hWnd);
 }
 
 void WindowManager::Blur()
 {
+    HWND hWnd = GetMainWindow();
+    HWND next_hwnd = ::GetNextWindow(hWnd, GW_HWNDNEXT);
+    while (next_hwnd)
+    {
+        if (::IsWindowVisible(next_hwnd))
+        {
+            ::SetForegroundWindow(next_hwnd);
+            return;
+        }
+        next_hwnd = ::GetNextWindow(next_hwnd, GW_HWNDNEXT);
+    }
 }
 
 void WindowManager::Show()

@@ -243,6 +243,11 @@ void WindowManagerPlugin::HandleMethodCall(const flutter::MethodCall<flutter::En
         window_manager->Focus();
         result->Success(flutter::EncodableValue(true));
     }
+    else if (method_name.compare("blur") == 0)
+    {
+        window_manager->Blur();
+        result->Success(flutter::EncodableValue(true));
+    }
     else if (method_name.compare("show") == 0)
     {
         window_manager->Show();
