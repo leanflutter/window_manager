@@ -450,6 +450,7 @@ void WindowManager::SetResizable(const flutter::EncodableMap &args)
     DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
     gwlStyle = isResizable ? gwlStyle | WS_THICKFRAME : gwlStyle & ~WS_THICKFRAME;
     SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
+	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_DRAWFRAME);
 }
 
 bool WindowManager::IsMinimizable()
