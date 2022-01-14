@@ -38,6 +38,7 @@ class WindowManager
     bool is_frameless = false;
     std::string title_bar_style = "default";
     double opacity = 1;
+	bool is_resizable = true;
 
     // The minimum size set by the platform channel.
     POINT minimum_size = {0, 0};
@@ -438,19 +439,12 @@ void WindowManager::SetMaximumSize(const flutter::EncodableMap &args)
 
 bool WindowManager::IsResizable()
 {
-    HWND hWnd = GetMainWindow();
-    DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
-    return (gwlStyle & WS_THICKFRAME) != 0;
+	return this->is_resizable;
 }
 
 void WindowManager::SetResizable(const flutter::EncodableMap &args)
 {
-    HWND hWnd = GetMainWindow();
-    bool isResizable = std::get<bool>(args.at(flutter::EncodableValue("isResizable")));
-    DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
-    gwlStyle = isResizable ? gwlStyle | WS_THICKFRAME : gwlStyle & ~WS_THICKFRAME;
-    SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
-	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_DRAWFRAME);
+    this->is_resizable = std::get<bool>(args.at(flutter::EncodableValue("isResizable")));
 }
 
 bool WindowManager::IsMinimizable()

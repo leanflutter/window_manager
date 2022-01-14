@@ -100,15 +100,14 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
             GetWindowPlacement(hWnd, &wPos);
             RECT borderThickness;
             SetRectEmpty(&borderThickness);
-            AdjustWindowRectEx(&borderThickness, GetWindowLongPtr(hWnd, GWL_STYLE) & ~WS_CAPTION & WS_BORDER, FALSE, NULL);
+            AdjustWindowRectEx(&borderThickness, GetWindowLongPtr(hWnd, GWL_STYLE) & ~WS_CAPTION, FALSE, NULL);
             NCCALCSIZE_PARAMS *sz = reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
 			
-			bool isResizable = window_manager->IsResizable();
             // Add 1 pixel to the top border to make the window resizable from the top border
-            sz->rgrc[0].top += isResizable ? 1 : 0;
-            sz->rgrc[0].right -= isResizable ? 7 : 0;
-            sz->rgrc[0].bottom -= isResizable ? 7 : 0;
-            sz->rgrc[0].left += isResizable ? 7 : 0;
+            sz->rgrc[0].top += 1;
+            sz->rgrc[0].right -= borderThickness.right;
+            sz->rgrc[0].bottom -= borderThickness.bottom;
+            sz->rgrc[0].left -= borderThickness.left;
 
             return (WVR_HREDRAW | WVR_VREDRAW);
         }
@@ -120,6 +119,10 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd, UINT mes
     }
     else  if (message == WM_NCHITTEST)
     {
+		bool isResizable = window_manager->is_resizable;
+		if (!isResizable) {
+			return HTNOWHERE;
+		}
         LONG width = 10;
         POINT mouse = {LOWORD(lParam), HIWORD(lParam)};
         RECT window;
