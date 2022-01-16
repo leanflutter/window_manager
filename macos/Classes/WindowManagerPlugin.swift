@@ -176,6 +176,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setTitleBarStyle(args)
             result(true)
             break
+        case "getTitleBarHeight":
+            result(windowManager.getTitleBarHeight())
+            break
         case "setSkipTaskbar":
             windowManager.setSkipTaskbar(args)
             result(true)

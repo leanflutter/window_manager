@@ -333,6 +333,12 @@ public class WindowManager: NSObject, NSWindowDelegate {
         mainWindow.standardWindowButton(.zoomButton)?.isHidden = !windowButtonVisibility
     }
     
+    public func getTitleBarHeight() -> Int {
+        let frame = mainWindow.frame;
+        let windowHeight: CGFloat = mainWindow.frame.height
+        return Int(windowHeight - mainWindow.contentRect(forFrameRect: frame).height)
+    }
+    
     public func setSkipTaskbar(_ args: [String: Any]) {
         let isSkipTaskbar: Bool = args["isSkipTaskbar"] as! Bool
         NSApplication.shared.setActivationPolicy(isSkipTaskbar ? .accessory : .regular)
@@ -342,7 +348,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
         let progress: CGFloat = CGFloat(truncating: args["progress"] as! NSNumber)
         
         let dockTile: NSDockTile = NSApp.dockTile;
-    
+        
         let firstTime = dockTile.contentView == nil || dockTile.contentView?.subviews.count == 0
         
         if (firstTime) {
