@@ -36,9 +36,9 @@ class WindowManager
     int last_state = STATE_NORMAL;
 
     bool is_frameless = false;
-    std::string title_bar_style = "default";
-    double opacity = 1;
-	bool is_resizable = true;
+    std::string title_bar_style_ = "default";
+    bool is_resizable_ = true;
+    double opacity_ = 1;
 
     // The minimum size set by the platform channel.
     POINT minimum_size = {0, 0};
@@ -439,12 +439,12 @@ void WindowManager::SetMaximumSize(const flutter::EncodableMap &args)
 
 bool WindowManager::IsResizable()
 {
-	return this->is_resizable;
+    return is_resizable_;
 }
 
 void WindowManager::SetResizable(const flutter::EncodableMap &args)
 {
-    this->is_resizable = std::get<bool>(args.at(flutter::EncodableValue("isResizable")));
+    is_resizable_ = std::get<bool>(args.at(flutter::EncodableValue("isResizable")));
 }
 
 bool WindowManager::IsMinimizable()
@@ -511,13 +511,11 @@ void WindowManager::SetTitle(const flutter::EncodableMap &args)
 
 void WindowManager::SetTitleBarStyle(const flutter::EncodableMap &args)
 {
-    std::string titleBarStyle = std::get<std::string>(args.at(flutter::EncodableValue("titleBarStyle")));
-
-    this->title_bar_style = titleBarStyle;
+    title_bar_style_ = std::get<std::string>(args.at(flutter::EncodableValue("titleBarStyle")));
 
     HWND hWnd = GetMainWindow();
     DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
-    if (titleBarStyle == "hidden")
+    if (title_bar_style_ == "hidden")
     {
         gwlStyle = gwlStyle & ~WS_CAPTION;
         SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
@@ -559,16 +557,16 @@ void WindowManager::SetSkipTaskbar(const flutter::EncodableMap &args)
 
 double WindowManager::GetOpacity()
 {
-    return this->opacity;
+    return opacity_;
 }
 
 void WindowManager::SetOpacity(const flutter::EncodableMap &args)
 {
-    this->opacity = std::get<double>(args.at(flutter::EncodableValue("opacity")));
+    opacity_ = std::get<double>(args.at(flutter::EncodableValue("opacity")));
     HWND hWnd = GetMainWindow();
     long gwlExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
     SetWindowLong(hWnd, GWL_EXSTYLE, gwlExStyle | WS_EX_LAYERED);
-    SetLayeredWindowAttributes(hWnd, 0, static_cast<int8_t>(255 * this->opacity), 0x02);
+    SetLayeredWindowAttributes(hWnd, 0, static_cast<int8_t>(255 * opacity_), 0x02);
 }
 
 void WindowManager::StartDragging()
