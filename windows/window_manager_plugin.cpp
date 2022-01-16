@@ -413,6 +413,12 @@ void WindowManagerPlugin::HandleMethodCall(const flutter::MethodCall<flutter::En
         window_manager->SetTitleBarStyle(args);
         result->Success(flutter::EncodableValue(true));
     }
+    else if (method_name.compare("getTitleBarHeight") == 0)
+    {
+        int value = window_manager->GetTitleBarHeight();
+        result->Success(flutter::EncodableValue(value));
+    }
+
     else if (method_name.compare("setSkipTaskbar") == 0)
     {
         const flutter::EncodableMap &args = std::get<flutter::EncodableMap>(*method_call.arguments());

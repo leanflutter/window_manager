@@ -328,6 +328,10 @@ class WindowManager {
     await _channel.invokeMethod('setTitleBarStyle', arguments);
   }
 
+  Future<int> getTitleBarHeight() async {
+    return await _channel.invokeMethod('getTitleBarHeight');
+  }
+
   /// Makes the window not show in the taskbar / dock.
   Future<void> setSkipTaskbar(bool isSkipTaskbar) async {
     final Map<String, dynamic> arguments = {

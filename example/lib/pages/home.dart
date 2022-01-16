@@ -424,6 +424,15 @@ class _HomePageState extends State<HomePage> with WindowListener {
               onTap: () {},
             ),
             PreferenceListItem(
+              title: Text('getTitleBarHeight'),
+              onTap: () async {
+                int titleBarHeight = await windowManager.getTitleBarHeight();
+                BotToast.showText(
+                  text: 'titleBarHeight: $titleBarHeight',
+                );
+              },
+            ),
+            PreferenceListItem(
               title: Text('setSkipTaskbar'),
               onTap: () async {
                 setState(() {
