@@ -41,6 +41,7 @@
         - [show](#show)
         - [hide](#hide)
         - [isVisible](#isvisible)
+        - [isActive](#isactive)
         - [isMaximized](#ismaximized)
         - [maximize](#maximize)
         - [unmaximize](#unmaximize)
@@ -405,6 +406,10 @@ Hides the window.
 ##### isVisible
 
 Returns `bool` - Whether the window is visible to the user.
+
+##### isActive
+
+Returns `bool` - Whether the window is active.
 
 ##### isMaximized
 

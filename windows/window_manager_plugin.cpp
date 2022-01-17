@@ -239,6 +239,9 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("isVisible") == 0) {
     bool value = window_manager->IsVisible();
     result->Success(flutter::EncodableValue(value));
+  } else if (method_name.compare("isActive") == 0) {
+    bool value = window_manager->IsActive();
+    result->Success(flutter::EncodableValue(value));
   } else if (method_name.compare("isMaximized") == 0) {
     bool value = window_manager->IsMaximized();
     result->Success(flutter::EncodableValue(value));
