@@ -1,3 +1,11 @@
+## 0.1.4
+
+- [macos & windows] Implemented getOpacity & setOpacity methods #37 #45
+- [macos] Implement setProgressBar method #40
+- [windows] Fix `focus`, `blur` event not responding
+- [windows] Implement `focus` & `blur` methods
+- [macos & windows] Implement getTitleBarHeight methods #34
+
 ## 0.1.3
 
 - [windows] #31 Optimize setTitleBarStyle method.

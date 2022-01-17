@@ -33,7 +33,63 @@ English | [简体中文](./README-ZH.md)
   - [Who's using it?](#whos-using-it)
   - [API](#api)
     - [WindowManager](#windowmanager)
+      - [Methods](#methods)
+        - [focus](#focus)
+        - [blur  `macos`  `windows`](#blur--macos--windows)
+        - [show](#show)
+        - [hide](#hide)
+        - [isVisible](#isvisible)
+        - [isMaximized](#ismaximized)
+        - [maximize](#maximize)
+        - [unmaximize](#unmaximize)
+        - [isMinimized](#isminimized)
+        - [minimize](#minimize)
+        - [restore](#restore)
+        - [isFullScreen](#isfullscreen)
+        - [setFullScreen](#setfullscreen)
+        - [setBackgroundColor](#setbackgroundcolor)
+        - [getBounds](#getbounds)
+        - [setBounds](#setbounds)
+        - [getPosition](#getposition)
+        - [setPosition](#setposition)
+        - [getSize](#getsize)
+        - [setSize](#setsize)
+        - [setMinimumSize](#setminimumsize)
+        - [setMaximumSize](#setmaximumsize)
+        - [isResizable](#isresizable)
+        - [setResizable](#setresizable)
+        - [isMovable  `macos`](#ismovable--macos)
+        - [setMovable  `macos`](#setmovable--macos)
+        - [isMinimizable  `macos`  `windows`](#isminimizable--macos--windows)
+        - [setMinimizable  `macos`  `windows`](#setminimizable--macos--windows)
+        - [isClosable  `macos`  `windows`](#isclosable--macos--windows)
+        - [setClosable  `macos`  `windows`](#setclosable--macos--windows)
+        - [isAlwaysOnTop](#isalwaysontop)
+        - [setAlwaysOnTop](#setalwaysontop)
+        - [getTitle](#gettitle)
+        - [setTitle](#settitle)
+        - [setTitleBarStyle  `macos`  `windows`](#settitlebarstyle--macos--windows)
+        - [getTitleBarHeight  `macos`  `windows`](#gettitlebarheight--macos--windows)
+        - [setSkipTaskbar](#setskiptaskbar)
+        - [setProgressBar  `macos`](#setprogressbar--macos)
+        - [hasShadow  `macos`](#hasshadow--macos)
+        - [setHasShadow  `macos`](#sethasshadow--macos)
+        - [getOpacity  `macos`  `windows`](#getopacity--macos--windows)
+        - [setOpacity  `macos`  `windows`](#setopacity--macos--windows)
+        - [startDragging](#startdragging)
     - [WindowListener](#windowlistener)
+      - [Methods](#methods-1)
+        - [onWindowFocus](#onwindowfocus)
+        - [onWindowBlur](#onwindowblur)
+        - [onWindowMaximize](#onwindowmaximize)
+        - [onWindowUnmaximize](#onwindowunmaximize)
+        - [onWindowMinimize](#onwindowminimize)
+        - [onWindowRestore](#onwindowrestore)
+        - [onWindowResize](#onwindowresize)
+        - [onWindowMove](#onwindowmove)
+        - [onWindowEnterFullScreen](#onwindowenterfullscreen)
+        - [onWindowLeaveFullScreen](#onwindowleavefullscreen)
+        - [onWindowEvent](#onwindowevent)
   - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -52,7 +108,7 @@ Add this to your package's pubspec.yaml file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.1.3
+  window_manager: ^0.1.4
 ```
 
 Or
@@ -255,63 +311,247 @@ class MainFlutterWindow: NSWindow {
 
 ## API
 
+<!-- README_DOC_GEN -->
 ### WindowManager
 
-| Method             | Description                                                                                                | Linux | macOS | Windows |
-| ------------------ | ---------------------------------------------------------------------------------------------------------- | ----- | ----- | ------- |
-| `focus`            | Focuses on the window.                                                                                     | ✔️     | ✔️     | ✔️       |
-| `blur`             | Removes focus from the window.                                                                             | ➖     | ✔️     | ✔️       |
-| `show`             | Shows and gives focus to the window.                                                                       | ✔️     | ✔️     | ✔️       |
-| `hide`             | Hides the window.                                                                                          | ✔️     | ✔️     | ✔️       |
-| `isVisible`        | Returns `bool` - Whether the window is visible to the user.                                                | ✔️     | ✔️     | ✔️       |
-| `isMaximized`      | Returns `bool` - Whether the window is maximized.                                                          | ✔️     | ✔️     | ✔️       |
-| `maximize`         | Maximizes the window.                                                                                      | ✔️     | ✔️     | ✔️       |
-| `unmaximize`       | Unmaximizes the window.                                                                                    | ✔️     | ✔️     | ✔️       |
-| `isMinimized`      | Returns `bool` - Whether the window is minimized.                                                          | ✔️     | ✔️     | ✔️       |
-| `minimize`         | Minimizes the window.                                                                                      | ✔️     | ✔️     | ✔️       |
-| `restore`          | Restores the window from minimized state to its previous state.                                            | ✔️     | ✔️     | ✔️       |
-| `isFullScreen`     | Returns `bool` - Whether the window is in fullscreen mode.                                                 | ✔️     | ✔️     | ✔️       |
-| `setFullScreen`    | Sets whether the window should be in fullscreen mode.                                                      | ✔️     | ✔️     | ✔️       |
-| `getBounds`        | Returns `Rect` - The bounds of the window as Object.                                                       | ✔️     | ✔️     | ✔️       |
-| `setBounds`        | Resizes and moves the window to the supplied bounds.                                                       | ✔️     | ✔️     | ✔️       |
-| `getPosition`      | Returns `Offset` - Contains the window's current position.                                                 | ✔️     | ✔️     | ✔️       |
-| `setPosition`      | Moves window to `x` and `y`.                                                                               | ✔️     | ✔️     | ✔️       |
-| `getSize`          | Returns `Size` - Contains the window's width and height.                                                   | ✔️     | ✔️     | ✔️       |
-| `setSize`          | Resizes the window to `width` and `height`.                                                                | ✔️     | ✔️     | ✔️       |
-| `setMinimumSize`   | Sets the minimum size of window to `width` and `height`.                                                   | ✔️     | ✔️     | ✔️       |
-| `setMaximumSize`   | Sets the maximum size of window to `width` and `height`.                                                   | ✔️     | ✔️     | ✔️       |
-| `isResizable`      | Returns `bool` - Whether the window can be manually resized by the user.                                   | ✔️     | ✔️     | ✔️       |
-| `setResizable`     | Sets whether the window can be manually resized by the user.                                               | ✔️     | ✔️     | ✔️       |
-| `isMovable`        | Returns `bool` - Whether the window can be moved by user. On Linux always returns `true`.                  | ➖     | ✔️     | ➖       |
-| `setMovable`       | Sets whether the window can be moved by user. On Linux does nothing.                                       | ➖     | ✔️     | ➖       |
-| `isMinimizable`    | Returns `bool` - Whether the window can be manually minimized by the user. On Linux always returns `true`. | ➖     | ✔️     | ✔️       |
-| `setMinimizable`   | Sets whether the window can be manually minimized by user. On Linux does nothing.                          | ➖     | ✔️     | ✔️       |
-| `isClosable`       | Returns `bool` - Whether the window can be manually closed by user. On Linux always returns `true`.        | ✔️     | ✔️     | ✔️       |
-| `setClosable`      | Sets whether the window can be manually closed by user. On Linux does nothing.                             | ✔️     | ✔️     | ✔️       |
-| `isAlwaysOnTop`    | Returns `bool` - Whether the window is always on top of other windows.                                     | ✔️     | ✔️     | ✔️       |
-| `setAlwaysOnTop`   | Sets whether the window should show always on top of other windows.                                        | ✔️     | ✔️     | ✔️       |
-| `getTitle`         | Returns `String` - The title of the native window.                                                         | ✔️     | ✔️     | ✔️       |
-| `setTitle`         | Changes the title of native window to title.                                                               | ✔️     | ✔️     | ✔️       |
-| `setTitleBarStyle` | Changes the title bar style of native window.                                                              | ➖     | ✔️     | ✔️       |
-| `setSkipTaskbar`   | Makes the window not show in the taskbar / dock.                                                           | ✔️     | ✔️     | ✔️       |
-| `hasShadow`        | Returns `bool` - Whether the window has a shadow.                                                          | ➖     | ✔️     | ➖       |
-| `setHasShadow`     | Sets whether the window should have a shadow.                                                              | ➖     | ✔️     | ➖       |
-| `startDragging`    | -                                                                                                          | ✔️     | ✔️     | ✔️       |
+#### Methods
+
+##### focus
+
+Focuses on the window.
+
+##### blur  `macos`  `windows`
+
+Removes focus from the window.
+
+
+##### show
+
+Shows and gives focus to the window.
+
+##### hide
+
+Hides the window.
+
+##### isVisible
+
+Returns `bool` - Whether the window is visible to the user.
+
+##### isMaximized
+
+Returns `bool` - Whether the window is maximized.
+
+##### maximize
+
+Maximizes the window.
+
+##### unmaximize
+
+Unmaximizes the window.
+
+##### isMinimized
+
+Returns `bool` - Whether the window is minimized.
+
+##### minimize
+
+Minimizes the window. On some platforms the minimized window will be shown in the Dock.
+
+##### restore
+
+Restores the window from minimized state to its previous state.
+
+##### isFullScreen
+
+Returns `bool` - Whether the window is in fullscreen mode.
+
+##### setFullScreen
+
+Sets whether the window should be in fullscreen mode.
+
+##### setBackgroundColor
+
+Sets the background color of the window.
+
+##### getBounds
+
+Returns `Rect` - The bounds of the window as Object.
+
+##### setBounds
+
+Resizes and moves the window to the supplied bounds.
+
+##### getPosition
+
+Returns `Offset` - Contains the window's current position.
+
+##### setPosition
+
+Moves window to position.
+
+##### getSize
+
+Returns `Size` - Contains the window's width and height.
+
+##### setSize
+
+Resizes the window to `width` and `height`.
+
+##### setMinimumSize
+
+Sets the minimum size of window to `width` and `height`.
+
+##### setMaximumSize
+
+Sets the maximum size of window to `width` and `height`.
+
+##### isResizable
+
+Returns `bool` - Whether the window can be manually resized by the user.
+
+##### setResizable
+
+Sets whether the window can be manually resized by the user.
+
+##### isMovable  `macos`
+
+Returns `bool` - Whether the window can be moved by user.
+
+
+##### setMovable  `macos`
+
+Sets whether the window can be moved by user.
+
+
+##### isMinimizable  `macos`  `windows`
+
+Returns `bool` - Whether the window can be manually minimized by the user.
+
+
+##### setMinimizable  `macos`  `windows`
+
+Sets whether the window can be manually minimized by user.
+
+
+##### isClosable  `macos`  `windows`
+
+Returns `bool` - Whether the window can be manually closed by user.
+
+
+##### setClosable  `macos`  `windows`
+
+Sets whether the window can be manually closed by user.
+
+
+##### isAlwaysOnTop
+
+Returns `bool` - Whether the window is always on top of other windows.
+
+##### setAlwaysOnTop
+
+Sets whether the window should show always on top of other windows.
+
+##### getTitle
+
+Returns `String` - The title of the native window.
+
+##### setTitle
+
+Changes the title of native window to title.
+
+##### setTitleBarStyle  `macos`  `windows`
+
+Changes the title bar style of native window.
+
+
+##### getTitleBarHeight  `macos`  `windows`
+
+Returns `int` - The title bar height of the native window.
+
+
+##### setSkipTaskbar
+
+Makes the window not show in the taskbar / dock.
+
+##### setProgressBar  `macos`
+
+Sets progress value in progress bar. Valid range is [0, 1.0].
+
+
+##### hasShadow  `macos`
+
+Returns `bool` - Whether the window has a shadow.
+
+
+##### setHasShadow  `macos`
+
+Sets whether the window should have a shadow.
+
+
+##### getOpacity  `macos`  `windows`
+
+Returns `double` - between 0.0 (fully transparent) and 1.0 (fully opaque). On Linux, always returns 1.
+
+
+##### setOpacity  `macos`  `windows`
+
+Sets the opacity of the window.
+
+
+##### startDragging
+
+Starts a window drag based on the specified mouse-down event.
 
 ### WindowListener
 
-| Method                    | Description                                                 | Linux | macOS | Windows |
-| ------------------------- | ----------------------------------------------------------- | ----- | ----- | ------- |
-| `onWindowFocus`           | Emitted when the window gains focus.                        | ✔️     | ✔️     | ✔️       |
-| `onWindowBlur`            | Emitted when the window loses focus.                        | ✔️     | ✔️     | ✔️       |
-| `onWindowMaximize`        | Emitted when window is maximized.                           | ✔️     | ✔️     | ✔️       |
-| `onWindowUnmaximize`      | Emitted when the window exits from a maximized state.       | ✔️     | ✔️     | ✔️       |
-| `onWindowMinimize`        | Emitted when the window is minimized.                       | ✔️     | ✔️     | ✔️       |
-| `onWindowRestore`         | Emitted when the window is restored from a minimized state. | ✔️     | ✔️     | ✔️       |
-| `onWindowResize`          | Emitted after the window has been resized.                  | ✔️     | ✔️     | ✔️       |
-| `onWindowMove`            | Emitted when the window is being moved to a new position.   | ✔️     | ✔️     | ✔️       |
-| `onWindowEnterFullScreen` | Emitted when the window enters a full-screen state.         | ✔️     | ✔️     | ✔️       |
-| `onWindowLeaveFullScreen` | Emitted when the window leaves a full-screen state.         | ✔️     | ✔️     | ✔️       |
+#### Methods
+
+##### onWindowFocus
+
+Emitted when the window gains focus.
+
+##### onWindowBlur
+
+Emitted when the window loses focus.
+
+##### onWindowMaximize
+
+Emitted when window is maximized.
+
+##### onWindowUnmaximize
+
+Emitted when the window exits from a maximized state.
+
+##### onWindowMinimize
+
+Emitted when the window is minimized.
+
+##### onWindowRestore
+
+Emitted when the window is restored from a minimized state.
+
+##### onWindowResize
+
+Emitted after the window has been resized.
+
+##### onWindowMove
+
+Emitted when the window is being moved to a new position.
+
+##### onWindowEnterFullScreen
+
+Emitted when the window enters a full-screen state.
+
+##### onWindowLeaveFullScreen
+
+Emitted when the window leaves a full-screen state.
+
+##### onWindowEvent
+
+Emitted all events.
+
+
+<!-- README_DOC_GEN -->
 
 ## License
 

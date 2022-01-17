@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'window_manager'
-  s.version          = '0.1.2'
+  s.version          = '0.1.4'
   s.summary          = 'A new flutter plugin project.'
   s.description      = <<-DESC
 A new flutter plugin project.
