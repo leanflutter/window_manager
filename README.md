@@ -276,6 +276,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
 ##### macOS
 
+Change the file MainFlutterWindow.swift as follows:
+
 ```diff
 import Cocoa
 import FlutterMacOS
@@ -299,6 +301,24 @@ class MainFlutterWindow: NSWindow {
 +    }
 }
 
+```
+
+##### Windows
+
+Change the file windows\runner\win32_window.cpp as follows:
+
+```diff
+bool Win32Window::CreateAndShow(const std::wstring& title,
+                                const Point& origin,
+                                const Size& size) {
+  ...                              
+  HWND window = CreateWindow(
+-      window_class, title.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE,
++      window_class, title.c_str(),
++      WS_OVERLAPPEDWINDOW, // do not add WS_VISIBLE since the window will be shown later
+      Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
+      Scale(size.width, scale_factor), Scale(size.height, scale_factor),
+      nullptr, nullptr, GetModuleHandle(nullptr), this);
 ```
 
 ## Who's using it?
