@@ -30,6 +30,7 @@ English | [简体中文](./README-ZH.md)
         - [Windows](#windows)
       - [Hidden at launch](#hidden-at-launch)
         - [macOS](#macos-1)
+        - [Windows](#windows-1)
   - [Who's using it?](#whos-using-it)
   - [API](#api)
     - [WindowManager](#windowmanager)
@@ -104,7 +105,7 @@ English | [简体中文](./README-ZH.md)
 
 ### Installation
 
-Add this to your package's pubspec.yaml file:
+Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
@@ -134,11 +135,12 @@ void main() async {
 
   // Use it only after calling `hiddenWindowAtLaunch`
   windowManager.waitUntilReadyToShow().then((_) async{
-    // Set to frameless window
-    await windowManager.setAsFrameless();
-    await windowManager.setSize(Size(600, 600));
+    // Hide window title bar
+    await windowManager.setTitleBarStyle('hidden');
+    await windowManager.setSize(Size(800, 600));
     await windowManager.setPosition(Offset.zero);
-    windowManager.show();
+    await windowManager.show();
+    await windowManager.setSkipTaskbar(false);
   });
 
   runApp(MyApp());
@@ -233,13 +235,14 @@ class _HomePageState extends State<HomePage> with WindowListener {
   }
 }
 ```
+
 #### Quit on close
 
 If you need to use the hide method, you need to disable `QuitOnClose`.
 
 ##### macOS
 
-`macos/Runner/AppDelegate.swift`
+Change the file `macos/Runner/AppDelegate.swift` as follows:
 
 ```diff
 import Cocoa
@@ -256,7 +259,7 @@ class AppDelegate: FlutterAppDelegate {
 
 ##### Windows
 
-`windows/runner/main.cpp`
+Change the file `windows/runner/main.cpp` as follows:
 
 ```diff
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
@@ -276,7 +279,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
 ##### macOS
 
-Change the file MainFlutterWindow.swift as follows:
+Change the file `macos/Runner/MainFlutterWindow.swift` as follows:
 
 ```diff
 import Cocoa
@@ -305,7 +308,7 @@ class MainFlutterWindow: NSWindow {
 
 ##### Windows
 
-Change the file windows\runner\win32_window.cpp as follows:
+Change the file `windows/runner/win32_window.cpp` as follows:
 
 ```diff
 bool Win32Window::CreateAndShow(const std::wstring& title,
@@ -319,6 +322,45 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
       Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
       Scale(size.width, scale_factor), Scale(size.height, scale_factor),
       nullptr, nullptr, GetModuleHandle(nullptr), this);
+```
+
+Make sure to call `setState` once on the `onWindowFocus` event.
+
+```dart
+import 'package:flutter/cupertino.dart';
+import 'package:window_manager/window_manager.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with WindowListener {
+  @override
+  void initState() {
+    windowManager.addListener(this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ...
+  }
+
+  @override
+  void onWindowFocus() {
+    // Make sure to call once.
+    setState(() {});
+    // do something
+  }
+}
+
 ```
 
 ## Who's using it?

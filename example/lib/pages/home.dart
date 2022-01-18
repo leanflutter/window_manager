@@ -76,9 +76,10 @@ class _HomePageState extends State<HomePage> with WindowListener {
             PreferenceListItem(
               title: Text('show / hide'),
               onTap: () async {
-                windowManager.hide();
+                await windowManager.hide();
                 await Future.delayed(Duration(seconds: 2));
-                windowManager.show();
+                await windowManager.show();
+                await windowManager.focus();
               },
             ),
             PreferenceListItem(
@@ -571,6 +572,11 @@ class _HomePageState extends State<HomePage> with WindowListener {
         ),
       ],
     );
+  }
+
+  @override
+  void onWindowFocus() {
+    setState(() {});
   }
 
   @override
