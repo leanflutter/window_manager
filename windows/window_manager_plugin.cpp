@@ -221,6 +221,9 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("setAsFrameless") == 0) {
     window_manager->SetAsFrameless();
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("close") == 0) {
+    window_manager->Close();
+    result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("focus") == 0) {
     window_manager->Focus();
     result->Success(flutter::EncodableValue(true));

@@ -46,6 +46,7 @@ class WindowManager {
   HWND GetMainWindow();
   void WindowManager::SetAsFrameless();
   void WindowManager::WaitUntilReadyToShow();
+  void WindowManager::Close();
   void WindowManager::Focus();
   void WindowManager::Blur();
   void WindowManager::Show();
@@ -131,6 +132,11 @@ void WindowManager::SetAsFrameless() {
 }
 
 void WindowManager::WaitUntilReadyToShow() {}
+
+void WindowManager::Close() {
+  HWND hWnd = GetMainWindow();
+  CloseWindow(hWnd);
+}
 
 void WindowManager::Focus() {
   HWND hWnd = GetMainWindow();
