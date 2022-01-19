@@ -378,6 +378,10 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
 #### Methods
 
+##### close
+
+Try to close the window.
+
 ##### focus
 
 Focuses on the window.
