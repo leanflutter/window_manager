@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:window_manager/window_manager.dart';
@@ -11,7 +13,9 @@ void main() async {
   // Use it only after calling `hiddenWindowAtLaunch`
   windowManager.waitUntilReadyToShow().then((_) async {
     // Hide window title bar
-    await windowManager.setTitleBarStyle('hidden');
+    if (!Platform.isLinux) {
+      await windowManager.setTitleBarStyle('hidden');
+    }
     await windowManager.setSize(Size(800, 600));
     await windowManager.show();
     await windowManager.focus();
