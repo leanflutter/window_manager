@@ -10,9 +10,12 @@ void main() async {
 
   // Use it only after calling `hiddenWindowAtLaunch`
   windowManager.waitUntilReadyToShow().then((_) async {
-    // await windowManager.setAsFrameless();
+    // Hide window title bar
+    await windowManager.setTitleBarStyle('hidden');
     await windowManager.setSize(Size(800, 600));
     await windowManager.show();
+    await windowManager.focus();
+    await windowManager.setSkipTaskbar(false);
   });
 
   runApp(MyApp());

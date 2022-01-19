@@ -30,6 +30,7 @@
         - [Windows](#windows)
       - [在启动时隐藏](#在启动时隐藏)
         - [macOS](#macos-1)
+        - [Windows](#windows-1)
   - [谁在用使用它？](#谁在用使用它)
   - [API](#api)
     - [WindowManager](#windowmanager)
@@ -104,7 +105,7 @@
 
 ### 安装
 
-将此添加到你的软件包的 pubspec.yaml 文件：
+将此添加到你的软件包的 `pubspec.yaml` 文件：
 
 ```yaml
 dependencies:
@@ -134,11 +135,12 @@ void main() async {
 
   // Use it only after calling `hiddenWindowAtLaunch`
   windowManager.waitUntilReadyToShow().then((_) async{
-    // 设置为无边框窗口
-    await windowManager.setAsFrameless();
-    await windowManager.setSize(Size(600, 600));
+    // 隐藏窗口标题栏
+    await windowManager.setTitleBarStyle('hidden');
+    await windowManager.setSize(Size(800, 600));
     await windowManager.setPosition(Offset.zero);
-    windowManager.show();
+    await windowManager.show();
+    await windowManager.setSkipTaskbar(false);
   });
 
   runApp(MyApp());
@@ -233,13 +235,14 @@ class _HomePageState extends State<HomePage> with WindowListener {
   }
 }
 ```
+
 #### 关闭时退出
 
 如果你需要使用 `hide` 方法，你需要禁用 `QuitOnClose`。
 
 ##### macOS
 
-`macos/Runner/AppDelegate.swift`
+更改文件 `macos/Runner/AppDelegate.swift` 如下：
 
 ```diff
 import Cocoa
@@ -256,7 +259,7 @@ class AppDelegate: FlutterAppDelegate {
 
 ##### Windows
 
-`windows/runner/main.cpp`
+更改文件 `windows/runner/main.cpp` 如下：
 
 ```diff
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
@@ -275,6 +278,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 #### 在启动时隐藏
 
 ##### macOS
+
+更改文件 `macos/Runner/MainFlutterWindow.swift` 如下：
 
 ```diff
 import Cocoa
@@ -297,6 +302,63 @@ class MainFlutterWindow: NSWindow {
 +        super.order(place, relativeTo: otherWin)
 +        hiddenWindowAtLaunch()
 +    }
+}
+
+```
+
+##### Windows
+
+更改文件 `windows/runner/win32_window.cpp` 如下：
+
+```diff
+bool Win32Window::CreateAndShow(const std::wstring& title,
+                                const Point& origin,
+                                const Size& size) {
+  ...                              
+  HWND window = CreateWindow(
+-      window_class, title.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE,
++      window_class, title.c_str(),
++      WS_OVERLAPPEDWINDOW, // do not add WS_VISIBLE since the window will be shown later
+      Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
+      Scale(size.width, scale_factor), Scale(size.height, scale_factor),
+      nullptr, nullptr, GetModuleHandle(nullptr), this);
+```
+
+确保在 `onWindowFocus` 事件中调用一次 `setState`。
+
+```dart
+import 'package:flutter/cupertino.dart';
+import 'package:window_manager/window_manager.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with WindowListener {
+  @override
+  void initState() {
+    windowManager.addListener(this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ...
+  }
+
+  @override
+  void onWindowFocus() {
+    // Make sure to call once.
+    setState(() {});
+    // do something
+  }
 }
 
 ```

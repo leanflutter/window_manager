@@ -15,7 +15,6 @@
 #include "window_manager.cpp"
 
 namespace {
-bool is_hidden_window_at_launch = false;
 std::unique_ptr<
     flutter::MethodChannel<flutter::EncodableValue>,
     std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
@@ -376,8 +375,4 @@ void WindowManagerPluginRegisterWithRegistrar(
   WindowManagerPlugin::RegisterWithRegistrar(
       flutter::PluginRegistrarManager::GetInstance()
           ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar));
-}
-
-void HiddenWindowAtLaunch() {
-  is_hidden_window_at_launch = true;
 }
