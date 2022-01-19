@@ -88,15 +88,20 @@ class WindowManager {
     await _channel.invokeMethod('waitUntilReadyToShow');
   }
 
+  /// Try to close the window.
+  Future<void> close() async {
+    await _channel.invokeMethod('close');
+  }
+
   /// Focuses on the window.
-  Future<void> focus({bool inactive = false}) async {
+  Future<void> focus() async {
     await _channel.invokeMethod('focus');
   }
 
   /// Removes focus from the window.
   ///
   /// @platforms macos,windows
-  Future<void> blur({bool inactive = false}) async {
+  Future<void> blur() async {
     await _channel.invokeMethod('blur');
   }
 

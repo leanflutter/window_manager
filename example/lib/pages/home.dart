@@ -66,6 +66,14 @@ class _HomePageState extends State<HomePage> with WindowListener {
           title: Text('METHODS'),
           children: [
             PreferenceListItem(
+              title: Text('close'),
+              onTap: () async {
+                await windowManager.close();
+                await Future.delayed(Duration(seconds: 2));
+                await windowManager.show();
+              },
+            ),
+            PreferenceListItem(
               title: Text('focus / blur'),
               onTap: () async {
                 windowManager.blur();

@@ -56,6 +56,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setAsFrameless()
             result(true)
             break
+        case "close":
+            windowManager.close()
+            result(true)
+            break
         case "focus":
             windowManager.focus()
             result(true)
