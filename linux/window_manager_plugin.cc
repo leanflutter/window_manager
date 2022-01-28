@@ -366,6 +366,24 @@ static FlMethodResponse* start_dragging(WindowManagerPlugin* self) {
       fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse* get_primary_display(WindowManagerPlugin* self,
+                                             FlValue* args) {
+  GdkDisplay* display = gdk_display_get_default();
+  GdkMonitor* monitor = gdk_display_get_primary_monitor(display);
+
+  GdkRectangle frame;
+  gdk_monitor_get_geometry(monitor, &frame);
+
+  auto size = fl_value_new_map();
+  fl_value_set_string_take(size, "width", fl_value_new_float(frame.width));
+  fl_value_set_string_take(size, "height", fl_value_new_float(frame.height));
+
+  g_autoptr(FlValue) value = fl_value_new_map();
+  fl_value_set_take(value, fl_value_new_string("size"), size);
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(value));
+}
+
 // Called when a method call is received from Flutter.
 static void window_manager_plugin_handle_method_call(
     WindowManagerPlugin* self,
@@ -445,6 +463,8 @@ static void window_manager_plugin_handle_method_call(
     response = set_skip_taskbar(self, args);
   } else if (strcmp(method, "startDragging") == 0) {
     response = start_dragging(self);
+  } else if (strcmp(method, "getPrimaryDisplay") == 0) {
+    response = get_primary_display(self, args);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
