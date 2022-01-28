@@ -87,6 +87,8 @@ class WindowManager {
   double WindowManager::GetOpacity();
   void WindowManager::SetOpacity(const flutter::EncodableMap& args);
   void WindowManager::StartDragging();
+  flutter::EncodableMap WindowManager::GetPrimaryDisplay(
+      const flutter::EncodableMap& args);
 
  private:
   bool g_is_window_fullscreen = false;
@@ -577,6 +579,31 @@ void WindowManager::SetOpacity(const flutter::EncodableMap& args) {
 void WindowManager::StartDragging() {
   ReleaseCapture();
   SendMessage(GetMainWindow(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+}
+
+flutter::EncodableMap WindowManager::GetPrimaryDisplay(
+    const flutter::EncodableMap& args) {
+  double devicePixelRatio =
+      std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
+  POINT ptZero = {0, 0};
+  HMONITOR monitor = MonitorFromPoint(ptZero, MONITOR_DEFAULTTOPRIMARY);
+  MONITORINFO info;
+  info.cbSize = sizeof(MONITORINFO);
+  ::GetMonitorInfo(monitor, &info);
+
+  double width =
+      (info.rcMonitor.right - info.rcMonitor.left) / devicePixelRatio;
+  double height =
+      (info.rcMonitor.bottom - info.rcMonitor.top) / devicePixelRatio;
+
+  flutter::EncodableMap size = flutter::EncodableMap();
+  size[flutter::EncodableValue("width")] = flutter::EncodableValue(width);
+  size[flutter::EncodableValue("height")] = flutter::EncodableValue(height);
+
+  flutter::EncodableMap display = flutter::EncodableMap();
+  display[flutter::EncodableValue("size")] = flutter::EncodableValue(size);
+
+  return display;
 }
 
 }  // namespace

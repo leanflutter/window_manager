@@ -210,8 +210,13 @@ class WindowManager {
     Map<String, dynamic> primaryDisplay = await _getPrimaryDisplay();
     print(primaryDisplay);
 
-    num visibleWidth = primaryDisplay['visibleSize']['width'];
-    num visibleHeight = primaryDisplay['visibleSize']['height'];
+    num visibleWidth = primaryDisplay['size']['width'];
+    num visibleHeight = primaryDisplay['size']['height'];
+
+    if (primaryDisplay['visibleSize'] != null) {
+      visibleWidth = primaryDisplay['visibleSize']['width'];
+      visibleHeight = primaryDisplay['visibleSize']['height'];
+    }
 
     Offset position = Offset(
       (visibleWidth / 2) - (windowSize.width / 2),
@@ -445,6 +450,7 @@ class WindowManager {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
     };
+    print(arguments);
     final Map<dynamic, dynamic> resultData =
         await _channel.invokeMethod('getPrimaryDisplay', arguments);
     return Map<String, dynamic>.from(resultData);

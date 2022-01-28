@@ -348,9 +348,7 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("getTitleBarHeight") == 0) {
     int value = window_manager->GetTitleBarHeight();
     result->Success(flutter::EncodableValue(value));
-  }
-
-  else if (method_name.compare("setSkipTaskbar") == 0) {
+  } else if (method_name.compare("setSkipTaskbar") == 0) {
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->SetSkipTaskbar(args);
@@ -366,6 +364,11 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("startDragging") == 0) {
     window_manager->StartDragging();
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("getPrimaryDisplay") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    flutter::EncodableMap value = window_manager->GetPrimaryDisplay(args);
+    result->Success(flutter::EncodableValue(value));
   } else {
     result->NotImplemented();
   }

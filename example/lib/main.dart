@@ -17,6 +17,7 @@ void main() async {
       await windowManager.setTitleBarStyle('hidden');
     }
     await windowManager.setSize(Size(800, 600));
+    await windowManager.center();
     await windowManager.show();
     await windowManager.focus();
     await windowManager.setSkipTaskbar(false);
