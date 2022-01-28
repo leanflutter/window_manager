@@ -35,6 +35,7 @@
   - [API](#api)
     - [WindowManager](#windowmanager)
       - [Methods](#methods)
+        - [close](#close)
         - [focus](#focus)
         - [blur  `macos`  `windows`](#blur--macos--windows)
         - [show](#show)
@@ -52,6 +53,7 @@
         - [getBounds](#getbounds)
         - [setBounds](#setbounds)
         - [getPosition](#getposition)
+        - [center](#center)
         - [setPosition](#setposition)
         - [getSize](#getsize)
         - [setSize](#setsize)
@@ -109,7 +111,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.1.4
+  window_manager: ^0.1.5
 ```
 
 或
@@ -138,7 +140,7 @@ void main() async {
     // 隐藏窗口标题栏
     await windowManager.setTitleBarStyle('hidden');
     await windowManager.setSize(Size(800, 600));
-    await windowManager.setPosition(Offset.zero);
+    await windowManager.center();
     await windowManager.show();
     await windowManager.setSkipTaskbar(false);
   });
@@ -378,6 +380,10 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
 #### Methods
 
+##### close
+
+Try to close the window.
+
 ##### focus
 
 Focuses on the window.
@@ -446,6 +452,10 @@ Resizes and moves the window to the supplied bounds.
 ##### getPosition
 
 Returns `Offset` - Contains the window's current position.
+
+##### center
+
+Moves window to the center of the screen.
 
 ##### setPosition
 

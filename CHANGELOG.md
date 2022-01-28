@@ -1,3 +1,8 @@
+## 0.1.5
+
+- Implement `close` method #56
+- Implement `center` method #59
+
 ## 0.1.4
 
 - [macos & windows] Implemented getOpacity & setOpacity methods #37 #45

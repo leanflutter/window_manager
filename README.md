@@ -35,6 +35,7 @@ English | [简体中文](./README-ZH.md)
   - [API](#api)
     - [WindowManager](#windowmanager)
       - [Methods](#methods)
+        - [close](#close)
         - [focus](#focus)
         - [blur  `macos`  `windows`](#blur--macos--windows)
         - [show](#show)
@@ -52,6 +53,7 @@ English | [简体中文](./README-ZH.md)
         - [getBounds](#getbounds)
         - [setBounds](#setbounds)
         - [getPosition](#getposition)
+        - [center](#center)
         - [setPosition](#setposition)
         - [getSize](#getsize)
         - [setSize](#setsize)
@@ -109,7 +111,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.1.4
+  window_manager: ^0.1.5
 ```
 
 Or
@@ -138,7 +140,7 @@ void main() async {
     // Hide window title bar
     await windowManager.setTitleBarStyle('hidden');
     await windowManager.setSize(Size(800, 600));
-    await windowManager.setPosition(Offset.zero);
+    await windowManager.center();
     await windowManager.show();
     await windowManager.setSkipTaskbar(false);
   });
@@ -450,6 +452,10 @@ Resizes and moves the window to the supplied bounds.
 ##### getPosition
 
 Returns `Offset` - Contains the window's current position.
+
+##### center
+
+Moves window to the center of the screen.
 
 ##### setPosition
 

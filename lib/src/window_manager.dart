@@ -204,7 +204,7 @@ class WindowManager {
     return Offset(resultData['x'], resultData['y']);
   }
 
-  // Moves window to the center of the screen.
+  /// Moves window to the center of the screen.
   Future<void> center() async {
     Size windowSize = await getSize();
     Map<String, dynamic> primaryDisplay = await _getPrimaryDisplay();
