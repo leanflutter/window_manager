@@ -223,6 +223,12 @@ class _HomePageState extends State<HomePage> with WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('center'),
+              onTap: () async {
+                await windowManager.center();
+              },
+            ),
+            PreferenceListItem(
               title: Text('getPosition / setPosition'),
               accessoryView: Row(
                 children: [

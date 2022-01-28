@@ -204,6 +204,23 @@ class WindowManager {
     return Offset(resultData['x'], resultData['y']);
   }
 
+  // Moves window to the center of the screen.
+  Future<void> center() async {
+    Size windowSize = await getSize();
+    Map<String, dynamic> primaryDisplay = await _getPrimaryDisplay();
+    print(primaryDisplay);
+
+    num visibleWidth = primaryDisplay['visibleSize']['width'];
+    num visibleHeight = primaryDisplay['visibleSize']['height'];
+
+    Offset position = Offset(
+      (visibleWidth / 2) - (windowSize.width / 2),
+      (visibleHeight / 2) - (windowSize.height / 2),
+    );
+
+    await this.setPosition(position);
+  }
+
   /// Moves window to position.
   Future<void> setPosition(Offset position, {animate = false}) async {
     final Map<String, dynamic> arguments = {
@@ -422,6 +439,15 @@ class WindowManager {
   /// Starts a window drag based on the specified mouse-down event.
   Future<void> startDragging() async {
     await _channel.invokeMethod('startDragging');
+  }
+
+  Future<Map<String, dynamic>> _getPrimaryDisplay() async {
+    final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
+    };
+    final Map<dynamic, dynamic> resultData =
+        await _channel.invokeMethod('getPrimaryDisplay', arguments);
+    return Map<String, dynamic>.from(resultData);
   }
 
   Future<bool> isSubWindow() async {

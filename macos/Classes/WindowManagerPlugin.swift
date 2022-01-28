@@ -209,6 +209,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.startDragging()
             result(true)
             break
+        case "getPrimaryDisplay":
+            result(windowManager.getPrimaryDisplay())
+            break
         case "isSubWindow":
             result(windowManager.isSubWindow())
             break
