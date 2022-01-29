@@ -53,6 +53,7 @@
         - [getBounds](#getbounds)
         - [setBounds](#setbounds)
         - [getPosition](#getposition)
+        - [setAlignment](#setalignment)
         - [center](#center)
         - [setPosition](#setposition)
         - [getSize](#getsize)
@@ -452,6 +453,10 @@ Resizes and moves the window to the supplied bounds.
 ##### getPosition
 
 Returns `Offset` - Contains the window's current position.
+
+##### setAlignment
+
+Move the window to a position aligned with the screen.
 
 ##### center
 

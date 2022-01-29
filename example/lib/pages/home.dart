@@ -223,6 +223,72 @@ class _HomePageState extends State<HomePage> with WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('setAlignment'),
+              accessoryView: Container(
+                width: 300,
+                child: Wrap(
+                  children: [
+                    CupertinoButton(
+                      child: Text('topLeft'),
+                      onPressed: () async {
+                        await windowManager.setAlignment(Alignment.topLeft);
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text('topCenter'),
+                      onPressed: () async {
+                        await windowManager.setAlignment(Alignment.topCenter);
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text('topRight'),
+                      onPressed: () async {
+                        await windowManager.setAlignment(Alignment.topRight);
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text('centerLeft'),
+                      onPressed: () async {
+                        await windowManager.setAlignment(Alignment.centerLeft);
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text('center'),
+                      onPressed: () async {
+                        await windowManager.setAlignment(Alignment.center);
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text('centerRight'),
+                      onPressed: () async {
+                        await windowManager.setAlignment(Alignment.centerRight);
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text('bottomLeft'),
+                      onPressed: () async {
+                        await windowManager.setAlignment(Alignment.bottomLeft);
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text('bottomCenter'),
+                      onPressed: () async {
+                        await windowManager
+                            .setAlignment(Alignment.bottomCenter);
+                      },
+                    ),
+                    CupertinoButton(
+                      child: Text('bottomRight'),
+                      onPressed: () async {
+                        await windowManager.setAlignment(Alignment.bottomRight);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              onTap: () async {},
+            ),
+            PreferenceListItem(
               title: Text('center'),
               onTap: () async {
                 await windowManager.center();

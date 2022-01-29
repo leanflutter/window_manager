@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'window_listener.dart';
@@ -204,23 +205,91 @@ class WindowManager {
     return Offset(resultData['x'], resultData['y']);
   }
 
-  /// Moves window to the center of the screen.
-  Future<void> center() async {
+  /// Move the window to a position aligned with the screen.
+  Future<void> setAlignment(Alignment alignment) async {
     Size windowSize = await getSize();
     Map<String, dynamic> primaryDisplay = await _getPrimaryDisplay();
-    print(primaryDisplay);
 
     num visibleWidth = primaryDisplay['size']['width'];
     num visibleHeight = primaryDisplay['size']['height'];
+    num visibleStartY = 0;
 
     if (primaryDisplay['visibleSize'] != null) {
       visibleWidth = primaryDisplay['visibleSize']['width'];
       visibleHeight = primaryDisplay['visibleSize']['height'];
     }
+    if (primaryDisplay['visiblePosition'] != null) {
+      visibleStartY = primaryDisplay['visiblePosition']['y'];
+    }
+    Offset position = Offset(0, 0);
+
+    if (alignment == Alignment.topLeft) {
+      position = Offset(0, 0);
+    } else if (alignment == Alignment.topCenter) {
+      position = Offset(
+        (visibleWidth / 2) - (windowSize.width / 2),
+        visibleStartY + 0,
+      );
+    } else if (alignment == Alignment.topRight) {
+      position = Offset(
+        visibleWidth - windowSize.width,
+        visibleStartY + 0,
+      );
+    } else if (alignment == Alignment.centerLeft) {
+      position = Offset(
+        0,
+        visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
+      );
+    } else if (alignment == Alignment.center) {
+      position = Offset(
+        (visibleWidth / 2) - (windowSize.width / 2),
+        visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
+      );
+    } else if (alignment == Alignment.centerRight) {
+      position = Offset(
+        visibleWidth - windowSize.width,
+        visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
+      );
+    } else if (alignment == Alignment.bottomLeft) {
+      position = Offset(
+        0,
+        visibleStartY + (visibleHeight - windowSize.height),
+      );
+    } else if (alignment == Alignment.bottomCenter) {
+      position = Offset(
+        (visibleWidth / 2) - (windowSize.width / 2),
+        visibleStartY + (visibleHeight - windowSize.height),
+      );
+    } else if (alignment == Alignment.bottomRight) {
+      position = Offset(
+        visibleWidth - windowSize.width,
+        visibleStartY + (visibleHeight - windowSize.height),
+      );
+    }
+
+    await this.setPosition(position);
+  }
+
+  /// Moves window to the center of the screen.
+  Future<void> center() async {
+    Size windowSize = await getSize();
+    Map<String, dynamic> primaryDisplay = await _getPrimaryDisplay();
+
+    num visibleWidth = primaryDisplay['size']['width'];
+    num visibleHeight = primaryDisplay['size']['height'];
+    num visibleStartY = 0;
+
+    if (primaryDisplay['visibleSize'] != null) {
+      visibleWidth = primaryDisplay['visibleSize']['width'];
+      visibleHeight = primaryDisplay['visibleSize']['height'];
+    }
+    if (primaryDisplay['visiblePosition'] != null) {
+      visibleStartY = primaryDisplay['visiblePosition']['y'];
+    }
 
     Offset position = Offset(
       (visibleWidth / 2) - (windowSize.width / 2),
-      (visibleHeight / 2) - (windowSize.height / 2),
+      visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
     );
 
     await this.setPosition(position);
@@ -450,7 +519,6 @@ class WindowManager {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
     };
-    print(arguments);
     final Map<dynamic, dynamic> resultData =
         await _channel.invokeMethod('getPrimaryDisplay', arguments);
     return Map<String, dynamic>.from(resultData);

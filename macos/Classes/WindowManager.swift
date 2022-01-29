@@ -416,12 +416,8 @@ public class WindowManager: NSObject, NSWindowDelegate {
         let visiblePosition: NSDictionary = [
             "x": screen.visibleFrame.topLeft.x,
             "y": screen.visibleFrame.topLeft.y,
-            "width": screen.visibleFrame.width,
-            "height": screen.visibleFrame.height,
         ]
         let visibleSize: NSDictionary = [
-            "x": screen.visibleFrame.topLeft.x,
-            "y": screen.visibleFrame.topLeft.y,
             "width": screen.visibleFrame.width,
             "height": screen.visibleFrame.height,
         ]
