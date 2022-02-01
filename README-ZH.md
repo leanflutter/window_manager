@@ -407,7 +407,7 @@ Hides the window.
 
 Returns `bool` - Whether the window is visible to the user.
 
-##### isActive
+##### isActive  `windows`
 
 Returns `bool` - Whether the window is active.
 
