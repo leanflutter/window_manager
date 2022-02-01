@@ -41,7 +41,7 @@
         - [show](#show)
         - [hide](#hide)
         - [isVisible](#isvisible)
-        - [isActive](#isactive)
+        - [isActive  `windows`](#isactive--windows)
         - [isMaximized](#ismaximized)
         - [maximize](#maximize)
         - [unmaximize](#unmaximize)
