@@ -52,6 +52,7 @@ class WindowManager {
   void WindowManager::Show();
   void WindowManager::Hide();
   bool WindowManager::IsVisible();
+  bool WindowManager::IsActive();
   bool WindowManager::IsMaximized();
   void WindowManager::Maximize();
   void WindowManager::Unmaximize();
@@ -182,6 +183,10 @@ void WindowManager::Hide() {
 bool WindowManager::IsVisible() {
   bool isVisible = IsWindowVisible(GetMainWindow());
   return isVisible;
+}
+
+bool WindowManager::IsActive() {
+  return GetMainWindow() == GetActiveWindow();
 }
 
 bool WindowManager::IsMaximized() {
