@@ -77,12 +77,16 @@ public class WindowManager: NSObject, NSWindowDelegate {
     }
     
     public func focus() {
+        NSApp.activate(ignoringOtherApps: false)
         mainWindow.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
     
     public func blur() {
-        NSApp.deactivate()
+        mainWindow.orderBack(nil)
+    }
+    
+    public func isFocused() -> Bool {
+        return mainWindow.isKeyWindow
     }
     
     public func show() {
@@ -376,7 +380,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
             progressIndicator.doubleValue = 1
         } else {
             progressIndicator.isHidden = false
-            progressIndicator.doubleValue = progress
+            progressIndicator.doubleValue = Double(progress)
         }
         dockTile.display()
     }

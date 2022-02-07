@@ -68,6 +68,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.blur()
             result(true)
             break
+        case "isFocused":
+            result(windowManager.isFocused())
+            break
         case "show":
             windowManager.show()
             result(true)
