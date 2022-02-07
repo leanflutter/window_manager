@@ -76,9 +76,11 @@ class _HomePageState extends State<HomePage> with WindowListener {
             PreferenceListItem(
               title: Text('focus / blur'),
               onTap: () async {
-                windowManager.blur();
+                print('isFocused: ${await windowManager.isFocused()}');
+                await windowManager.blur();
                 await Future.delayed(Duration(seconds: 2));
-                windowManager.focus();
+                print('isFocused: ${await windowManager.isFocused()}');
+                await windowManager.focus();
               },
             ),
             PreferenceListItem(

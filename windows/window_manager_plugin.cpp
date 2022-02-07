@@ -230,6 +230,9 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("blur") == 0) {
     window_manager->Blur();
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("isFocused") == 0) {
+    bool value = window_manager->IsFocused();
+    result->Success(flutter::EncodableValue(value));
   } else if (method_name.compare("show") == 0) {
     window_manager->Show();
     result->Success(flutter::EncodableValue(true));
@@ -238,9 +241,6 @@ void WindowManagerPlugin::HandleMethodCall(
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("isVisible") == 0) {
     bool value = window_manager->IsVisible();
-    result->Success(flutter::EncodableValue(value));
-  } else if (method_name.compare("isActive") == 0) {
-    bool value = window_manager->IsActive();
     result->Success(flutter::EncodableValue(value));
   } else if (method_name.compare("isMaximized") == 0) {
     bool value = window_manager->IsMaximized();

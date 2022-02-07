@@ -106,6 +106,13 @@ class WindowManager {
     await _channel.invokeMethod('blur');
   }
 
+  /// Returns `bool` - Whether window is focused.
+  ///
+  /// @platforms windows
+  Future<bool> isFocused() async {
+    return await _channel.invokeMethod('isFocused');
+  }
+
   /// Shows and gives focus to the window.
   Future<void> show({bool inactive = false}) async {
     bool isMinimized = await this.isMinimized();
@@ -128,12 +135,7 @@ class WindowManager {
     return await _channel.invokeMethod('isVisible');
   }
 
-  /// Returns bool - Whether window is active.
-  Future<bool> isActive() async {
-    return await _channel.invokeMethod('isActive');
-  }
-
-  /// Returns bool - Whether the window is maximized.
+  /// Returns `bool` - Whether the window is maximized.
   Future<bool> isMaximized() async {
     return await _channel.invokeMethod('isMaximized');
   }

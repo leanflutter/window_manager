@@ -38,10 +38,10 @@ English | [简体中文](./README-ZH.md)
         - [close](#close)
         - [focus](#focus)
         - [blur  `macos`  `windows`](#blur--macos--windows)
+        - [isFocused  `windows`](#isfocused--windows)
         - [show](#show)
         - [hide](#hide)
         - [isVisible](#isvisible)
-        - [isActive  `windows`](#isactive--windows)
         - [isMaximized](#ismaximized)
         - [maximize](#maximize)
         - [unmaximize](#unmaximize)
@@ -395,6 +395,11 @@ Focuses on the window.
 Removes focus from the window.
 
 
+##### isFocused  `windows`
+
+Returns `bool` - Whether window is focused.
+
+
 ##### show
 
 Shows and gives focus to the window.
@@ -406,10 +411,6 @@ Hides the window.
 ##### isVisible
 
 Returns `bool` - Whether the window is visible to the user.
-
-##### isActive  `windows`
-
-Returns `bool` - Whether the window is active.
 
 ##### isMaximized
 
