@@ -126,31 +126,6 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     if (!window_manager->is_resizable_) {
       return HTNOWHERE;
     }
-
-    LONG width = 10;
-    POINT mouse = {LOWORD(lParam), HIWORD(lParam)};
-    RECT window;
-    GetWindowRect(hWnd, &window);
-    RECT rcFrame = {0};
-    // AdjustWindowRectEx(&rcFrame, WS_OVERLAPPEDWINDOW & ~WS_CAPTION, FALSE,
-    // NULL);
-    USHORT x = 1;
-    USHORT y = 1;
-    bool fOnResizeBorder = true;
-    if (mouse.y >= window.top && mouse.y < window.top + width)
-      x = 0;
-    else if (mouse.y < window.bottom && mouse.y >= window.bottom - width)
-      x = 2;
-    if (mouse.x >= window.left && mouse.x < window.left + width)
-      y = 0;
-    else if (mouse.x < window.right && mouse.x >= window.right - width)
-      y = 2;
-    LRESULT hitTests[3][3] = {
-        {HTTOPLEFT, fOnResizeBorder ? HTTOP : HTCAPTION, HTTOPRIGHT},
-        {HTLEFT, HTNOWHERE, HTRIGHT},
-        {HTBOTTOMLEFT, HTBOTTOM, HTBOTTOMRIGHT},
-    };
-    return hitTests[x][y];
   } else if (message == WM_GETMINMAXINFO) {
     MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lParam);
     // For the special "unconstrained" values, leave the defaults.
