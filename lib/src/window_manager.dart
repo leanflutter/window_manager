@@ -17,6 +17,7 @@ const kWindowEventResize = 'resize';
 const kWindowEventMove = 'move';
 const kWindowEventEnterFullScreen = 'enter-full-screen';
 const kWindowEventLeaveFullScreen = 'leave-full-screen';
+const kWindowEventClose = 'close';
 
 // WindowManager
 class WindowManager {
@@ -54,6 +55,7 @@ class WindowManager {
         kWindowEventMove: listener.onWindowMove,
         kWindowEventEnterFullScreen: listener.onWindowEnterFullScreen,
         kWindowEventLeaveFullScreen: listener.onWindowLeaveFullScreen,
+        kWindowEventClose: listener.onWindowClose
       };
       funcMap[eventName]!();
     }
@@ -515,6 +517,24 @@ class WindowManager {
       'opacity': opacity,
     };
     await _channel.invokeMethod('setOpacity', arguments);
+  }
+
+  /// Set if intercept the native close signal. May useful when combine with the onclose event listener.
+  /// This will also prevent the manually triggered close event.
+  ///
+  /// @platforms windows
+  Future<void> setPreventClose(bool isPreventClose) async {
+    final Map<String, dynamic> arguments = {
+      'isPreventClose': isPreventClose,
+    };
+    await _channel.invokeMethod('setPreventClose', arguments);
+  }
+
+  /// Check if is intercepting the native close signal.
+  ///
+  /// @platforms windows
+  Future<bool> isPreventClose() async {
+    return await _channel.invokeMethod("isPreventClose");
   }
 
   /// Starts a window drag based on the specified mouse-down event.
