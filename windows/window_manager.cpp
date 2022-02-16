@@ -37,6 +37,7 @@ class WindowManager {
   std::string title_bar_style_ = "default";
   bool is_resizable_ = true;
   double opacity_ = 1;
+  bool prevent_close = false;
 
   // The minimum size set by the platform channel.
   POINT minimum_size = {0, 0};
@@ -90,6 +91,8 @@ class WindowManager {
   void WindowManager::StartDragging();
   flutter::EncodableMap WindowManager::GetPrimaryDisplay(
       const flutter::EncodableMap& args);
+  void WindowManager::SetPreventClose(const flutter::EncodableMap& args);
+  bool WindowManager::IsPreventClose();
 
  private:
   bool g_is_window_fullscreen = false;
@@ -609,6 +612,16 @@ flutter::EncodableMap WindowManager::GetPrimaryDisplay(
   display[flutter::EncodableValue("size")] = flutter::EncodableValue(size);
 
   return display;
+}
+
+void WindowManager::SetPreventClose(const flutter::EncodableMap& args) {
+  bool isPreventClose =
+      std::get<bool>(args.at(flutter::EncodableValue("isPreventClose")));
+  prevent_close = isPreventClose;
+}
+
+bool WindowManager::IsPreventClose() {
+  return prevent_close;
 }
 
 }  // namespace

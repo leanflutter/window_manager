@@ -178,7 +178,12 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       }
     }
   } else if (message == WM_CLOSE) {
-    return 1;
+    _EmitEvent("close");
+    if (window_manager->IsPreventClose()) {
+      return -1;
+    } else {
+      return std::nullopt;
+    }
   }
   return result;
 }
@@ -349,6 +354,13 @@ void WindowManagerPlugin::HandleMethodCall(
         std::get<flutter::EncodableMap>(*method_call.arguments());
     flutter::EncodableMap value = window_manager->GetPrimaryDisplay(args);
     result->Success(flutter::EncodableValue(value));
+  } else if (method_name.compare("setPreventClose") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->SetPreventClose(args);
+  } else if (method_name.compare("setPreventClose") == 0) {
+    auto res = window_manager->IsPreventClose();
+    result->Success(flutter::EncodableValue(res));
   } else {
     result->NotImplemented();
   }
