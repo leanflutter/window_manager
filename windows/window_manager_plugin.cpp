@@ -358,6 +358,7 @@ void WindowManagerPlugin::HandleMethodCall(
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->SetPreventClose(args);
+    result->Success();
   } else if (method_name.compare("isPreventClose") == 0) {
     auto res = window_manager->IsPreventClose();
     result->Success(flutter::EncodableValue(res));
