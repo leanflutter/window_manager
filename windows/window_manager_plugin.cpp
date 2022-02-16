@@ -177,6 +177,8 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
         window_manager->last_state = STATE_NORMAL;
       }
     }
+  } else if (message == WM_CLOSE) {
+    return 1;
   }
   return result;
 }
