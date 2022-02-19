@@ -29,6 +29,9 @@ abstract class WindowListener {
   /// Emitted when the window leaves a full-screen state.
   void onWindowLeaveFullScreen() {}
 
+  /// Emitted when the window is about to close
+  void onWindowClose() {}
+
   /// Emitted all events.
   void onWindowEvent(String eventName) {}
 }
