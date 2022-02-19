@@ -1,3 +1,12 @@
+## 0.1.6
+
+- Implement `isPreventClose` & `setPreventClose` methods #69
+- Implement `close` event
+- [macos & windows] Reimplement `close` method
+- [windows] Fix Horizontal resizing not working on secondary display. #71
+- [macos] Implement `isFocused` method
+- Implement `setAlignment` method #52
+
 ## 0.1.5
 
 - Implement `close` method #56

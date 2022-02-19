@@ -28,6 +28,7 @@
       - [关闭时退出](#关闭时退出)
         - [macOS](#macos)
         - [Windows](#windows)
+    - [关闭前确认](#关闭前确认)
       - [在启动时隐藏](#在启动时隐藏)
         - [macOS](#macos-1)
         - [Windows](#windows-1)
@@ -36,9 +37,11 @@
     - [WindowManager](#windowmanager)
       - [Methods](#methods)
         - [close](#close)
+        - [isPreventClose](#ispreventclose)
+        - [setPreventClose](#setpreventclose)
         - [focus](#focus)
         - [blur  `macos`  `windows`](#blur--macos--windows)
-        - [isFocused  `windows`](#isfocused--windows)
+        - [isFocused  `macos`  `windows`](#isfocused--macos--windows)
         - [show](#show)
         - [hide](#hide)
         - [isVisible](#isvisible)
@@ -84,6 +87,7 @@
         - [startDragging](#startdragging)
     - [WindowListener](#windowlistener)
       - [Methods](#methods-1)
+        - [onWindowClose](#onwindowclose)
         - [onWindowFocus](#onwindowfocus)
         - [onWindowBlur](#onwindowblur)
         - [onWindowMaximize](#onwindowmaximize)
@@ -113,7 +117,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.1.5
+  window_manager: ^0.1.6
 ```
 
 或
@@ -186,6 +190,11 @@ class _HomePageState extends State<HomePage> with WindowListener {
   @override
   void onWindowEvent(String eventName) {
     print('[WindowManager] onWindowEvent: $eventName');
+  }
+
+  @override
+  void onWindowClose() {
+    // do something
   }
 
   @override
@@ -276,6 +285,72 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   // ...
 
   return EXIT_SUCCESS;
+}
+```
+
+### 关闭前确认
+
+```dart
+import 'package:flutter/cupertino.dart';
+import 'package:window_manager/window_manager.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with WindowListener {
+  @override
+  void initState() {
+    windowManager.addListener(this);
+    super.initState();
+  }
+
+  void _init() async {
+    await windowManager.setPreventClose(true);
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ...
+  }
+
+  @override
+  void onWindowClose() async {
+    bool _isPreventClose = await windowManager.isPreventClose();
+    if (_isPreventClose) {
+      showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text('Are you sure you want to close this window?'),
+            actions: [
+              TextButton(
+                child: Text('No'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Yes'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  exit(0);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 }
 ```
 
@@ -386,6 +461,15 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
 Try to close the window.
 
+##### isPreventClose
+
+Check if is intercepting the native close signal.
+
+##### setPreventClose
+
+Set if intercept the native close signal. May useful when combine with the onclose event listener.
+This will also prevent the manually triggered close event.
+
 ##### focus
 
 Focuses on the window.
@@ -395,7 +479,7 @@ Focuses on the window.
 Removes focus from the window.
 
 
-##### isFocused  `windows`
+##### isFocused  `macos`  `windows`
 
 Returns `bool` - Whether window is focused.
 
@@ -588,6 +672,10 @@ Starts a window drag based on the specified mouse-down event.
 ### WindowListener
 
 #### Methods
+
+##### onWindowClose
+
+Emitted when the window is going to be closed.
 
 ##### onWindowFocus
 

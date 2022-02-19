@@ -124,7 +124,7 @@ class WindowManager {
 
   /// Returns `bool` - Whether window is focused.
   ///
-  /// @platforms windows
+  /// @platforms macos,windows
   Future<bool> isFocused() async {
     return await _channel.invokeMethod('isFocused');
   }

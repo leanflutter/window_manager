@@ -9,6 +9,10 @@
         "type_traits": "cpp",
         "xlocmon": "cpp",
         "xlocnum": "cpp",
-        "xtr1common": "cpp"
+        "xtr1common": "cpp",
+        "__locale": "cpp",
+        "__string": "cpp",
+        "string": "cpp",
+        "string_view": "cpp"
     }
 }
