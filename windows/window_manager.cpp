@@ -48,6 +48,8 @@ class WindowManager {
   void WindowManager::SetAsFrameless();
   void WindowManager::WaitUntilReadyToShow();
   void WindowManager::Close();
+  void WindowManager::SetPreventClose(const flutter::EncodableMap& args);
+  bool WindowManager::IsPreventClose();
   void WindowManager::Focus();
   void WindowManager::Blur();
   bool WindowManager::IsFocused();
@@ -91,8 +93,6 @@ class WindowManager {
   void WindowManager::StartDragging();
   flutter::EncodableMap WindowManager::GetPrimaryDisplay(
       const flutter::EncodableMap& args);
-  void WindowManager::SetPreventClose(const flutter::EncodableMap& args);
-  bool WindowManager::IsPreventClose();
 
  private:
   bool g_is_window_fullscreen = false;
@@ -142,6 +142,16 @@ void WindowManager::WaitUntilReadyToShow() {}
 void WindowManager::Close() {
   HWND hWnd = GetMainWindow();
   CloseWindow(hWnd);
+}
+
+void WindowManager::SetPreventClose(const flutter::EncodableMap& args) {
+  bool isPreventClose =
+      std::get<bool>(args.at(flutter::EncodableValue("isPreventClose")));
+  prevent_close = isPreventClose;
+}
+
+bool WindowManager::IsPreventClose() {
+  return prevent_close;
 }
 
 void WindowManager::Focus() {
@@ -612,16 +622,6 @@ flutter::EncodableMap WindowManager::GetPrimaryDisplay(
   display[flutter::EncodableValue("size")] = flutter::EncodableValue(size);
 
   return display;
-}
-
-void WindowManager::SetPreventClose(const flutter::EncodableMap& args) {
-  bool isPreventClose =
-      std::get<bool>(args.at(flutter::EncodableValue("isPreventClose")));
-  prevent_close = isPreventClose;
-}
-
-bool WindowManager::IsPreventClose() {
-  return prevent_close;
 }
 
 }  // namespace

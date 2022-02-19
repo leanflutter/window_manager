@@ -206,6 +206,14 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("close") == 0) {
     window_manager->Close();
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("setPreventClose") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->SetPreventClose(args);
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("isPreventClose") == 0) {
+    auto value = window_manager->IsPreventClose();
+    result->Success(flutter::EncodableValue(value));
   } else if (method_name.compare("focus") == 0) {
     window_manager->Focus();
     result->Success(flutter::EncodableValue(true));
@@ -354,14 +362,6 @@ void WindowManagerPlugin::HandleMethodCall(
         std::get<flutter::EncodableMap>(*method_call.arguments());
     flutter::EncodableMap value = window_manager->GetPrimaryDisplay(args);
     result->Success(flutter::EncodableValue(value));
-  } else if (method_name.compare("setPreventClose") == 0) {
-    const flutter::EncodableMap& args =
-        std::get<flutter::EncodableMap>(*method_call.arguments());
-    window_manager->SetPreventClose(args);
-    result->Success();
-  } else if (method_name.compare("isPreventClose") == 0) {
-    auto res = window_manager->IsPreventClose();
-    result->Success(flutter::EncodableValue(res));
   } else {
     result->NotImplemented();
   }

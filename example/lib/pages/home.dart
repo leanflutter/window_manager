@@ -28,6 +28,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with WindowListener {
+  bool _isPreventClose = false;
   Size _size = _kSizes.first;
   Size? _minSize;
   Size? _maxSize;
@@ -71,6 +72,19 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 await windowManager.close();
                 await Future.delayed(Duration(seconds: 2));
                 await windowManager.show();
+              },
+            ),
+            PreferenceListSwitchItem(
+              title: Text('isPreventClose / setPreventClose'),
+              onTap: () async {
+                _isPreventClose = await windowManager.isPreventClose();
+                BotToast.showText(text: 'isPreventClose: $_isPreventClose');
+              },
+              value: _isPreventClose,
+              onChanged: (newValue) async {
+                _isPreventClose = newValue;
+                await windowManager.setPreventClose(_isPreventClose);
+                setState(() {});
               },
             ),
             PreferenceListItem(
@@ -661,6 +675,35 @@ class _HomePageState extends State<HomePage> with WindowListener {
   @override
   void onWindowFocus() {
     setState(() {});
+  }
+
+  @override
+  void onWindowClose() {
+    if (_isPreventClose) {
+      showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text('Are you sure you want to close this window?'),
+            actions: [
+              TextButton(
+                child: Text('No'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Yes'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  windowManager.close();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
