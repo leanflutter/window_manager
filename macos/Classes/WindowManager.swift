@@ -161,6 +161,23 @@ public class WindowManager: NSObject, NSWindowDelegate {
             }
         }
     }
+
+    public func setAspectRatio(_ args: [String: Any]) {
+        let hasFrame = !mainWindow.styleMask.contains(.fullSizeContentView);
+        let aspectRatio = (args["aspectRatio"] as! NSNumber).doubleValue
+        
+        // Reset the behaviour to default if aspect_ratio is set to 0 or less.
+        if (aspectRatio > 0.0) {
+            let aspectRatioSize: NSSize = NSMakeSize(aspectRatio, 1.0)
+            if (hasFrame) {
+                mainWindow.contentAspectRatio = aspectRatioSize
+            } else {
+                mainWindow.aspectRatio = aspectRatioSize;
+            }
+        } else {
+            mainWindow.resizeIncrements = NSMakeSize(1.0, 1.0)
+        }
+    }
     
     public func setBackgroundColor(_ args: [String: Any]) {
         let backgroundColorA = args["backgroundColorA"] as! Int

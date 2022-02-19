@@ -194,6 +194,16 @@ class WindowManager {
     await _channel.invokeMethod('setFullScreen', arguments);
   }
 
+  /// This will make a window maintain an aspect ratio.
+  /// 
+  /// @platforms macos
+  Future<void> setAspectRatio(double aspectRatio) async {
+    final Map<String, dynamic> arguments = {
+      'aspectRatio': aspectRatio,
+    };
+    await _channel.invokeMethod('setAspectRatio', arguments);
+  }
+
   /// Sets the background color of the window.
   Future<void> setBackgroundColor(Color backgroundColor) async {
     final Map<String, dynamic> arguments = {

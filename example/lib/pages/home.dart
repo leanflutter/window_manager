@@ -179,6 +179,37 @@ class _HomePageState extends State<HomePage> with WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('setAspectRatio'),
+              accessoryView: Row(
+                children: [
+                  CupertinoButton(
+                    child: Text('reset'),
+                    onPressed: () async {
+                      windowManager.setAspectRatio(0);
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('1:1'),
+                    onPressed: () async {
+                      windowManager.setAspectRatio(1);
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('16:9'),
+                    onPressed: () async {
+                      windowManager.setAspectRatio(16 / 9);
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('4:3'),
+                    onPressed: () async {
+                      windowManager.setAspectRatio(4 / 3);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            PreferenceListItem(
               title: Text('setBackgroundColor'),
               accessoryView: Row(
                 children: [

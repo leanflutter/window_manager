@@ -53,6 +53,7 @@ English | [简体中文](./README-ZH.md)
         - [restore](#restore)
         - [isFullScreen](#isfullscreen)
         - [setFullScreen](#setfullscreen)
+        - [setAspectRatio  `macos`](#setaspectratio--macos)
         - [setBackgroundColor](#setbackgroundcolor)
         - [getBounds](#getbounds)
         - [setBounds](#setbounds)
@@ -307,6 +308,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
   }
 
   void _init() async {
+    // Add this line to override the default close handler
     await windowManager.setPreventClose(true);
     setState(() {});
   }
@@ -527,6 +529,11 @@ Returns `bool` - Whether the window is in fullscreen mode.
 ##### setFullScreen
 
 Sets whether the window should be in fullscreen mode.
+
+##### setAspectRatio  `macos`
+
+This will make a window maintain an aspect ratio.
+
 
 ##### setBackgroundColor
 

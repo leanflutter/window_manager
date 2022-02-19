@@ -118,6 +118,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setFullScreen(args)
             result(true)
             break
+        case "setAspectRatio":
+            windowManager.setAspectRatio(args)
+            result(true)
+            break
         case "setBackgroundColor":
             windowManager.setBackgroundColor(args)
             result(true)
