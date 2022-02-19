@@ -28,7 +28,7 @@
       - [关闭时退出](#关闭时退出)
         - [macOS](#macos)
         - [Windows](#windows)
-    - [关闭前确认](#关闭前确认)
+      - [关闭前确认](#关闭前确认)
       - [在启动时隐藏](#在启动时隐藏)
         - [macOS](#macos-1)
         - [Windows](#windows-1)
@@ -288,7 +288,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 }
 ```
 
-### 关闭前确认
+#### 关闭前确认
 
 ```dart
 import 'package:flutter/cupertino.dart';

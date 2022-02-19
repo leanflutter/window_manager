@@ -28,7 +28,7 @@ English | [简体中文](./README-ZH.md)
       - [Quit on close](#quit-on-close)
         - [macOS](#macos)
         - [Windows](#windows)
-    - [Confirm before closing](#confirm-before-closing)
+      - [Confirm before closing](#confirm-before-closing)
       - [Hidden at launch](#hidden-at-launch)
         - [macOS](#macos-1)
         - [Windows](#windows-1)
@@ -288,7 +288,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 }
 ```
 
-### Confirm before closing
+#### Confirm before closing
 
 ```dart
 import 'package:flutter/cupertino.dart';
