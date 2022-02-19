@@ -93,7 +93,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
   std::optional<LRESULT> result = std::nullopt;
 
   if (message == WM_NCCALCSIZE) {
-    if (wParam && window_manager->is_frameless) {
+    if (wParam && window_manager->is_frameless_) {
       SetWindowLong(hWnd, 0, 0);
       return 1;
     }
@@ -151,6 +151,64 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     _EmitEvent("move");
   } else if (message == WM_SIZING) {
     _EmitEvent("resize");
+
+    if (window_manager->aspect_ratio_ > 0) {
+      RECT* rect = (LPRECT)lParam;
+
+      double aspect_ratio = window_manager->aspect_ratio_;
+
+      int new_width = static_cast<int>(rect->right - rect->left);
+      int new_height = static_cast<int>(rect->bottom - rect->top);
+
+      bool is_resizing_horizontally =
+          wParam == WMSZ_LEFT || wParam == WMSZ_RIGHT ||
+          wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT;
+
+      if (is_resizing_horizontally) {
+        new_height = static_cast<int>(new_width / aspect_ratio);
+      } else {
+        new_width = static_cast<int>(new_height * aspect_ratio);
+      }
+
+      int left = rect->left;
+      int top = rect->top;
+      int right = rect->right;
+      int bottom = rect->bottom;
+
+      switch (wParam) {
+        case WMSZ_RIGHT:
+        case WMSZ_BOTTOM:
+          right = new_width + left;
+          bottom = top + new_height;
+          break;
+        case WMSZ_TOP:
+          right = new_width + left;
+          top = bottom - new_height;
+          break;
+        case WMSZ_LEFT:
+        case WMSZ_TOPLEFT:
+          left = right - new_width;
+          top = bottom - new_height;
+          break;
+        case WMSZ_TOPRIGHT:
+          right = left + new_width;
+          top = bottom - new_height;
+          break;
+        case WMSZ_BOTTOMLEFT:
+          left = right - new_width;
+          bottom = top + new_height;
+          break;
+        case WMSZ_BOTTOMRIGHT:
+          right = left + new_width;
+          bottom = top + new_height;
+          break;
+      }
+
+      rect->left = left;
+      rect->top = top;
+      rect->right = right;
+      rect->bottom = bottom;
+    }
   } else if (message == WM_SIZE) {
     LONG_PTR gwlStyle =
         GetWindowLongPtr(window_manager->GetMainWindow(), GWL_STYLE);
@@ -257,6 +315,11 @@ void WindowManagerPlugin::HandleMethodCall(
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->SetFullScreen(args);
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("setAspectRatio") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->SetAspectRatio(args);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("setBackgroundColor") == 0) {
     const flutter::EncodableMap& args =

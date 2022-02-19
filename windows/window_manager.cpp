@@ -33,11 +33,12 @@ class WindowManager {
 
   int last_state = STATE_NORMAL;
 
-  bool is_frameless = false;
-  std::string title_bar_style_ = "default";
+  bool is_frameless_ = false;
+  bool is_prevent_close_ = false;
+  double aspect_ratio_ = 0;
   bool is_resizable_ = true;
+  std::string title_bar_style_ = "default";
   double opacity_ = 1;
-  bool prevent_close = false;
 
   // The minimum size set by the platform channel.
   POINT minimum_size = {0, 0};
@@ -64,6 +65,7 @@ class WindowManager {
   void WindowManager::Restore();
   bool WindowManager::IsFullScreen();
   void WindowManager::SetFullScreen(const flutter::EncodableMap& args);
+  void WindowManager::SetAspectRatio(const flutter::EncodableMap& args);
   void WindowManager::SetBackgroundColor(const flutter::EncodableMap& args);
   flutter::EncodableMap WindowManager::GetPosition(
       const flutter::EncodableMap& args);
@@ -111,7 +113,7 @@ HWND WindowManager::GetMainWindow() {
 }
 
 void WindowManager::SetAsFrameless() {
-  is_frameless = true;
+  is_frameless_ = true;
   HWND hWnd = GetMainWindow();
 
   RECT rect;
@@ -144,14 +146,13 @@ void WindowManager::Close() {
   PostMessage(hWnd, WM_SYSCOMMAND, SC_CLOSE, 0);
 }
 
-bool WindowManager::IsPreventClose() {
-  return prevent_close;
+void WindowManager::SetPreventClose(const flutter::EncodableMap& args) {
+  is_prevent_close_ =
+      std::get<bool>(args.at(flutter::EncodableValue("isPreventClose")));
 }
 
-void WindowManager::SetPreventClose(const flutter::EncodableMap& args) {
-  bool isPreventClose =
-      std::get<bool>(args.at(flutter::EncodableValue("isPreventClose")));
-  prevent_close = isPreventClose;
+bool WindowManager::IsPreventClose() {
+  return is_prevent_close_;
 }
 
 void WindowManager::Focus() {
@@ -314,6 +315,11 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
   }
 
   g_is_window_fullscreen = isFullScreen;
+}
+
+void WindowManager::SetAspectRatio(const flutter::EncodableMap& args) {
+  aspect_ratio_ =
+      std::get<double>(args.at(flutter::EncodableValue("aspectRatio")));
 }
 
 void WindowManager::SetBackgroundColor(const flutter::EncodableMap& args) {
