@@ -176,6 +176,20 @@ static FlMethodResponse* set_full_screen(WindowManagerPlugin* self,
       fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse* set_aspect_ratio(WindowManagerPlugin* self,
+                                          FlValue* args) {
+  const float aspect_ratio =
+      fl_value_get_float(fl_value_lookup_string(args, "aspectRatio"));
+
+  self->window_geometry.min_aspect = aspect_ratio;
+  self->window_geometry.max_aspect = aspect_ratio;
+
+  gdk_window_set_geometry_hints(get_gdk_window(self), &self->window_geometry,
+                                static_cast<GdkWindowHints>(GDK_HINT_ASPECT));
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
 static FlMethodResponse* set_background_color(WindowManagerPlugin* self,
                                               FlValue* args) {
   bg_color_r = ((double)fl_value_get_int(
@@ -447,6 +461,8 @@ static void window_manager_plugin_handle_method_call(
     response = is_full_screen(self);
   } else if (strcmp(method, "setFullScreen") == 0) {
     response = set_full_screen(self, args);
+  } else if (strcmp(method, "setAspectRatio") == 0) {
+    response = set_aspect_ratio(self, args);
   } else if (strcmp(method, "setBackgroundColor") == 0) {
     response = set_background_color(self, args);
   } else if (strcmp(method, "getPosition") == 0) {
