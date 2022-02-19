@@ -49,6 +49,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
     }
     
+    private var _isPreventClose: Bool = false
     private var _isMaximized: Bool = false
     
     override public init() {
@@ -73,7 +74,15 @@ public class WindowManager: NSObject, NSWindowDelegate {
     }
     
     public func close() {
-        mainWindow.close()
+        mainWindow.performClose(nil)
+    }
+    
+    public func isPreventClose() -> Bool {
+        return _isPreventClose;
+    }
+    
+    public func setPreventClose(_ args: [String: Any]) {
+        _isPreventClose = args["isPreventClose"] as! Bool
     }
     
     public func focus() {
@@ -481,6 +490,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
     // NSWindowDelegate
     
     public func windowShouldClose(_ sender: NSWindow) -> Bool {
+        _emitEvent("close")
+        if (isPreventClose()) {
+            return false
+        }
         return true;
     }
     

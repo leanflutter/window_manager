@@ -60,6 +60,13 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.close()
             result(true)
             break
+        case "isPreventClose":
+            result(windowManager.isPreventClose())
+            break
+        case "setPreventClose":
+            windowManager.setPreventClose(args)
+            result(true)
+            break
         case "focus":
             windowManager.focus()
             result(true)
