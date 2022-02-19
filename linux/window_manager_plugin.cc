@@ -23,6 +23,7 @@ struct _WindowManagerPlugin {
   FlPluginRegistrar* registrar;
   FlMethodChannel* channel;
   GdkGeometry window_geometry;
+  bool _is_prevent_close = false;
   bool _is_frameless = false;
   bool _is_maximized = false;
   bool _is_minimized = false;
@@ -71,6 +72,19 @@ static FlMethodResponse* set_as_frameless(WindowManagerPlugin* self,
 
 static FlMethodResponse* close(WindowManagerPlugin* self) {
   gtk_window_close(get_window(self));
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse* is_prevent_close(WindowManagerPlugin* self) {
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(
+      fl_value_new_bool(self->_is_prevent_close)));
+}
+
+static FlMethodResponse* set_prevent_close(WindowManagerPlugin* self,
+                                           FlValue* args) {
+  self->_is_prevent_close =
+      fl_value_get_bool(fl_value_lookup_string(args, "isPreventClose"));
   return FL_METHOD_RESPONSE(
       fl_method_success_response_new(fl_value_new_bool(true)));
 }
@@ -403,6 +417,10 @@ static void window_manager_plugin_handle_method_call(
     response = set_as_frameless(self, args);
   } else if (strcmp(method, "close") == 0) {
     response = close(self);
+  } else if (strcmp(method, "setPreventClose") == 0) {
+    response = set_prevent_close(self, args);
+  } else if (strcmp(method, "isPreventClose") == 0) {
+    response = is_prevent_close(self);
   } else if (strcmp(method, "focus") == 0) {
     response = focus(self);
   } else if (strcmp(method, "blur") == 0) {
@@ -497,6 +515,11 @@ void _emit_event(const char* event_name) {
                                   result_data, nullptr, nullptr, nullptr);
 }
 
+gboolean on_window_close(GtkWidget* widget, GdkEvent* event, gpointer data) {
+  _emit_event("close");
+  return plugin_instance->_is_prevent_close;
+}
+
 gboolean on_window_focus(GtkWidget* widget, GdkEvent* event, gpointer data) {
   _emit_event("focus");
   return false;
@@ -586,7 +609,8 @@ void window_manager_plugin_register_with_registrar(
   plugin->window_geometry.min_height = -1;
   plugin->window_geometry.max_width = G_MAXINT;
   plugin->window_geometry.max_height = G_MAXINT;
-
+  g_signal_connect(get_window(plugin), "delete_event",
+                   G_CALLBACK(on_window_close), NULL);
   g_signal_connect(get_window(plugin), "focus-in-event",
                    G_CALLBACK(on_window_focus), NULL);
   g_signal_connect(get_window(plugin), "focus-out-event",

@@ -96,22 +96,18 @@ class WindowManager {
     await _channel.invokeMethod('close');
   }
 
+  /// Check if is intercepting the native close signal.
+  Future<bool> isPreventClose() async {
+    return await _channel.invokeMethod("isPreventClose");
+  }
+
   /// Set if intercept the native close signal. May useful when combine with the onclose event listener.
   /// This will also prevent the manually triggered close event.
-  ///
-  /// @platforms windows
   Future<void> setPreventClose(bool isPreventClose) async {
     final Map<String, dynamic> arguments = {
       'isPreventClose': isPreventClose,
     };
     await _channel.invokeMethod('setPreventClose', arguments);
-  }
-
-  /// Check if is intercepting the native close signal.
-  ///
-  /// @platforms windows
-  Future<bool> isPreventClose() async {
-    return await _channel.invokeMethod("isPreventClose");
   }
 
   /// Focuses on the window.
