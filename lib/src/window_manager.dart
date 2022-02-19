@@ -195,8 +195,6 @@ class WindowManager {
   }
 
   /// This will make a window maintain an aspect ratio.
-  /// 
-  /// @platforms macos
   Future<void> setAspectRatio(double aspectRatio) async {
     final Map<String, dynamic> arguments = {
       'aspectRatio': aspectRatio,

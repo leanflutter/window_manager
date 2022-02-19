@@ -53,7 +53,7 @@ English | [简体中文](./README-ZH.md)
         - [restore](#restore)
         - [isFullScreen](#isfullscreen)
         - [setFullScreen](#setfullscreen)
-        - [setAspectRatio  `macos`](#setaspectratio--macos)
+        - [setAspectRatio](#setaspectratio)
         - [setBackgroundColor](#setbackgroundcolor)
         - [getBounds](#getbounds)
         - [setBounds](#setbounds)
@@ -530,10 +530,9 @@ Returns `bool` - Whether the window is in fullscreen mode.
 
 Sets whether the window should be in fullscreen mode.
 
-##### setAspectRatio  `macos`
+##### setAspectRatio
 
 This will make a window maintain an aspect ratio.
-
 
 ##### setBackgroundColor
 
