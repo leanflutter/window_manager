@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:bot_toast/bot_toast.dart';
@@ -696,7 +697,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 child: Text('Yes'),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  windowManager.close();
+                  exit(0);
                 },
               ),
             ],

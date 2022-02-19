@@ -141,7 +141,7 @@ void WindowManager::WaitUntilReadyToShow() {}
 
 void WindowManager::Close() {
   HWND hWnd = GetMainWindow();
-  CloseWindow(hWnd);
+  PostMessage(hWnd, WM_SYSCOMMAND, SC_CLOSE, 0);
 }
 
 void WindowManager::SetPreventClose(const flutter::EncodableMap& args) {
