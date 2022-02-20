@@ -692,6 +692,29 @@ class _HomePageState extends State<HomePage> with WindowListener {
                     ),
                   ),
                 ),
+                if (Platform.isWindows)
+                  Container(
+                    height: 100,
+                    margin: EdgeInsets.all(20),
+                    child: DragToResizeArea(
+                      child: Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Colors.grey.withOpacity(0.3),
+                        child: Center(
+                          child: GestureDetector(
+                            child: Text('DragToResizeArea'),
+                            onTap: () {
+                              BotToast.showText(
+                                  text: 'DragToResizeArea example');
+                            },
+                          ),
+                        ),
+                      ),
+                      resizeEdgeSize: 6,
+                      resizeEdgeColor: Colors.red.withOpacity(0.2),
+                    ),
+                  ),
                 Expanded(
                   child: _buildBody(context),
                 ),

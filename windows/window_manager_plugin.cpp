@@ -423,10 +423,10 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("startDragging") == 0) {
     window_manager->StartDragging();
     result->Success(flutter::EncodableValue(true));
-  } else if (method_name.compare("startResize") == 0) {
+  } else if (method_name.compare("startResizing") == 0) {
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
-    window_manager->StartResize(args);
+    window_manager->StartResizing(args);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("getPrimaryDisplay") == 0) {
     const flutter::EncodableMap& args =

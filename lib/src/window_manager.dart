@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'resize_edge.dart';
 import 'window_listener.dart';
 
 const kWindowEventClose = 'close';
@@ -545,23 +546,23 @@ class WindowManager {
   Future<void> startDragging() async {
     await _channel.invokeMethod('startDragging');
   }
-  
-  Future<void> startResize(DragPosition position) {
+
+  Future<void> startResizing(ResizeEdge resizeEdge) {
     return _channel.invokeMethod<bool>(
-      'startResize',
+      'startResizing',
       {
-        "top": position == DragPosition.top ||
-            position == DragPosition.topLeft ||
-            position == DragPosition.topRight,
-        "bottom": position == DragPosition.bottom ||
-            position == DragPosition.bottomLeft ||
-            position == DragPosition.bottomRight,
-        "right": position == DragPosition.right ||
-            position == DragPosition.topRight ||
-            position == DragPosition.bottomRight,
-        "left": position == DragPosition.left ||
-            position == DragPosition.topLeft ||
-            position == DragPosition.bottomLeft,
+        "top": resizeEdge == ResizeEdge.top ||
+            resizeEdge == ResizeEdge.topLeft ||
+            resizeEdge == ResizeEdge.topRight,
+        "bottom": resizeEdge == ResizeEdge.bottom ||
+            resizeEdge == ResizeEdge.bottomLeft ||
+            resizeEdge == ResizeEdge.bottomRight,
+        "right": resizeEdge == ResizeEdge.right ||
+            resizeEdge == ResizeEdge.topRight ||
+            resizeEdge == ResizeEdge.bottomRight,
+        "left": resizeEdge == ResizeEdge.left ||
+            resizeEdge == ResizeEdge.topLeft ||
+            resizeEdge == ResizeEdge.bottomLeft,
       },
     );
   }
@@ -598,14 +599,3 @@ class WindowManager {
 }
 
 final windowManager = WindowManager.instance;
-
-enum DragPosition {
-  top,
-  left,
-  right,
-  bottom,
-  topLeft,
-  bottomLeft,
-  topRight,
-  bottomRight
-}
