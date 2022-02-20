@@ -14,6 +14,8 @@
 
 #include "window_manager.cpp"
 
+const double kBaseDpi = 96.0;
+
 namespace {
 std::unique_ptr<
     flutter::MethodChannel<flutter::EncodableValue>,
@@ -109,9 +111,14 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
                          NULL);
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 
+      UINT dpi = FlutterDesktopGetDpiForHWND(hWnd);
+      double scale_factor = dpi / kBaseDpi;
+
       // Add 8 pixel to the top border when maximized so the app isn't cut off
-	  // Top resize border is still not working.
-      sz->rgrc[0].top += window_manager->IsMaximized() ? 8 : 0;
+      // Top resize border is still not working.
+      sz->rgrc[0].top += window_manager->IsMaximized()
+                             ? 8
+                             : static_cast<LONG>(1 * scale_factor);
       sz->rgrc[0].right -= 8;
       sz->rgrc[0].bottom -= 8;
       sz->rgrc[0].left -= -8;
@@ -417,9 +424,10 @@ void WindowManagerPlugin::HandleMethodCall(
     window_manager->StartDragging();
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("startResize") == 0) {
-	const flutter::EncodableMap &args = std::get<flutter::EncodableMap>(*method_call.arguments());
-	window_manager->StartResize(args);
-	result->Success(flutter::EncodableValue(true));
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->StartResize(args);
+    result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("getPrimaryDisplay") == 0) {
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
