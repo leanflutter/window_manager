@@ -93,6 +93,7 @@ class WindowManager {
   double WindowManager::GetOpacity();
   void WindowManager::SetOpacity(const flutter::EncodableMap& args);
   void WindowManager::StartDragging();
+  void WindowManager::StartResize(const flutter::EncodableMap &args);
   flutter::EncodableMap WindowManager::GetPrimaryDisplay(
       const flutter::EncodableMap& args);
 
@@ -538,10 +539,10 @@ void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args) {
   HWND hWnd = GetMainWindow();
   DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
   if (title_bar_style_ == "hidden") {
-    gwlStyle = gwlStyle & ~WS_CAPTION;
+    gwlStyle = gwlStyle | WS_POPUP;
     SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
   } else {
-    gwlStyle = gwlStyle | WS_CAPTION;
+    gwlStyle = gwlStyle & ~WS_POPUP;
     SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
   }
 
@@ -558,9 +559,7 @@ int WindowManager::GetTitleBarHeight() {
   TITLEBARINFOEX* ptinfo = (TITLEBARINFOEX*)malloc(sizeof(TITLEBARINFOEX));
   ptinfo->cbSize = sizeof(TITLEBARINFOEX);
   SendMessage(hWnd, WM_GETTITLEBARINFOEX, 0, (LPARAM)ptinfo);
-  int height = ptinfo->rcTitleBar.bottom == 0
-                   ? 0
-                   : ptinfo->rcTitleBar.bottom - ptinfo->rcTitleBar.top;
+  int height = ptinfo->rcTitleBar.bottom - ptinfo->rcTitleBar.top;
   free(ptinfo);
 
   return height;
@@ -605,6 +604,49 @@ void WindowManager::SetOpacity(const flutter::EncodableMap& args) {
 void WindowManager::StartDragging() {
   ReleaseCapture();
   SendMessage(GetMainWindow(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+}
+
+void WindowManager::StartResize(const flutter::EncodableMap &args) {
+	bool top = std::get<bool>(args.at(flutter::EncodableValue("top")));
+	bool bottom = std::get<bool>(args.at(flutter::EncodableValue("bottom")));
+	bool left = std::get<bool>(args.at(flutter::EncodableValue("left")));
+	bool right = std::get<bool>(args.at(flutter::EncodableValue("right")));
+	HWND hWnd = GetMainWindow();
+	ReleaseCapture();
+	LONG command = SC_SIZE;
+	if (top && !bottom && !right && !left)
+	{
+	  command |= WMSZ_TOP;
+	}
+	else if (top && left && !bottom && !right)
+	{
+	  command |= WMSZ_TOPLEFT;
+	}
+	else if (left && !top && !bottom && !right)
+	{
+	  command |= WMSZ_LEFT;
+	}
+	else if (right && !top && !left && !bottom)
+	{
+	  command |= WMSZ_RIGHT;
+	}
+	else if (top && right && !left && !bottom)
+	{
+	  command |= WMSZ_TOPRIGHT;
+	}
+	else if (bottom && !top && !right && !left)
+	{
+	  command |= WMSZ_BOTTOM;
+	}
+	else if (bottom && left && !top && !right)
+	{
+	  command |= WMSZ_BOTTOMLEFT;
+	}
+	else if (bottom && right && !top && !left)
+	{
+	  command |= WMSZ_BOTTOMRIGHT;
+	}
+	SendMessage(hWnd, WM_SYSCOMMAND, command, 0);
 }
 
 flutter::EncodableMap WindowManager::GetPrimaryDisplay(

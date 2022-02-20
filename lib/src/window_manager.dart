@@ -545,6 +545,26 @@ class WindowManager {
   Future<void> startDragging() async {
     await _channel.invokeMethod('startDragging');
   }
+  
+  Future<void> startResize(DragPosition position) {
+    return _channel.invokeMethod<bool>(
+      'startResize',
+      {
+        "top": position == DragPosition.top ||
+            position == DragPosition.topLeft ||
+            position == DragPosition.topRight,
+        "bottom": position == DragPosition.bottom ||
+            position == DragPosition.bottomLeft ||
+            position == DragPosition.bottomRight,
+        "right": position == DragPosition.right ||
+            position == DragPosition.topRight ||
+            position == DragPosition.bottomRight,
+        "left": position == DragPosition.left ||
+            position == DragPosition.topLeft ||
+            position == DragPosition.bottomLeft,
+      },
+    );
+  }
 
   Future<Map<String, dynamic>> _getPrimaryDisplay() async {
     final Map<String, dynamic> arguments = {
@@ -578,3 +598,14 @@ class WindowManager {
 }
 
 final windowManager = WindowManager.instance;
+
+enum DragPosition {
+  top,
+  left,
+  right,
+  bottom,
+  topLeft,
+  bottomLeft,
+  topRight,
+  bottomRight
+}
