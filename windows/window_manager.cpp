@@ -558,7 +558,9 @@ int WindowManager::GetTitleBarHeight() {
   TITLEBARINFOEX* ptinfo = (TITLEBARINFOEX*)malloc(sizeof(TITLEBARINFOEX));
   ptinfo->cbSize = sizeof(TITLEBARINFOEX);
   SendMessage(hWnd, WM_GETTITLEBARINFOEX, 0, (LPARAM)ptinfo);
-  int height = ptinfo->rcTitleBar.bottom - ptinfo->rcTitleBar.top;
+  int height = ptinfo->rcTitleBar.bottom == 0
+                   ? 0
+                   : ptinfo->rcTitleBar.bottom - ptinfo->rcTitleBar.top;
   free(ptinfo);
 
   return height;
