@@ -80,7 +80,7 @@ class DragToResizeArea extends StatelessWidget {
                       child: Container(),
                     ),
                     _buildDragToResizeEdge(
-                      ResizeEdge.topRight,
+                      ResizeEdge.right,
                       cursor: SystemMouseCursors.resizeRight,
                       width: resizeEdgeSize,
                       height: double.infinity,
@@ -91,7 +91,7 @@ class DragToResizeArea extends StatelessWidget {
               Row(
                 children: [
                   _buildDragToResizeEdge(
-                    ResizeEdge.topLeft,
+                    ResizeEdge.bottomLeft,
                     cursor: SystemMouseCursors.resizeDownLeft,
                     width: resizeEdgeSize,
                     height: resizeEdgeSize,
@@ -99,13 +99,13 @@ class DragToResizeArea extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: _buildDragToResizeEdge(
-                      ResizeEdge.top,
+                      ResizeEdge.bottom,
                       cursor: SystemMouseCursors.resizeDown,
                       height: resizeEdgeSize,
                     ),
                   ),
                   _buildDragToResizeEdge(
-                    ResizeEdge.topRight,
+                    ResizeEdge.bottomRight,
                     cursor: SystemMouseCursors.resizeDownRight,
                     width: resizeEdgeSize,
                     height: resizeEdgeSize,
