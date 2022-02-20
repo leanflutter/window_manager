@@ -105,23 +105,19 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       RECT borderThickness;
       SetRectEmpty(&borderThickness);
       AdjustWindowRectEx(&borderThickness,
-                         GetWindowLongPtr(hWnd, GWL_STYLE) & ~WS_CAPTION, FALSE,
+                         GetWindowLongPtr(hWnd, GWL_STYLE) & WS_POPUP, FALSE,
                          NULL);
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 
-      // Add 1 pixel to the top border to make the window resizable from the top
-      // border
-      sz->rgrc[0].top += 1;
-      sz->rgrc[0].right -= borderThickness.right;
-      sz->rgrc[0].bottom -= borderThickness.bottom;
-      sz->rgrc[0].left -= borderThickness.left;
+      // Add 8 pixel to the top border when maximized so the app isn't cut off
+	  // Top resize border is still not working.
+      sz->rgrc[0].top += window_manager->IsMaximized() ? 8 : 0;
+      sz->rgrc[0].right -= 8;
+      sz->rgrc[0].bottom -= 8;
+      sz->rgrc[0].left -= -8;
 
       return (WVR_HREDRAW | WVR_VREDRAW);
     }
-  }
-  if (message == WM_NCPAINT) {
-    if (window_manager->title_bar_style_ == "hidden")
-      return 1;
   } else if (message == WM_NCHITTEST) {
     if (!window_manager->is_resizable_) {
       return HTNOWHERE;
@@ -420,6 +416,10 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("startDragging") == 0) {
     window_manager->StartDragging();
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("startResize") == 0) {
+	const flutter::EncodableMap &args = std::get<flutter::EncodableMap>(*method_call.arguments());
+	window_manager->StartResize(args);
+	result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("getPrimaryDisplay") == 0) {
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
