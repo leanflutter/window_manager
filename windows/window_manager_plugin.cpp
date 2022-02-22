@@ -250,9 +250,10 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     _EmitEvent("close");
     if (window_manager->IsPreventClose()) {
       return -1;
-    } else {
-      return std::nullopt;
     }
+  } else if (message == WM_DESTROY) {
+    PostQuitMessage(0);
+    return 0;
   }
   return result;
 }
