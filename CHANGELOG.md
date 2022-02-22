@@ -1,3 +1,11 @@
+## 0.1.7
+
+- Implement `setAspectRatio` method #74
+- [windows] Reimplement `getTitleBarHeight` method #33
+- [windows] Implement `startResizing` method
+- [windows] Add `DragToResizeArea` widget
+- [windows] Fix maximize and minimize animation not working when there is title bar hidden
+
 ## 0.1.6
 
 - Implement `isPreventClose` & `setPreventClose` methods #69
