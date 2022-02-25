@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:preference_list/preference_list.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../utilities/utilities.dart';
+
 const _kSizes = [
   Size(400, 400),
   Size(600, 600),
@@ -63,6 +65,21 @@ class _HomePageState extends State<HomePage> with WindowListener {
   Widget _buildBody(BuildContext context) {
     return PreferenceList(
       children: <Widget>[
+        PreferenceListSection(
+          children: [
+            PreferenceListItem(
+              title: Text('ThemeMode'),
+              detailText: Text('${sharedConfig.themeMode}'),
+              onTap: () async {
+                sharedConfigManager.setThemeMode(
+                  sharedConfig.themeMode == ThemeMode.light
+                      ? ThemeMode.dark
+                      : ThemeMode.light,
+                );
+              },
+            ),
+          ],
+        ),
         PreferenceListSection(
           title: Text('METHODS'),
           children: [
@@ -664,8 +681,12 @@ class _HomePageState extends State<HomePage> with WindowListener {
             // ],
           ),
           child: Scaffold(
-            appBar: AppBar(
-              title: const Text("window_manager_example"),
+            appBar: PreferredSize(
+              child: WindowCaption(
+                brightness: Theme.of(context).brightness,
+                title: Text('window_manager_example'),
+              ),
+              preferredSize: const Size.fromHeight(kWindowCaptionHeight),
             ),
             body: Column(
               children: [

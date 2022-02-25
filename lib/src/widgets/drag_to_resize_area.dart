@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../resize_edge.dart';
 import '../window_manager.dart';
 
 class DragToResizeArea extends StatelessWidget {
   final Widget child;
   final double resizeEdgeSize;
   final Color resizeEdgeColor;
+  final List<ResizeEdge>? enableResizeEdges;
 
   const DragToResizeArea({
     Key? key,
     required this.child,
     this.resizeEdgeColor = Colors.transparent,
     this.resizeEdgeSize = 4,
+    this.enableResizeEdges,
   }) : super(key: key);
 
   Widget _buildDragToResizeEdge(
@@ -20,6 +23,8 @@ class DragToResizeArea extends StatelessWidget {
     double? width,
     double? height,
   }) {
+    if (enableResizeEdges != null && !enableResizeEdges!.contains(resizeEdge))
+      return Container();
     return Container(
       width: width,
       height: height,

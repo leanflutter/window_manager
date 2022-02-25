@@ -1,10 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:window_manager/window_manager.dart';
 
 import './pages/home.dart';
+import 'themes/themes.dart';
+import 'utilities/utilities.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,15 +32,32 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.light;
+
+  @override
+  void initState() {
+    sharedConfigManager.addListener(_configListen);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    sharedConfigManager.removeListener(_configListen);
+    super.dispose();
+  }
+
+  void _configListen() {
+    _themeMode = sharedConfig.themeMode;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Color(0xff416ff4),
-        canvasColor: Colors.white,
-        scaffoldBackgroundColor: Color(0xffF7F9FB),
-        dividerColor: Colors.grey.withOpacity(0.3),
-      ),
+      debugShowCheckedModeBanner: false,
+      theme: lightThemeData,
+      darkTheme: darkThemeData,
+      themeMode: _themeMode,
       builder: BotToastInit(),
       navigatorObservers: [BotToastNavigatorObserver()],
       home: HomePage(),

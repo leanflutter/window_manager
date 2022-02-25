@@ -24,3 +24,7 @@ flutter:
         pluginClass: WindowManagerPlugin
       windows:
         pluginClass: WindowManagerPlugin
+  assets:
+    - images/ic_chrome_close.png
+    - images/ic_chrome_maximize.png
+    - images/ic_chrome_minimize.png
