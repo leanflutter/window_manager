@@ -72,6 +72,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
             titleBarView.isHidden = true
         }
     }
+
+    public func destroy() {
+        NSApp.terminate(nil)
+    }
     
     public func close() {
         mainWindow.performClose(nil)
