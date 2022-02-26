@@ -27,11 +27,10 @@
       - [监听事件](#监听事件)
       - [关闭时退出](#关闭时退出)
         - [macOS](#macos)
-        - [Windows](#windows)
       - [关闭前确认](#关闭前确认)
       - [在启动时隐藏](#在启动时隐藏)
         - [macOS](#macos-1)
-        - [Windows](#windows-1)
+        - [Windows](#windows)
   - [谁在用使用它？](#谁在用使用它)
   - [API](#api)
     - [WindowManager](#windowmanager)
@@ -118,7 +117,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.1.7
+  window_manager: ^0.1.8
 ```
 
 或
@@ -268,24 +267,6 @@ class AppDelegate: FlutterAppDelegate {
 -    return true
 +    return false
   }
-}
-```
-
-##### Windows
-
-更改文件 `windows/runner/main.cpp` 如下：
-
-```diff
-int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
-                      _In_ wchar_t *command_line, _In_ int show_command) {
-  // ...
-
--  window.SetQuitOnClose(true);
-+  window.SetQuitOnClose(false);
-
-  // ...
-
-  return EXIT_SUCCESS;
 }
 ```
 

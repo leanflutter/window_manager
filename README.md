@@ -27,15 +27,15 @@ English | [简体中文](./README-ZH.md)
       - [Listening events](#listening-events)
       - [Quit on close](#quit-on-close)
         - [macOS](#macos)
-        - [Windows](#windows)
       - [Confirm before closing](#confirm-before-closing)
       - [Hidden at launch](#hidden-at-launch)
         - [macOS](#macos-1)
-        - [Windows](#windows-1)
+        - [Windows](#windows)
   - [Who's using it?](#whos-using-it)
   - [API](#api)
     - [WindowManager](#windowmanager)
       - [Methods](#methods)
+        - [destroy  `macos`  `windows`](#destroy--macos--windows)
         - [close](#close)
         - [isPreventClose](#ispreventclose)
         - [setPreventClose](#setpreventclose)
@@ -118,7 +118,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.1.7
+  window_manager: ^0.1.8
 ```
 
 Or
@@ -268,24 +268,6 @@ class AppDelegate: FlutterAppDelegate {
 -    return true
 +    return false
   }
-}
-```
-
-##### Windows
-
-Change the file `windows/runner/main.cpp` as follows:
-
-```diff
-int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
-                      _In_ wchar_t *command_line, _In_ int show_command) {
-  // ...
-
--  window.SetQuitOnClose(true);
-+  window.SetQuitOnClose(false);
-
-  // ...
-
-  return EXIT_SUCCESS;
 }
 ```
 
@@ -458,6 +440,11 @@ class _HomePageState extends State<HomePage> with WindowListener {
 ### WindowManager
 
 #### Methods
+
+##### destroy  `macos`  `windows`
+
+Force closing the window.
+
 
 ##### close
 

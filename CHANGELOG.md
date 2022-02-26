@@ -1,3 +1,8 @@
+## 0.1.8
+
+- Add `WindowCaption` widget. #81
+- [macos & windows] Implement `destroy` method
+
 ## 0.1.7
 
 - Implement `setAspectRatio` method #74

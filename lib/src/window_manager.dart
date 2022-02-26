@@ -93,6 +93,8 @@ class WindowManager {
   }
 
   /// Force closing the window.
+  ///
+  /// @platforms macos,windows
   Future<void> destroy() async {
     await _channel.invokeMethod('destroy');
   }
