@@ -33,7 +33,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   if (!window.CreateAndShow(L"window_manager_example", origin, size)) {
     return EXIT_FAILURE;
   }
-  window.SetQuitOnClose(false);
+  window.SetQuitOnClose(true);
 
   run_loop.Run();
 

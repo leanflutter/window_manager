@@ -250,8 +250,6 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     _EmitEvent("close");
     if (window_manager->IsPreventClose()) {
       return -1;
-    } else {
-      return std::nullopt;
     }
   }
   return result;
@@ -271,6 +269,9 @@ void WindowManagerPlugin::HandleMethodCall(
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("setAsFrameless") == 0) {
     window_manager->SetAsFrameless();
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("destroy") == 0) {
+    window_manager->Destroy();
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("close") == 0) {
     window_manager->Close();

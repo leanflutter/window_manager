@@ -92,6 +92,11 @@ class WindowManager {
     await _channel.invokeMethod('waitUntilReadyToShow');
   }
 
+  /// Force closing the window.
+  Future<void> destroy() async {
+    await _channel.invokeMethod('destroy');
+  }
+
   /// Try to close the window.
   Future<void> close() async {
     await _channel.invokeMethod('close');

@@ -48,6 +48,7 @@ class WindowManager {
   HWND GetMainWindow();
   void WindowManager::SetAsFrameless();
   void WindowManager::WaitUntilReadyToShow();
+  void WindowManager::Destroy();
   void WindowManager::Close();
   bool WindowManager::IsPreventClose();
   void WindowManager::SetPreventClose(const flutter::EncodableMap& args);
@@ -141,6 +142,10 @@ void WindowManager::SetAsFrameless() {
 }
 
 void WindowManager::WaitUntilReadyToShow() {}
+
+void WindowManager::Destroy() {
+  PostQuitMessage(0);
+}
 
 void WindowManager::Close() {
   HWND hWnd = GetMainWindow();

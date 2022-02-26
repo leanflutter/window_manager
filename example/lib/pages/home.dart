@@ -4,6 +4,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:preference_list/preference_list.dart';
+import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../utilities/utilities.dart';
@@ -29,7 +30,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with WindowListener {
+class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   bool _isPreventClose = false;
   Size _size = _kSizes.first;
   Size? _minSize;
@@ -47,6 +48,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
   @override
   void initState() {
+    trayManager.addListener(this);
     windowManager.addListener(this);
     _init();
     super.initState();
@@ -54,11 +56,29 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
   @override
   void dispose() {
+    trayManager.removeListener(this);
     windowManager.removeListener(this);
     super.dispose();
   }
 
   void _init() async {
+    await trayManager.setIcon(
+      Platform.isWindows
+          ? 'images/tray_icon_original.ico'
+          : 'images/tray_icon_original.png',
+    );
+    List<MenuItem> items = [
+      MenuItem(
+        key: 'show_window',
+        title: 'Show Window',
+      ),
+      MenuItem.separator,
+      MenuItem(
+        key: 'exit_app',
+        title: 'Exit App',
+      ),
+    ];
+    await trayManager.setContextMenu(items);
     setState(() {});
   }
 
@@ -748,6 +768,11 @@ class _HomePageState extends State<HomePage> with WindowListener {
   }
 
   @override
+  void onTrayIconMouseDown() {
+    windowManager.show();
+  }
+
+  @override
   void onWindowFocus() {
     setState(() {});
   }
@@ -771,7 +796,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 child: Text('Yes'),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  exit(0);
+                  windowManager.destroy();
                 },
               ),
             ],

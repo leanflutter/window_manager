@@ -90,7 +90,7 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "org.leanflutter.plugins" "\0"
-            VALUE "FileDescription", "Demonstrates how to use the window_manager plugin." "\0"
+            VALUE "FileDescription", "window_manager_example" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "window_manager_example" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2021 org.leanflutter.plugins. All rights reserved." "\0"
