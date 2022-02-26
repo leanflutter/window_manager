@@ -26,6 +26,8 @@ class WindowCaption extends StatefulWidget {
 }
 
 class _WindowCaptionState extends State<WindowCaption> with WindowListener {
+  bool _isMaximized = false;
+
   @override
   void initState() {
     windowManager.addListener(this);
@@ -67,7 +69,7 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
                             color: widget.brightness == Brightness.light
                                 ? Colors.black.withOpacity(0.8956)
                                 : Colors.white,
-                            fontSize: 12,
+                            fontSize: 14,
                           ),
                           child: widget.title ?? Container(),
                         ),
@@ -87,17 +89,20 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
                   }
                 },
               ),
-              WindowCaptionButton.maximize(
-                brightness: widget.brightness,
-                onPressed: () async {
-                  bool isMaximized = await windowManager.isMaximized();
-                  if (isMaximized) {
-                    windowManager.unmaximize();
-                  } else {
+              if (!_isMaximized)
+                WindowCaptionButton.maximize(
+                  brightness: widget.brightness,
+                  onPressed: () {
                     windowManager.maximize();
-                  }
-                },
-              ),
+                  },
+                )
+              else
+                WindowCaptionButton.unmaximize(
+                  brightness: widget.brightness,
+                  onPressed: () {
+                    windowManager.unmaximize();
+                  },
+                ),
               WindowCaptionButton.close(
                 brightness: widget.brightness,
                 onPressed: () {
@@ -109,5 +114,17 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
         ),
       ),
     );
+  }
+
+  @override
+  void onWindowMaximize() {
+    _isMaximized = true;
+    setState(() {});
+  }
+
+  @override
+  void onWindowUnmaximize() {
+    _isMaximized = false;
+    setState(() {});
   }
 }

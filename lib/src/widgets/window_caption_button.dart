@@ -17,8 +17,9 @@ class WindowCaptionButtonIcon extends StatelessWidget {
     return Image.asset(
       name,
       package: package,
-      width: 16,
+      width: 15,
       color: color,
+      filterQuality: FilterQuality.high,
     );
   }
 }
@@ -74,6 +75,14 @@ class WindowCaptionButton extends StatefulWidget {
     this.icon,
     this.onPressed,
   })  : this.iconName = 'images/ic_chrome_maximize.png',
+        super(key: key);
+
+  WindowCaptionButton.unmaximize({
+    Key? key,
+    this.brightness,
+    this.icon,
+    this.onPressed,
+  })  : this.iconName = 'images/ic_chrome_unmaximize.png',
         super(key: key);
 
   WindowCaptionButton.close({
@@ -144,10 +153,6 @@ class _WindowCaptionButtonState extends State<WindowCaptionButton> {
       bgColor = widget.buttonBgColorScheme.pressed;
       iconColor = widget.buttonIconColorScheme.pressed;
     }
-    // if (widget.onPressed == null) {
-    //   bgColor = widget.buttonBgColorScheme.normal;
-    //   iconColor = widget.buttonIconColorScheme.disabled;
-    // }
 
     return MouseRegion(
       onExit: (value) => _onEntered(hovered: false),

@@ -28,3 +28,4 @@ flutter:
     - images/ic_chrome_close.png
     - images/ic_chrome_maximize.png
     - images/ic_chrome_minimize.png
+    - images/ic_chrome_unmaximize.png
