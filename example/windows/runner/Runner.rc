@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "window_manager_example" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "window_manager_example" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2021 org.leanflutter.plugins. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2022 org.leanflutter.plugins. All rights reserved." "\0"
             VALUE "OriginalFilename", "window_manager_example.exe" "\0"
             VALUE "ProductName", "window_manager_example" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
