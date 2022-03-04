@@ -15,6 +15,22 @@
 #include "window_manager.cpp"
 
 namespace {
+
+bool IsWindows11OrGreater() {
+  DWORD dwVersion = 0;
+  DWORD dwBuild = 0;
+
+#pragma warning(push)
+#pragma warning(disable : 4996)
+  dwVersion = GetVersion();
+  // Get the build number.
+  if (dwVersion < 0x80000000)
+    dwBuild = (DWORD)(HIWORD(dwVersion));
+#pragma warning(pop)
+
+  return dwBuild < 22000;
+}
+
 std::unique_ptr<
     flutter::MethodChannel<flutter::EncodableValue>,
     std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
@@ -109,23 +125,12 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
                          NULL);
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 
-      DWORD dwVersion = 0;
-      DWORD dwBuild = 0;
-
-#pragma warning(push)
-#pragma warning(disable : 4996)
-      dwVersion = GetVersion();
-      // Get the build number.
-      if (dwVersion < 0x80000000)
-        dwBuild = (DWORD)(HIWORD(dwVersion));
-#pragma warning(pop)
-
       // Add 8 pixel to the top border when maximized so the app isn't cut off
       // Top resize border is still not working.
       if (window_manager->IsMaximized()) {
         sz->rgrc[0].top += 8;
       } else {
-        sz->rgrc[0].top += dwBuild < 22000 ? 0 : 1;
+        sz->rgrc[0].top += IsWindows11OrGreater() ? 0 : 1;
       }
       sz->rgrc[0].right -= 8;
       sz->rgrc[0].bottom -= 8;
