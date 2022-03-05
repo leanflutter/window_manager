@@ -26,8 +26,6 @@ class WindowCaption extends StatefulWidget {
 }
 
 class _WindowCaptionState extends State<WindowCaption> with WindowListener {
-  bool _isMaximized = false;
-
   @override
   void initState() {
     windowManager.addListener(this);
@@ -89,20 +87,25 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
                   }
                 },
               ),
-              if (!_isMaximized)
-                WindowCaptionButton.maximize(
-                  brightness: widget.brightness,
-                  onPressed: () {
-                    windowManager.maximize();
-                  },
-                )
-              else
-                WindowCaptionButton.unmaximize(
-                  brightness: widget.brightness,
-                  onPressed: () {
-                    windowManager.unmaximize();
-                  },
-                ),
+              FutureBuilder<bool>(
+                future: windowManager.isMaximized(),
+                builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+                  if (snapshot.data == true) {
+                    return WindowCaptionButton.unmaximize(
+                      brightness: widget.brightness,
+                      onPressed: () {
+                        windowManager.unmaximize();
+                      },
+                    );
+                  }
+                  return WindowCaptionButton.maximize(
+                    brightness: widget.brightness,
+                    onPressed: () {
+                      windowManager.maximize();
+                    },
+                  );
+                },
+              ),
               WindowCaptionButton.close(
                 brightness: widget.brightness,
                 onPressed: () {
@@ -118,13 +121,11 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
 
   @override
   void onWindowMaximize() {
-    _isMaximized = true;
     setState(() {});
   }
 
   @override
   void onWindowUnmaximize() {
-    _isMaximized = false;
     setState(() {});
   }
 }
