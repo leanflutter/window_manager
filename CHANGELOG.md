@@ -1,3 +1,8 @@
+## 0.1.9
+
+- Fixed Visual bug in fullScreen #83
+- Update `WindowCaption` widget.
+
 ## 0.1.8
 
 - Add `WindowCaption` widget. #81

@@ -117,7 +117,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.1.8
+  window_manager: ^0.1.9
 ```
 
 或
