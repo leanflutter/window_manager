@@ -286,19 +286,20 @@ class _HomePageState extends State<HomePage> with WindowListener {
   @override
   void initState() {
     windowManager.addListener(this);
+    _init();
     super.initState();
-  }
-
-  void _init() async {
-    // Add this line to override the default close handler
-    await windowManager.setPreventClose(true);
-    setState(() {});
   }
 
   @override
   void dispose() {
     windowManager.removeListener(this);
     super.dispose();
+  }
+
+  void _init() async {
+    // Add this line to override the default close handler
+    await windowManager.setPreventClose(true);
+    setState(() {});
   }
 
   @override
@@ -326,7 +327,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
                 child: Text('Yes'),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  exit(0);
+                  await windowManager.destroy();
                 },
               ),
             ],
