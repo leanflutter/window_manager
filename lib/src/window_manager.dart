@@ -557,7 +557,6 @@ class WindowManager {
     final Map<String, dynamic> arguments = {
       'brightness': brightness.name,
     };
-    print(arguments);
     await _channel.invokeMethod('setBrightness', arguments);
   }
 

@@ -22,6 +22,8 @@
 #define STATE_MINIMIZED 2
 #define STATE_FULLSCREEN_ENTERED 3
 
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 19
+
 namespace {
 class WindowManager {
  public:
@@ -93,6 +95,7 @@ class WindowManager {
   void WindowManager::SetHasShadow(const flutter::EncodableMap& args);
   double WindowManager::GetOpacity();
   void WindowManager::SetOpacity(const flutter::EncodableMap& args);
+  void WindowManager::SetBrightness(const flutter::EncodableMap& args);
   void WindowManager::StartDragging();
   void WindowManager::StartResizing(const flutter::EncodableMap& args);
   flutter::EncodableMap WindowManager::GetPrimaryDisplay(
@@ -618,6 +621,17 @@ void WindowManager::SetOpacity(const flutter::EncodableMap& args) {
   SetWindowLong(hWnd, GWL_EXSTYLE, gwlExStyle | WS_EX_LAYERED);
   SetLayeredWindowAttributes(hWnd, 0, static_cast<int8_t>(255 * opacity_),
                              0x02);
+}
+
+void WindowManager::SetBrightness(const flutter::EncodableMap& args) {
+  std::string brightness =
+      std::get<std::string>(args.at(flutter::EncodableValue("brightness")));
+
+  const BOOL is_dark_mode = brightness == "dark";
+
+  HWND hWnd = GetMainWindow();
+  DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &is_dark_mode,
+                        sizeof(is_dark_mode));
 }
 
 void WindowManager::StartDragging() {
