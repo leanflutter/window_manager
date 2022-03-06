@@ -72,7 +72,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
             titleBarView.isHidden = true
         }
     }
-
+    
     public func destroy() {
         NSApp.terminate(nil)
     }
@@ -165,7 +165,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
             }
         }
     }
-
+    
     public func setAspectRatio(_ args: [String: Any]) {
         let hasFrame = !mainWindow.styleMask.contains(.fullSizeContentView);
         let aspectRatio = (args["aspectRatio"] as! NSNumber).doubleValue
@@ -432,6 +432,16 @@ public class WindowManager: NSObject, NSWindowDelegate {
     public func setOpacity(_ args: [String: Any]) {
         let opacity: CGFloat = CGFloat(truncating: args["opacity"] as! NSNumber)
         mainWindow.alphaValue = opacity
+    }
+    
+    public func setBrightness(_ args: [String: Any]) {
+        let brightness: String = args["brightness"] as! String
+        if (brightness == "dark") {
+            mainWindow.appearance = NSAppearance(named: NSAppearance.Name.vibrantDark)
+        } else {
+            mainWindow.appearance = NSAppearance(named: NSAppearance.Name.vibrantLight)
+        }
+        mainWindow.invalidateShadow()
     }
     
     public func startDragging() {

@@ -223,6 +223,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setOpacity(args)
             result(true)
             break
+        case "setBrightness":
+            windowManager.setBrightness(args)
+            result(true)
+            break
         case "startDragging":
             windowManager.startDragging()
             result(true)

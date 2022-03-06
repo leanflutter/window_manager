@@ -91,10 +91,16 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               title: Text('ThemeMode'),
               detailText: Text('${sharedConfig.themeMode}'),
               onTap: () async {
-                sharedConfigManager.setThemeMode(
-                  sharedConfig.themeMode == ThemeMode.light
-                      ? ThemeMode.dark
-                      : ThemeMode.light,
+                ThemeMode newThemeMode =
+                    sharedConfig.themeMode == ThemeMode.light
+                        ? ThemeMode.dark
+                        : ThemeMode.light;
+
+                await sharedConfigManager.setThemeMode(newThemeMode);
+                await windowManager.setBrightness(
+                  newThemeMode == ThemeMode.light
+                      ? Brightness.light
+                      : Brightness.dark,
                 );
               },
             ),
