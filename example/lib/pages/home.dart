@@ -739,7 +739,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                     ),
                   ),
                 ),
-                if (Platform.isWindows)
+                if (Platform.isLinux || Platform.isWindows)
                   Container(
                     height: 100,
                     margin: EdgeInsets.all(20),
