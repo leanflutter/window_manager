@@ -29,6 +29,7 @@ struct _WindowManagerPlugin {
   bool _is_minimized = false;
   bool _is_fullscreen = false;
   bool _is_always_on_top = false;
+  GdkEventButton _event_button = GdkEventButton{};
 };
 
 G_DEFINE_TYPE(WindowManagerPlugin, window_manager_plugin, g_object_get_type())
@@ -368,6 +369,18 @@ static FlMethodResponse* set_title(WindowManagerPlugin* self, FlValue* args) {
       fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse* set_title_bar_style(WindowManagerPlugin* self,
+                                             FlValue* args) {
+  const gchar* title_bar_style =
+      fl_value_get_string(fl_value_lookup_string(args, "titleBarStyle"));
+
+  gtk_window_set_decorated(get_window(self),
+                           strcmp(title_bar_style, "hidden") != 0);
+
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
 static FlMethodResponse* set_skip_taskbar(WindowManagerPlugin* self,
                                           FlValue* args) {
   bool isSkipTaskbar =
@@ -389,6 +402,54 @@ static FlMethodResponse* start_dragging(WindowManagerPlugin* self) {
   guint32 timestamp = (guint32)g_get_monotonic_time();
 
   gtk_window_begin_move_drag(window, 1, root_x, root_y, timestamp);
+
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
+                                        FlValue* args) {
+  const gchar* resize_edge =
+      fl_value_get_string(fl_value_lookup_string(args, "resizeEdge"));
+
+  // bool top = fl_value_get_bool(fl_value_lookup_string(args, "top"));
+  // bool bottom = fl_value_get_bool(fl_value_lookup_string(args, "bottom"));
+  // bool left = fl_value_get_bool(fl_value_lookup_string(args, "left"));
+  // bool right = fl_value_get_bool(fl_value_lookup_string(args, "right"));
+
+  auto window = get_window(self);
+  auto screen = gtk_window_get_screen(window);
+  auto display = gdk_screen_get_display(screen);
+  auto seat = gdk_display_get_default_seat(display);
+  auto device = gdk_seat_get_pointer(seat);
+
+  gint root_x, root_y;
+  gdk_device_get_position(device, nullptr, &root_x, &root_y);
+  guint32 timestamp = (guint32)g_get_monotonic_time();
+
+  GdkWindowEdge gdk_window_edge = GDK_WINDOW_EDGE_NORTH_WEST;
+
+  if (strcmp(resize_edge, "topLeft") == 0) {
+    gdk_window_edge = GDK_WINDOW_EDGE_NORTH_WEST;
+  } else if (strcmp(resize_edge, "top") == 0) {
+    gdk_window_edge = GDK_WINDOW_EDGE_NORTH;
+  } else if (strcmp(resize_edge, "topRight") == 0) {
+    gdk_window_edge = GDK_WINDOW_EDGE_NORTH_EAST;
+  } else if (strcmp(resize_edge, "left") == 0) {
+    gdk_window_edge = GDK_WINDOW_EDGE_WEST;
+  } else if (strcmp(resize_edge, "right") == 0) {
+    gdk_window_edge = GDK_WINDOW_EDGE_EAST;
+  } else if (strcmp(resize_edge, "bottomLeft")) {
+    gdk_window_edge = GDK_WINDOW_EDGE_SOUTH_WEST;
+  } else if (strcmp(resize_edge, "bottom")) {
+    gdk_window_edge = GDK_WINDOW_EDGE_SOUTH;
+  } else if (strcmp(resize_edge, "bottomRight")) {
+    gdk_window_edge = GDK_WINDOW_EDGE_SOUTH_EAST;
+  }
+
+  gtk_window_begin_resize_drag(window, gdk_window_edge,
+                               self->_event_button.button, root_x, root_y,
+                               timestamp);
 
   return FL_METHOD_RESPONSE(
       fl_method_success_response_new(fl_value_new_bool(true)));
@@ -493,10 +554,14 @@ static void window_manager_plugin_handle_method_call(
     response = get_title(self);
   } else if (strcmp(method, "setTitle") == 0) {
     response = set_title(self, args);
+  } else if (strcmp(method, "setTitleBarStyle") == 0) {
+    response = set_title_bar_style(self, args);
   } else if (strcmp(method, "setSkipTaskbar") == 0) {
     response = set_skip_taskbar(self, args);
   } else if (strcmp(method, "startDragging") == 0) {
     response = start_dragging(self);
+  } else if (strcmp(method, "startResizing") == 0) {
+    response = start_resizing(self, args);
   } else if (strcmp(method, "getPrimaryDisplay") == 0) {
     response = get_primary_display(self, args);
   } else {
@@ -614,6 +679,22 @@ gboolean on_window_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
   return false;
 }
 
+gboolean on_mouse_press(GSignalInvocationHint* ihint,
+                        guint n_param_values,
+                        const GValue* param_values,
+                        gpointer data) {
+  GdkEventButton* event_button =
+      (GdkEventButton*)(g_value_get_boxed(param_values + 1));
+
+  // plugin_instance->_event_button = event_button;
+
+  memset(&plugin_instance->_event_button, 0,
+         sizeof(plugin_instance->_event_button));
+  memcpy(&plugin_instance->_event_button, event_button,
+         sizeof(plugin_instance->_event_button));
+  return TRUE;
+}
+
 void window_manager_plugin_register_with_registrar(
     FlPluginRegistrar* registrar) {
   WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(
@@ -643,6 +724,10 @@ void window_manager_plugin_register_with_registrar(
                    G_CALLBACK(on_window_state_change), NULL);
   g_signal_connect(get_window(plugin), "draw", G_CALLBACK(on_window_draw),
                    NULL);
+
+  g_signal_add_emission_hook(
+      g_signal_lookup("button-press-event", GTK_TYPE_WIDGET), 0, on_mouse_press,
+      plugin, NULL);
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   plugin->channel =

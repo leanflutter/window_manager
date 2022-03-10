@@ -565,10 +565,14 @@ class WindowManager {
     await _channel.invokeMethod('startDragging');
   }
 
+  /// Starts a window resize based on the specified mouse-down & mouse-move event.
+  ///
+  /// @platforms linux,windows
   Future<void> startResizing(ResizeEdge resizeEdge) {
     return _channel.invokeMethod<bool>(
       'startResizing',
       {
+        "resizeEdge": resizeEdge.name,
         "top": resizeEdge == ResizeEdge.top ||
             resizeEdge == ResizeEdge.topLeft ||
             resizeEdge == ResizeEdge.topRight,
