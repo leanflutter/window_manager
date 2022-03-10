@@ -627,6 +627,8 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                   await windowManager.setProgressBar(_progress);
                   await Future.delayed(Duration(milliseconds: 100));
                 }
+                await Future.delayed(Duration(milliseconds: 1000));
+                await windowManager.setProgressBar(-1);
               },
             ),
             PreferenceListSwitchItem(
