@@ -81,11 +81,13 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
     } else if (_kIsWindows) {
       return DragToResizeArea(
         child: widget.child,
-        enableResizeEdges: [
-          ResizeEdge.topLeft,
-          ResizeEdge.top,
-          ResizeEdge.topRight,
-        ],
+        enableResizeEdges: (_isMaximized || _isFullScreen)
+            ? []
+            : [
+                ResizeEdge.topLeft,
+                ResizeEdge.top,
+                ResizeEdge.topRight,
+              ],
       );
     }
 
