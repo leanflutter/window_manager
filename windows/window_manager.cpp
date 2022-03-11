@@ -97,6 +97,7 @@ class WindowManager {
   double WindowManager::GetOpacity();
   void WindowManager::SetOpacity(const flutter::EncodableMap& args);
   void WindowManager::SetBrightness(const flutter::EncodableMap& args);
+  void WindowManager::SetIgnoreMouseEvents(const flutter::EncodableMap& args);
   void WindowManager::StartDragging();
   void WindowManager::StartResizing(const flutter::EncodableMap& args);
   flutter::EncodableMap WindowManager::GetPrimaryDisplay(
@@ -654,6 +655,19 @@ void WindowManager::SetBrightness(const flutter::EncodableMap& args) {
   HWND hWnd = GetMainWindow();
   DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &is_dark_mode,
                         sizeof(is_dark_mode));
+}
+
+void WindowManager::SetIgnoreMouseEvents(const flutter::EncodableMap& args) {
+  bool ignore = std::get<bool>(args.at(flutter::EncodableValue("ignore")));
+
+  HWND hwnd = GetMainWindow();
+  LONG ex_style = ::GetWindowLong(hwnd, GWL_EXSTYLE);
+  if (ignore)
+    ex_style |= (WS_EX_TRANSPARENT | WS_EX_LAYERED);
+  else
+    ex_style &= ~(WS_EX_TRANSPARENT | WS_EX_LAYERED);
+
+  ::SetWindowLong(hwnd, GWL_EXSTYLE, ex_style);
 }
 
 void WindowManager::StartDragging() {
