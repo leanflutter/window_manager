@@ -23,6 +23,7 @@ English | [简体中文](./README-ZH.md)
   - [Platform Support](#platform-support)
   - [Quick Start](#quick-start)
     - [Installation](#installation)
+      - [Linux requirements](#linux-requirements)
     - [Usage](#usage)
       - [Listening events](#listening-events)
       - [Quit on close](#quit-on-close)
@@ -129,6 +130,12 @@ dependencies:
     git:
       url: https://github.com/leanflutter/window_manager.git
       ref: main
+```
+
+#### Linux requirements
+
+```
+sudo apt install libappindicator3-1 libappindicator3-dev
 ```
 
 ### Usage
