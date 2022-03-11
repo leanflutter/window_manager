@@ -1,3 +1,13 @@
+## 0.2.0
+
+- [linux] Implement `setTitleBarStyle` method
+- [linux] Implement `startResizing` method
+- [windows] Implement `setProgressBar` method #42
+- [macos & windows] Implement `setIgnoreMouseEvents` metnod #89
+- Update `DragToResizeArea` widget
+- Add `VirtualWindowFrame` widget
+- Update `WindowCaption` widget
+
 ## 0.1.9
 
 - Fixed Visual bug in fullScreen #83
