@@ -444,6 +444,11 @@ public class WindowManager: NSObject, NSWindowDelegate {
         mainWindow.invalidateShadow()
     }
     
+    public func setIgnoreMouseEvents(_ args: [String: Any]) {
+        let ignore: Bool = args["ignore"] as! Bool
+        mainWindow.ignoresMouseEvents = ignore
+    }
+    
     public func startDragging() {
         DispatchQueue.main.async {
             let window: NSWindow  = self.mainWindow

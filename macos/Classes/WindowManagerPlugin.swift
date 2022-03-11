@@ -227,6 +227,10 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setBrightness(args)
             result(true)
             break
+        case "setIgnoreMouseEvents":
+            windowManager.setIgnoreMouseEvents(args)
+            result(true)
+            break
         case "startDragging":
             windowManager.startDragging()
             result(true)

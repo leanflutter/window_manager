@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   double _progress = 0;
   bool _hasShadow = true;
   double _opacity = 1;
+  bool _isIgnoreMouseEvents = false;
 
   @override
   void initState() {
@@ -674,6 +675,20 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                   ),
                 ],
               ),
+            ),
+            PreferenceListSwitchItem(
+              title: Text('setIgnoreMouseEvents'),
+              value: _isIgnoreMouseEvents,
+              onChanged: (newValue) async {
+                _isIgnoreMouseEvents = newValue;
+                await windowManager.setIgnoreMouseEvents(_isIgnoreMouseEvents);
+                setState(() {});
+
+                await Future.delayed(Duration(seconds: 10));
+                _isIgnoreMouseEvents = false;
+                await windowManager.setIgnoreMouseEvents(_isIgnoreMouseEvents);
+                setState(() {});
+              },
             ),
             PreferenceListItem(
               title: Text('createSubWindow'),

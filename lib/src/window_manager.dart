@@ -560,6 +560,16 @@ class WindowManager {
     await _channel.invokeMethod('setBrightness', arguments);
   }
 
+  /// Makes the window ignore all mouse events.
+  ///
+  /// All mouse events happened in this window will be passed to the window below this window, but if this window has focus, it will still receive keyboard events.
+  Future<void> setIgnoreMouseEvents(bool ignore,{bool forward = false}) async {
+    final Map<String, dynamic> arguments = {
+      'ignore': ignore,
+    };
+    await _channel.invokeMethod('setIgnoreMouseEvents', arguments);
+  }
+
   /// Starts a window drag based on the specified mouse-down event.
   Future<void> startDragging() async {
     await _channel.invokeMethod('startDragging');
