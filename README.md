@@ -85,7 +85,10 @@ English | [简体中文](./README-ZH.md)
         - [setHasShadow  `macos`](#sethasshadow--macos)
         - [getOpacity  `macos`  `windows`](#getopacity--macos--windows)
         - [setOpacity  `macos`  `windows`](#setopacity--macos--windows)
+        - [setBrightness  `macos`  `windows`](#setbrightness--macos--windows)
+        - [setIgnoreMouseEvents](#setignoremouseevents)
         - [startDragging](#startdragging)
+        - [startResizing  `linux`  `windows`](#startresizing--linux--windows)
     - [WindowListener](#windowlistener)
       - [Methods](#methods-1)
         - [onWindowClose](#onwindowclose)
@@ -660,9 +663,25 @@ Returns `double` - between 0.0 (fully transparent) and 1.0 (fully opaque). On Li
 Sets the opacity of the window.
 
 
+##### setBrightness  `macos`  `windows`
+
+Sets the brightness of the window.
+
+
+##### setIgnoreMouseEvents
+
+Makes the window ignore all mouse events.
+
+All mouse events happened in this window will be passed to the window below this window, but if this window has focus, it will still receive keyboard events.
+
 ##### startDragging
 
 Starts a window drag based on the specified mouse-down event.
+
+##### startResizing  `linux`  `windows`
+
+Starts a window resize based on the specified mouse-down & mouse-move event.
+
 
 ### WindowListener
 
