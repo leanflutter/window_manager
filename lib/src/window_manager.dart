@@ -555,7 +555,7 @@ class WindowManager {
   /// @platforms macos,windows
   Future<void> setBrightness(Brightness brightness) async {
     final Map<String, dynamic> arguments = {
-      'brightness': brightness.name,
+      'brightness': brightness.toString().split('.')[1],
     };
     await _channel.invokeMethod('setBrightness', arguments);
   }
@@ -563,7 +563,7 @@ class WindowManager {
   /// Makes the window ignore all mouse events.
   ///
   /// All mouse events happened in this window will be passed to the window below this window, but if this window has focus, it will still receive keyboard events.
-  Future<void> setIgnoreMouseEvents(bool ignore,{bool forward = false}) async {
+  Future<void> setIgnoreMouseEvents(bool ignore, {bool forward = false}) async {
     final Map<String, dynamic> arguments = {
       'ignore': ignore,
     };
@@ -582,7 +582,7 @@ class WindowManager {
     return _channel.invokeMethod<bool>(
       'startResizing',
       {
-        "resizeEdge": resizeEdge.name,
+        "resizeEdge": resizeEdge.toString().split('.')[1],
         "top": resizeEdge == ResizeEdge.top ||
             resizeEdge == ResizeEdge.topLeft ||
             resizeEdge == ResizeEdge.topRight,
