@@ -3,6 +3,11 @@ description: This plugin allows Flutter desktop apps to resizing and repositioni
 version: 0.2.0
 homepage: https://github.com/leanflutter/window_manager
 
+platforms:
+  linux:
+  macos:
+  windows:
+
 environment:
   sdk: ">=2.12.0 <3.0.0"
   flutter: ">=1.20.0"
