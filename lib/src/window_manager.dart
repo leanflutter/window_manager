@@ -495,8 +495,6 @@ class WindowManager {
   }
 
   /// Returns `int` - The title bar height of the native window.
-  ///
-  /// @platforms macos,windows
   Future<int> getTitleBarHeight() async {
     return await _channel.invokeMethod('getTitleBarHeight');
   }

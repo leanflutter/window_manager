@@ -29,6 +29,7 @@ struct _WindowManagerPlugin {
   bool _is_minimized = false;
   bool _is_fullscreen = false;
   bool _is_always_on_top = false;
+  gchar* title_bar_style_ = strdup("default");
   GdkEventButton _event_button = GdkEventButton{};
 };
 
@@ -377,8 +378,24 @@ static FlMethodResponse* set_title_bar_style(WindowManagerPlugin* self,
   gtk_window_set_decorated(get_window(self),
                            strcmp(title_bar_style, "hidden") != 0);
 
+  self->title_bar_style_ = strdup(title_bar_style);
+
   return FL_METHOD_RESPONSE(
       fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
+static FlMethodResponse* get_title_bar_height(WindowManagerPlugin* self,
+                                              FlValue* args) {
+  GtkWidget* widget = gtk_window_get_titlebar(get_window(self));
+
+  int title_bar_height = 0;
+
+  if (strcmp(self->title_bar_style_, "hidden") != 0) {
+    title_bar_height = gtk_widget_get_allocated_height(widget);
+  }
+
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_int(title_bar_height)));
 }
 
 static FlMethodResponse* set_skip_taskbar(WindowManagerPlugin* self,
@@ -411,11 +428,6 @@ static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
                                         FlValue* args) {
   const gchar* resize_edge =
       fl_value_get_string(fl_value_lookup_string(args, "resizeEdge"));
-
-  // bool top = fl_value_get_bool(fl_value_lookup_string(args, "top"));
-  // bool bottom = fl_value_get_bool(fl_value_lookup_string(args, "bottom"));
-  // bool left = fl_value_get_bool(fl_value_lookup_string(args, "left"));
-  // bool right = fl_value_get_bool(fl_value_lookup_string(args, "right"));
 
   auto window = get_window(self);
   auto screen = gtk_window_get_screen(window);
@@ -556,6 +568,8 @@ static void window_manager_plugin_handle_method_call(
     response = set_title(self, args);
   } else if (strcmp(method, "setTitleBarStyle") == 0) {
     response = set_title_bar_style(self, args);
+  } else if (strcmp(method, "getTitleBarHeight") == 0) {
+    response = get_title_bar_height(self, args);
   } else if (strcmp(method, "setSkipTaskbar") == 0) {
     response = set_skip_taskbar(self, args);
   } else if (strcmp(method, "startDragging") == 0) {
