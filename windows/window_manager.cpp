@@ -38,14 +38,14 @@ class WindowManager {
   bool is_frameless_ = false;
   bool is_prevent_close_ = false;
   double aspect_ratio_ = 0;
+  POINT minimum_size_ = {0, 0};
+  POINT maximum_size_ = {-1, -1};
   bool is_resizable_ = true;
   std::string title_bar_style_ = "default";
   double opacity_ = 1;
 
-  // The minimum size set by the platform channel.
-  POINT minimum_size = {0, 0};
-  // The maximum size set by the platform channel.
-  POINT maximum_size = {-1, -1};
+  bool is_resizing_ = false;
+  bool is_moving_ = false;
 
   HWND GetMainWindow();
   void WindowManager::SetAsFrameless();
@@ -471,7 +471,7 @@ void WindowManager::SetMinimumSize(const flutter::EncodableMap& args) {
     POINT point = {};
     point.x = static_cast<LONG>(width * devicePixelRatio);
     point.y = static_cast<LONG>(height * devicePixelRatio);
-    minimum_size = point;
+    minimum_size_ = point;
   }
 }
 
@@ -485,7 +485,7 @@ void WindowManager::SetMaximumSize(const flutter::EncodableMap& args) {
     POINT point = {};
     point.x = static_cast<LONG>(width * devicePixelRatio);
     point.y = static_cast<LONG>(height * devicePixelRatio);
-    maximum_size = point;
+    maximum_size_ = point;
   }
 }
 

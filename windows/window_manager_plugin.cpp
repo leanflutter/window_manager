@@ -145,14 +145,14 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
   } else if (message == WM_GETMINMAXINFO) {
     MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lParam);
     // For the special "unconstrained" values, leave the defaults.
-    if (window_manager->minimum_size.x != 0)
-      info->ptMinTrackSize.x = window_manager->minimum_size.x;
-    if (window_manager->minimum_size.y != 0)
-      info->ptMinTrackSize.y = window_manager->minimum_size.y;
-    if (window_manager->maximum_size.x != -1)
-      info->ptMaxTrackSize.x = window_manager->maximum_size.x;
-    if (window_manager->maximum_size.y != -1)
-      info->ptMaxTrackSize.y = window_manager->maximum_size.y;
+    if (window_manager->minimum_size_.x != 0)
+      info->ptMinTrackSize.x = window_manager->minimum_size_.x;
+    if (window_manager->minimum_size_.y != 0)
+      info->ptMinTrackSize.y = window_manager->minimum_size_.y;
+    if (window_manager->maximum_size_.x != -1)
+      info->ptMaxTrackSize.x = window_manager->maximum_size_.x;
+    if (window_manager->maximum_size_.y != -1)
+      info->ptMaxTrackSize.y = window_manager->maximum_size_.y;
     result = 0;
   } else if (message == WM_NCACTIVATE) {
     if (wParam == TRUE) {
@@ -163,9 +163,22 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
 
     if (window_manager->title_bar_style_ == "hidden")
       return 1;
+  } else if (message == WM_EXITSIZEMOVE) {
+    if (window_manager->is_resizing_) {
+      _EmitEvent("resized");
+      window_manager->is_resizing_ = false;
+    }
+    if (window_manager->is_moving_) {
+      _EmitEvent("moved");
+      window_manager->is_moving_ = false;
+    }
+    return false;
   } else if (message == WM_MOVING) {
+    window_manager->is_moving_ = true;
     _EmitEvent("move");
+    return false;
   } else if (message == WM_SIZING) {
+    window_manager->is_resizing_ = true;
     _EmitEvent("resize");
 
     if (window_manager->aspect_ratio_ > 0) {
