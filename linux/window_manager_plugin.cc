@@ -407,6 +407,11 @@ static FlMethodResponse* set_skip_taskbar(WindowManagerPlugin* self,
       fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse* get_opacity(WindowManagerPlugin* self) {
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_float(1)));
+}
+
 static FlMethodResponse* start_dragging(WindowManagerPlugin* self) {
   auto window = get_window(self);
   auto screen = gtk_window_get_screen(window);
@@ -572,6 +577,8 @@ static void window_manager_plugin_handle_method_call(
     response = get_title_bar_height(self, args);
   } else if (strcmp(method, "setSkipTaskbar") == 0) {
     response = set_skip_taskbar(self, args);
+  } else if (strcmp(method, "getOpacity") == 0) {
+    response = get_opacity(self);
   } else if (strcmp(method, "startDragging") == 0) {
     response = start_dragging(self);
   } else if (strcmp(method, "startResizing") == 0) {
