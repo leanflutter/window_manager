@@ -544,9 +544,17 @@ public class WindowManager: NSObject, NSWindowDelegate {
             _emitEvent("unmaximize")
         }
     }
+
+    public func windowDidEndLiveResize(_ notification: Notification) {
+        _emitEvent("resized")
+    }
+
+    public func windowWillMove(_ notification: Notification) {
+        _emitEvent("move")
+    }
     
     public func windowDidMove(_ notification: Notification) {
-        _emitEvent("move")
+        _emitEvent("moved")
     }
     
     public func windowDidBecomeMain(_ notification: Notification) {

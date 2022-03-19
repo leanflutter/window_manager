@@ -23,8 +23,18 @@ abstract class WindowListener {
   /// Emitted after the window has been resized.
   void onWindowResize() {}
 
+  /// Emitted once when the window has finished being resized.
+  ///
+  /// @platforms macos,windows
+  void onWindowResized() {}
+
   /// Emitted when the window is being moved to a new position.
   void onWindowMove() {}
+
+  /// Emitted once when the window is moved to a new position.
+  ///
+  /// @platforms macos,windows
+  void onWindowMoved() {}
 
   /// Emitted when the window enters a full-screen state.
   void onWindowEnterFullScreen() {}

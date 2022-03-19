@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'resize_edge.dart';
@@ -17,7 +16,9 @@ const kWindowEventUnmaximize = 'unmaximize';
 const kWindowEventMinimize = 'minimize';
 const kWindowEventRestore = 'restore';
 const kWindowEventResize = 'resize';
+const kWindowEventResized = 'resized';
 const kWindowEventMove = 'move';
+const kWindowEventMoved = 'moved';
 const kWindowEventEnterFullScreen = 'enter-full-screen';
 const kWindowEventLeaveFullScreen = 'leave-full-screen';
 
@@ -55,7 +56,9 @@ class WindowManager {
         kWindowEventMinimize: listener.onWindowMinimize,
         kWindowEventRestore: listener.onWindowRestore,
         kWindowEventResize: listener.onWindowResize,
+        kWindowEventResized: listener.onWindowResized,
         kWindowEventMove: listener.onWindowMove,
+        kWindowEventMoved: listener.onWindowMoved,
         kWindowEventEnterFullScreen: listener.onWindowEnterFullScreen,
         kWindowEventLeaveFullScreen: listener.onWindowLeaveFullScreen,
       };
