@@ -446,7 +446,14 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     public func setIgnoreMouseEvents(_ args: [String: Any]) {
         let ignore: Bool = args["ignore"] as! Bool
+        let forward: Bool = args["forward"] as! Bool
         mainWindow.ignoresMouseEvents = ignore
+        
+        if (!ignore) {
+            mainWindow.acceptsMouseMovedEvents = false
+        } else {
+            mainWindow.acceptsMouseMovedEvents = forward
+        }
     }
     
     public func startDragging() {
@@ -544,11 +551,11 @@ public class WindowManager: NSObject, NSWindowDelegate {
             _emitEvent("unmaximize")
         }
     }
-
+    
     public func windowDidEndLiveResize(_ notification: Notification) {
         _emitEvent("resized")
     }
-
+    
     public func windowWillMove(_ notification: Notification) {
         _emitEvent("move")
     }

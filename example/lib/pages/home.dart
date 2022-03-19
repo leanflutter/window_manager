@@ -672,7 +672,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                   CupertinoButton(
                     child: Text('0.8'),
                     onPressed: () async {
-                      _opacity = 0.5;
+                      _opacity = 0.8;
                       windowManager.setOpacity(_opacity);
                       setState(() {});
                     },
@@ -693,7 +693,10 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               value: _isIgnoreMouseEvents,
               onChanged: (newValue) async {
                 _isIgnoreMouseEvents = newValue;
-                await windowManager.setIgnoreMouseEvents(_isIgnoreMouseEvents);
+                await windowManager.setIgnoreMouseEvents(
+                  _isIgnoreMouseEvents,
+                  forward: false,
+                );
                 setState(() {});
               },
             ),
@@ -713,8 +716,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _build(BuildContext context) {
     return Stack(
       children: [
         Container(
@@ -798,6 +800,23 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   }
 
   @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) {
+        if (_isIgnoreMouseEvents) {
+          windowManager.setOpacity(1.0);
+        }
+      },
+      onExit: (_) {
+        if (_isIgnoreMouseEvents) {
+          windowManager.setOpacity(0.5);
+        }
+      },
+      child: _build(context),
+    );
+  }
+
+  @override
   void onTrayIconMouseDown() {
     windowManager.show();
   }
@@ -810,6 +829,9 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   @override
   void onTrayMenuItemClick(MenuItem menuItem) async {
     switch (menuItem.key) {
+      case 'show_window':
+        await windowManager.focus();
+        break;
       case 'set_ignore_mouse_events':
         _isIgnoreMouseEvents = false;
         await windowManager.setIgnoreMouseEvents(_isIgnoreMouseEvents);

@@ -568,6 +568,7 @@ class WindowManager {
   Future<void> setIgnoreMouseEvents(bool ignore, {bool forward = false}) async {
     final Map<String, dynamic> arguments = {
       'ignore': ignore,
+      'forward': forward,
     };
     await _channel.invokeMethod('setIgnoreMouseEvents', arguments);
   }
