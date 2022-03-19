@@ -29,7 +29,7 @@ struct _WindowManagerPlugin {
   bool _is_minimized = false;
   bool _is_fullscreen = false;
   bool _is_always_on_top = false;
-  gchar* title_bar_style_ = strdup("default");
+  gchar* title_bar_style_ = strdup("normal");
   GdkEventButton _event_button = GdkEventButton{};
 };
 

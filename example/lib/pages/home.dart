@@ -578,10 +578,10 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               accessoryView: Row(
                 children: [
                   CupertinoButton(
-                    child: Text('default'),
+                    child: Text('normal'),
                     onPressed: () async {
                       windowManager.setTitleBarStyle(
-                        'default',
+                        TitleBarStyle.normal,
                         windowButtonVisibility: true,
                       );
                       setState(() {});
@@ -591,7 +591,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                     child: Text('hidden'),
                     onPressed: () async {
                       windowManager.setTitleBarStyle(
-                        'hidden',
+                        TitleBarStyle.hidden,
                         windowButtonVisibility: false,
                       );
                       setState(() {});

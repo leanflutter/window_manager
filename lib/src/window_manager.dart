@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'resize_edge.dart';
+import 'title_bar_style.dart';
 import 'window_listener.dart';
 
 const kWindowEventClose = 'close';
@@ -484,11 +485,11 @@ class WindowManager {
   ///
   /// @platforms macos,windows
   Future<void> setTitleBarStyle(
-    String titleBarStyle, {
+    TitleBarStyle titleBarStyle, {
     bool windowButtonVisibility = true,
   }) async {
     final Map<String, dynamic> arguments = {
-      'titleBarStyle': titleBarStyle,
+      'titleBarStyle': describeEnum(titleBarStyle),
       'windowButtonVisibility': windowButtonVisibility,
     };
     await _channel.invokeMethod('setTitleBarStyle', arguments);
@@ -556,7 +557,7 @@ class WindowManager {
   /// @platforms macos,windows
   Future<void> setBrightness(Brightness brightness) async {
     final Map<String, dynamic> arguments = {
-      'brightness': brightness.toString().split('.')[1],
+      'brightness': describeEnum(brightness),
     };
     await _channel.invokeMethod('setBrightness', arguments);
   }
@@ -583,7 +584,7 @@ class WindowManager {
     return _channel.invokeMethod<bool>(
       'startResizing',
       {
-        "resizeEdge": resizeEdge.toString().split('.')[1],
+        "resizeEdge": describeEnum(resizeEdge),
         "top": resizeEdge == ResizeEdge.top ||
             resizeEdge == ResizeEdge.topLeft ||
             resizeEdge == ResizeEdge.topRight,

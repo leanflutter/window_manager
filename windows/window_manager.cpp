@@ -41,7 +41,7 @@ class WindowManager {
   POINT minimum_size_ = {0, 0};
   POINT maximum_size_ = {-1, -1};
   bool is_resizable_ = true;
-  std::string title_bar_style_ = "default";
+  std::string title_bar_style_ = "normal";
   double opacity_ = 1;
 
   bool is_resizing_ = false;
@@ -301,7 +301,7 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
   if (isFullScreen) {
     flutter::EncodableMap args2 = flutter::EncodableMap();
     args2[flutter::EncodableValue("titleBarStyle")] =
-        flutter::EncodableValue("default");
+        flutter::EncodableValue("normal");
     SetTitleBarStyle(args2);
 
     // Set new window style and size.
