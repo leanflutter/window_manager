@@ -41,6 +41,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   bool _isMinimizable = true;
   bool _isClosable = true;
   bool _isAlwaysOnTop = false;
+  bool _isAlwaysOnBottom = false;
   bool _isSkipTaskbar = false;
   double _progress = 0;
   bool _hasShadow = true;
@@ -558,6 +559,19 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               onChanged: (newValue) {
                 _isAlwaysOnTop = newValue;
                 windowManager.setAlwaysOnTop(_isAlwaysOnTop);
+                setState(() {});
+              },
+            ),
+            PreferenceListSwitchItem(
+              title: Text('isAlwaysOnBottom / setAlwaysOnBottom'),
+              onTap: () async {
+                bool isAlwaysOnBottom = await windowManager.isAlwaysOnBottom();
+                BotToast.showText(text: 'isAlwaysOnBottom: $isAlwaysOnBottom');
+              },
+              value: _isAlwaysOnBottom,
+              onChanged: (newValue) {
+                _isAlwaysOnBottom = newValue;
+                windowManager.setAlwaysOnBottom(_isAlwaysOnBottom);
                 setState(() {});
               },
             ),
