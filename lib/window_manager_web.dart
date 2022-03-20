@@ -7,6 +7,7 @@ import 'dart:ui';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html show window, document;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
@@ -29,8 +30,14 @@ class WindowManagerWeb {
     }
 
     html.window.onUnload.listen((event) => invokeEvent(kWindowEventClose));
-    html.window.onFocus.listen((event) => invokeEvent(kWindowEventFocus));
-    html.window.onBlur.listen((event) => invokeEvent(kWindowEventBlur));
+    html.window.onFocus.listen((event) {
+      invokeEvent(kWindowEventFocus);
+      hasFocus = true;
+    });
+    html.window.onBlur.listen((event) {
+      invokeEvent(kWindowEventBlur);
+      hasFocus = false;
+    });
     html.document.onFullscreenChange.listen((event) {
       if (isFullScreen) {
         invokeEvent(kWindowEventMaximize);
@@ -44,6 +51,10 @@ class WindowManagerWeb {
     html.window.onResize.listen((event) => invokeEvent(kWindowEventResized));
   }
 
+  /// TODO(web): This is a current workaround.
+  /// See https://github.com/dart-lang/sdk/issues/48620
+  static bool hasFocus = true;
+
   StreamSubscription? isPreventCloseSubscription;
 
   /// Handles method calls over the MethodChannel of this plugin.
@@ -52,41 +63,41 @@ class WindowManagerWeb {
   Future<dynamic> handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'ensureInitialized':
-        return true;
+      case 'setAsFrameless':
       case 'waitUntilReadyToShow':
-        return true;
+        return;
       case 'destory':
       case 'close':
         html.window.close();
         return;
+      case 'isPreventClose':
+        return isPreventCloseSubscription != null;
       case 'setPreventClose':
         final isPreventClose = call.arguments['isPreventClose'] as bool;
         if (isPreventClose) {
           isPreventCloseSubscription =
               html.window.onBeforeUnload.listen((event) {
             // TODO (web): set prevent clsoe
+            html.window.alert('Close?');
           });
         } else {
           isPreventCloseSubscription?.cancel();
           isPreventCloseSubscription = null;
         }
         return;
-      case 'isPreventClose':
-        return isPreventCloseSubscription != null;
-      case 'blur':
-        html.window.document.documentElement?.blur();
-        return;
+      case 'show':
       case 'focus':
         html.window.document.documentElement?.focus();
         return;
+      case 'minimize':
+      case 'hide':
+      case 'blur':
+        html.window.document.documentElement?.blur();
+        return;
+      case 'isFocused':
+        return hasFocus;
       case 'isVisible':
         return !(html.document.hidden ?? true);
-      case 'getSize':
-        final int width = html.window.innerWidth ?? html.window.outerWidth;
-        final int height = html.window.innerHeight ?? html.window.outerHeight;
-        return {'height': height.toDouble(), 'width': width.toDouble()};
-      case 'getPosition':
-        return {'x': 0.0, 'h': 0.0};
       case 'isClosable':
         // See https://stackoverflow.com/questions/30575988/how-know-if-a-window-can-be-closed-with-js
         return html.window.opener != null;
@@ -116,6 +127,10 @@ class WindowManagerWeb {
           html.document.exitFullscreen();
         }
         return;
+      case 'isMinimized':
+        return html.document.hidden ?? false;
+      case 'minimize':
+        return;
       case 'setBackgroundColor':
         int a = call.arguments['backgroundColorA'];
         int r = call.arguments['backgroundColorR'];
@@ -125,12 +140,37 @@ class WindowManagerWeb {
         final element = html.document.documentElement;
         element?.style.background = Color.fromARGB(a, r, g, b).toHex();
         return;
+      case 'getSize':
+        final int width = html.window.innerWidth ?? html.window.outerWidth;
+        final int height = html.window.innerHeight ?? html.window.outerHeight;
+        return {'height': height.toDouble(), 'width': width.toDouble()};
+      case 'getPosition':
+        return {'x': 0.0, 'h': 0.0};
+      case 'getTitleBarHeight':
+        return;
+      case 'createSubWindow':
+        String title = call.arguments['title'];
+        double? width = call.arguments['width'];
+        double? height = call.arguments['height'];
+        double? left = call.arguments['x'];
+        double? top = call.arguments['y'];
+        html.window.open(
+          'localhost',
+          title,
+          (width != null ? 'width=$width,' : '') +
+              (height != null ? 'height=$height,' : '') +
+              (top != null ? 'top=$top,' : '') +
+              (left != null ? 'left=$left,' : ''),
+        );
+        return;
       default:
-        throw PlatformException(
+        // Do not throw
+        final exception = PlatformException(
           code: 'Unimplemented',
           details:
               'window_manager for web doesn\'t implement \'${call.method}\'',
         );
+        debugPrint(exception.toString());
     }
   }
 
