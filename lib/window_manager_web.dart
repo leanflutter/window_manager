@@ -66,7 +66,7 @@ class WindowManagerWeb {
       case 'setAsFrameless':
       case 'waitUntilReadyToShow':
         return;
-      case 'destory':
+      case 'destroy':
       case 'close':
         html.window.close();
         return;
@@ -148,6 +148,15 @@ class WindowManagerWeb {
         return {'x': 0.0, 'h': 0.0};
       case 'getTitleBarHeight':
         return;
+      case 'getPrimaryDisplay':
+        final int width = html.window.innerWidth ?? html.window.outerWidth;
+        final int height = html.window.innerHeight ?? html.window.outerHeight;
+        return {
+          'size': {
+            'width': width,
+            'height': height,
+          }
+        };
       case 'createSubWindow':
         String title = call.arguments['title'];
         double? width = call.arguments['width'];
@@ -163,6 +172,8 @@ class WindowManagerWeb {
               (left != null ? 'left=$left,' : ''),
         );
         return;
+      case 'getOpacity':
+        return 1.0;
       default:
         // Do not throw
         final exception = PlatformException(

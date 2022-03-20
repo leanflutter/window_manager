@@ -1,7 +1,8 @@
-import 'dart:io';
+// import 'dart:io';
 
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:preference_list/preference_list.dart';
 import 'package:tray_manager/tray_manager.dart';
@@ -64,8 +65,9 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   }
 
   void _init() async {
+    if (kIsWeb) return;
     await trayManager.setIcon(
-      Platform.isWindows
+      defaultTargetPlatform == TargetPlatform.windows
           ? 'images/tray_icon_original.ico'
           : 'images/tray_icon_original.png',
     );
@@ -779,7 +781,8 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                     ),
                   ),
                 ),
-                if (Platform.isLinux || Platform.isWindows)
+                if ([TargetPlatform.linux, TargetPlatform.windows]
+                    .contains(defaultTargetPlatform))
                   Container(
                     height: 100,
                     margin: EdgeInsets.all(20),
