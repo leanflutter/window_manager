@@ -131,8 +131,6 @@ class WindowManagerWeb {
         return;
       case 'isMinimized':
         return html.document.hidden ?? false;
-      case 'minimize':
-        return;
       case 'setBackgroundColor':
         int a = call.arguments['backgroundColorA'];
         int r = call.arguments['backgroundColorR'];
@@ -149,7 +147,7 @@ class WindowManagerWeb {
       case 'getPosition':
         return {'x': 0.0, 'h': 0.0};
       case 'getTitleBarHeight':
-        return;
+        return 0.0;
       case 'getPrimaryDisplay':
         final int width = html.window.innerWidth ?? html.window.outerWidth;
         final int height = html.window.innerHeight ?? html.window.outerHeight;
