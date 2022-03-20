@@ -68,6 +68,8 @@ class WindowManagerWeb {
         return;
       case 'destroy':
       case 'close':
+        // This only closes windows that have been opened using `createSubWindow`
+        // See: https://stackoverflow.com/a/4553527/11622876
         html.window.close();
         return;
       case 'isPreventClose':
