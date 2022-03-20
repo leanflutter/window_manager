@@ -15,6 +15,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -29,6 +31,9 @@ flutter:
         pluginClass: WindowManagerPlugin
       windows:
         pluginClass: WindowManagerPlugin
+      web:
+        pluginClass: WindowManagerWeb
+        fileName: window_manager_web.dart
   assets:
     - images/ic_chrome_close.png
     - images/ic_chrome_maximize.png
