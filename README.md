@@ -75,6 +75,8 @@ English | [简体中文](./README-ZH.md)
         - [setClosable  `macos`  `windows`](#setclosable--macos--windows)
         - [isAlwaysOnTop](#isalwaysontop)
         - [setAlwaysOnTop](#setalwaysontop)
+        - [isAlwaysOnBottom `linux`](#isalwaysonbottom-linux)
+        - [setAlwaysOnBottom `linux`](#setalwaysonbottom-linux)
         - [getTitle](#gettitle)
         - [setTitle](#settitle)
         - [setTitleBarStyle  `macos`  `windows`](#settitlebarstyle--macos--windows)
@@ -615,6 +617,14 @@ Returns `bool` - Whether the window is always on top of other windows.
 ##### setAlwaysOnTop
 
 Sets whether the window should show always on top of other windows.
+
+##### isAlwaysOnBottom `linux`
+
+Returns `bool` - Whether the window is always below other windows.
+
+##### setAlwaysOnBottom `linux`
+
+Sets whether the window should show always below other windows.
 
 ##### getTitle
 

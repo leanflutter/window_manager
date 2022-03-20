@@ -468,6 +468,19 @@ class WindowManager {
     await _channel.invokeMethod('setAlwaysOnTop', arguments);
   }
 
+  /// Returns `bool` - Whether the window is always below other windows.
+  Future<bool> isAlwaysOnBottom() async {
+    return await _channel.invokeMethod('isAlwaysOnBottom');
+  }
+
+  /// Sets whether the window should show always below other windows.
+  Future<void> setAlwaysOnBottom(bool isAlwaysOnBottom) async {
+    final Map<String, dynamic> arguments = {
+      'isAlwaysOnBottom': isAlwaysOnBottom,
+    };
+    await _channel.invokeMethod('setAlwaysOnBottom', arguments);
+  }
+
   /// Returns `String` - The title of the native window.
   Future<String> getTitle() async {
     return await _channel.invokeMethod('getTitle');

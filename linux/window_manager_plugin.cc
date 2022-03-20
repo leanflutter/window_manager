@@ -29,6 +29,7 @@ struct _WindowManagerPlugin {
   bool _is_minimized = false;
   bool _is_fullscreen = false;
   bool _is_always_on_top = false;
+  bool _is_always_on_bottom = false;
   gchar* title_bar_style_ = strdup("normal");
   GdkEventButton _event_button = GdkEventButton{};
 };
@@ -354,6 +355,27 @@ static FlMethodResponse* set_always_on_top(WindowManagerPlugin* self,
       fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse* is_always_on_bottom(WindowManagerPlugin* self) {
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(
+      fl_value_new_bool(self->_is_always_on_bottom))
+  );
+}
+
+static FlMethodResponse* set_always_on_bottom(
+  WindowManagerPlugin* self,
+  FlValue* args) {
+  bool isAlwaysOnBottom = fl_value_get_bool(
+    fl_value_lookup_string(args, "isAlwaysOnBottom")
+  );
+
+  gtk_window_set_keep_below(get_window(self), isAlwaysOnBottom);
+  self->_is_always_on_bottom = isAlwaysOnBottom;
+
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(
+      fl_value_new_bool(true)
+    ));
+}
+
 static FlMethodResponse* get_title(WindowManagerPlugin* self) {
   const gchar* title = gtk_window_get_title(get_window(self));
   return FL_METHOD_RESPONSE(
@@ -567,6 +589,10 @@ static void window_manager_plugin_handle_method_call(
     response = is_always_on_top(self);
   } else if (strcmp(method, "setAlwaysOnTop") == 0) {
     response = set_always_on_top(self, args);
+  } else if (strcmp(method, "isAlwaysOnBottom") == 0) {
+    response = is_always_on_bottom(self);
+  } else if (strcmp(method, "setAlwaysOnBottom") == 0) {
+    response = set_always_on_bottom(self, args);
   } else if (strcmp(method, "getTitle") == 0) {
     response = get_title(self);
   } else if (strcmp(method, "setTitle") == 0) {
