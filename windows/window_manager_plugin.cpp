@@ -111,7 +111,9 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
   if (message == WM_NCCALCSIZE) {
     if (wParam && window_manager->is_frameless_) {
       SetWindowLong(hWnd, 0, 0);
-      return 1;
+      NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+      sz->rgrc[0].bottom += 1;
+      return (WVR_HREDRAW | WVR_VREDRAW);
     }
 
     if (wParam && window_manager->title_bar_style_ == "hidden") {

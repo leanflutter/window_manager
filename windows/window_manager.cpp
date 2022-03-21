@@ -129,7 +129,7 @@ void WindowManager::SetAsFrameless() {
   MARGINS margins = {0, 0, 0, 0};
 
   GetWindowRect(hWnd, &rect);
-  SetWindowLong(hWnd, GWL_STYLE, WS_POPUP | WS_CAPTION | WS_VISIBLE);
+  SetWindowLong(hWnd, GWL_STYLE, WS_POPUP            | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_VISIBLE);
   DwmExtendFrameIntoClientArea(hWnd, &margins);
   SetWindowPos(hWnd, nullptr, rect.left, rect.top, rect.right - rect.left,
                rect.bottom - rect.top,
@@ -564,11 +564,21 @@ void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args) {
 
   HWND hWnd = GetMainWindow();
   DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
+  // Enables the ability to go from setAsFrameless() to TitleBarStyle.normal/hidden
+  is_frameless_ = false;
   if (title_bar_style_ == "hidden") {
-    gwlStyle = gwlStyle | WS_POPUP;
+    gwlStyle = WS_POPUP            | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_VISIBLE;
     SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
-  } else {
-    gwlStyle = gwlStyle & ~WS_POPUP;
+	BOOL composition_enabled = FALSE;
+	bool success = DwmIsCompositionEnabled(&composition_enabled) == S_OK;
+	if (composition_enabled && success) {
+		static const MARGINS shadow_state[2]{ { 0,0,0,0 },{ 1,1,1,1 } };
+		DwmExtendFrameIntoClientArea(hWnd, &shadow_state[0]);
+		ShowWindow(hWnd, SW_SHOW);
+	}
+  } 
+  else {
+    gwlStyle = WS_OVERLAPPEDWINDOW | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE;
     SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
   }
 
