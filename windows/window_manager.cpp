@@ -569,6 +569,13 @@ void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args) {
   if (title_bar_style_ == "hidden") {
     gwlStyle = WS_POPUP            | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
     SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
+	BOOL composition_enabled = FALSE;
+	bool success = DwmIsCompositionEnabled(&composition_enabled) == S_OK;
+	if (composition_enabled && success) {
+		static const MARGINS shadow_state[2]{ { 0,0,0,0 },{ 1,1,1,1 } };
+		DwmExtendFrameIntoClientArea(hWnd, &shadow_state[0]);
+		ShowWindow(hWnd, SW_SHOW);
+	}
   } 
   else {
     gwlStyle = WS_OVERLAPPEDWINDOW | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
