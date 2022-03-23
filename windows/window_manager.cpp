@@ -296,6 +296,7 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
     g_ex_style_before_fullscreen = GetWindowLong(mainWindow, GWL_EXSTYLE);
     ::GetWindowRect(mainWindow, &g_frame_before_fullscreen);
     g_title_bar_style_before_fullscreen = title_bar_style_;
+	g_is_frameless_before_fullscreen = is_frameless_;
   }
 
   if (isFullScreen) {
@@ -323,10 +324,14 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
                    SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     ::SendMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
   } else {
-    flutter::EncodableMap args2 = flutter::EncodableMap();
-    args2[flutter::EncodableValue("titleBarStyle")] =
-        flutter::EncodableValue(g_title_bar_style_before_fullscreen);
-    SetTitleBarStyle(args2);
+	if (g_is_frameless_before_fullscreen) {
+		SetAsFrameless();
+	} else {
+		flutter::EncodableMap args2 = flutter::EncodableMap();
+		args2[flutter::EncodableValue("titleBarStyle")] =
+			flutter::EncodableValue(g_title_bar_style_before_fullscreen);
+		SetTitleBarStyle(args2);
+	}
 
     ::SetWindowLong(mainWindow, GWL_STYLE, g_style_before_fullscreen);
     ::SetWindowLong(mainWindow, GWL_EXSTYLE, g_ex_style_before_fullscreen);
