@@ -109,19 +109,19 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
   std::optional<LRESULT> result = std::nullopt;
 
   if (message == WM_NCCALCSIZE) {
-		//This must always be first or else the one of other two ifs will execute
-		// when window is in full screen and we don't want that
+    // This must always be first or else the one of other two ifs will execute
+    //  when window is in full screen and we don't want that
     if (wParam && window_manager->IsFullScreen()) {
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
       sz->rgrc[0].bottom -= 3;
       return 0;
     }
 
-		//This must always be before handling title_bar_style_ == "hidden" so 
-		// the if TitleBarStyle.hidden doesn't get executed.
+    // This must always be before handling title_bar_style_ == "hidden" so
+    //  the if TitleBarStyle.hidden doesn't get executed.
     if (wParam && window_manager->is_frameless_) {
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-			// Add borders when maximized so app doesn't get cut off.
+      // Add borders when maximized so app doesn't get cut off.
       if (window_manager->IsMaximized()) {
         sz->rgrc[0].left += 8;
         sz->rgrc[0].top += 8;
@@ -132,25 +132,26 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       return 0;
     }
 
-		//This must always be last.
+    // This must always be last.
     if (wParam && window_manager->title_bar_style_ == "hidden") {
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 
-      // Add 8 pixel to the top border when maximized so the app isn't cut off
+      // Add 8 pixel to the top border when maximized so the app isn't cut offa
+      // sdasd asd
       if (window_manager->IsMaximized()) {
         sz->rgrc[0].top += 8;
       } else {
-			// on windows 10, if set to 0, there's a white line at the top
-			// of the app and I've yet to find a way to remove that.
+        // on windows 10, if set to 0, there's a white line at the top
+        // of the app and I've yet to find a way to remove that.
         sz->rgrc[0].top += IsWindows11OrGreater() ? 0 : 1;
       }
       sz->rgrc[0].right -= 8;
       sz->rgrc[0].bottom -= 8;
       sz->rgrc[0].left -= -8;
 
-      // Previously (WVR_HREDRAW | WVR_VREDRAW), but returning 0 or 1 doesn't 
-			//actually break anything so I've set it to 0. Unless someone pointed a 
-			//problem in the future.
+      // Previously (WVR_HREDRAW | WVR_VREDRAW), but returning 0 or 1 doesn't
+      // actually break anything so I've set it to 0. Unless someone pointed a
+      // problem in the future.
       return 0;
     }
   } else if (message == WM_NCHITTEST) {
