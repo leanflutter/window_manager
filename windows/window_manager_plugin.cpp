@@ -109,21 +109,21 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
   std::optional<LRESULT> result = std::nullopt;
 
   if (message == WM_NCCALCSIZE) {
-	if (wParam && window_manager->IsFullScreen()) {
+    if (wParam && window_manager->IsFullScreen()) {
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-	  sz->rgrc[0].bottom -= 3;
+      sz->rgrc[0].bottom -= 3;
       return (WVR_HREDRAW | WVR_VREDRAW);
-	}
-	
+    }
+
     if (wParam && window_manager->is_frameless_) {
       SetWindowLong(hWnd, 0, 0);
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-	  if (window_manager->IsMaximized()) {
-		  sz->rgrc[0].left += 8;
-		  sz->rgrc[0].top += 8;
-		  sz->rgrc[0].right -= 8;
-		  sz->rgrc[0].bottom -= 9;
-	  }
+      if (window_manager->IsMaximized()) {
+        sz->rgrc[0].left += 8;
+        sz->rgrc[0].top += 8;
+        sz->rgrc[0].right -= 8;
+        sz->rgrc[0].bottom -= 9;
+      }
       sz->rgrc[0].bottom += 1;
       return (WVR_HREDRAW | WVR_VREDRAW);
     }
