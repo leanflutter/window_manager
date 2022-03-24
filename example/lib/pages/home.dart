@@ -116,6 +116,12 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
           title: Text('METHODS'),
           children: [
             PreferenceListItem(
+              title: Text('setAsFrameless'),
+              onTap: () async {
+                await windowManager.setAsFrameless();
+              },
+            ),
+            PreferenceListItem(
               title: Text('close'),
               onTap: () async {
                 await windowManager.close();
