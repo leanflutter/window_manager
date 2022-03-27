@@ -136,8 +136,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     if (wParam && window_manager->title_bar_style_ == "hidden") {
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 
-      // Add 8 pixel to the top border when maximized so the app isn't cut offa
-      // sdasd asd
+      // Add 8 pixel to the top border when maximized so the app isn't cut off
       if (window_manager->IsMaximized()) {
         sz->rgrc[0].top += 8;
       } else {
