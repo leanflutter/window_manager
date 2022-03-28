@@ -128,6 +128,8 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
         sz->rgrc[0].right -= 8;
         sz->rgrc[0].bottom -= 9;
       }
+      // This cuts the app at the bottom by one pixel but that's necessary to
+      // prevent jitter when resizing the app
       sz->rgrc[0].bottom += 1;
       return 0;
     }
@@ -458,6 +460,14 @@ void WindowManagerPlugin::HandleMethodCall(
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->SetProgressBar(args);
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("hasShadow") == 0) {
+    bool value = window_manager->HasShadow();
+    result->Success(flutter::EncodableValue(value));
+  } else if (method_name.compare("setHasShadow") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->SetHasShadow(args);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("getOpacity") == 0) {
     double value = window_manager->GetOpacity();

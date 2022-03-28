@@ -35,6 +35,7 @@ class WindowManager {
 
   int last_state = STATE_NORMAL;
 
+  bool has_shadow_ = false;
   bool is_frameless_ = false;
   bool is_prevent_close_ = false;
   double aspect_ratio_ = 0;
@@ -127,6 +128,7 @@ void WindowManager::SetAsFrameless() {
   HWND hWnd = GetMainWindow();
 
   RECT rect;
+
   GetWindowRect(hWnd, &rect);
   SetWindowPos(hWnd, nullptr, rect.left, rect.top, rect.right - rect.left,
                rect.bottom - rect.top,
@@ -554,12 +556,13 @@ void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args) {
       std::get<std::string>(args.at(flutter::EncodableValue("titleBarStyle")));
   // Enables the ability to go from setAsFrameless() to
   // TitleBarStyle.normal/hidden
-	
   is_frameless_ = false;
 
+  MARGINS margins = {0, 0, 0, 0};
   HWND hWnd = GetMainWindow();
   RECT rect;
   GetWindowRect(hWnd, &rect);
+  DwmExtendFrameIntoClientArea(hWnd, &margins);
   SetWindowPos(hWnd, nullptr, rect.left, rect.top, 0, 0,
                SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOSIZE |
                    SWP_FRAMECHANGED);
@@ -616,6 +619,24 @@ void WindowManager::SetProgressBar(const flutter::EncodableMap& args) {
     taskbar_->SetProgressState(hWnd, TBPF_INDETERMINATE);
     taskbar_->SetProgressValue(hWnd, static_cast<int32_t>(progress * 100),
                                static_cast<int32_t>(100));
+  }
+}
+
+bool WindowManager::HasShadow() {
+  if (is_frameless_)
+    return has_shadow_;
+  return true;
+}
+
+void WindowManager::SetHasShadow(const flutter::EncodableMap& args) {
+  if (is_frameless_) {
+    has_shadow_ = std::get<bool>(args.at(flutter::EncodableValue("hasShadow")));
+
+    HWND hWnd = GetMainWindow();
+
+    MARGINS margins[2]{{0, 0, 0, 0}, {0, 0, 1, 0}};
+
+    DwmExtendFrameIntoClientArea(hWnd, &margins[has_shadow_]);
   }
 }
 

@@ -653,14 +653,14 @@ Makes the window not show in the taskbar / dock.
 Sets progress value in progress bar. Valid range is [0, 1.0].
 
 
-##### hasShadow  `macos`
+##### hasShadow  `macos`  `windows`
 
-Returns `bool` - Whether the window has a shadow.
+Returns `bool` - Whether the window has a shadow. On Windows, always returns true unless window is frameless.
 
 
-##### setHasShadow  `macos`
+##### setHasShadow  `macos`  `windows`
 
-Sets whether the window should have a shadow.
+Sets whether the window should have a shadow. On Windows, doesn't do anything unless window is frameless.
 
 
 ##### getOpacity  `macos`  `windows`
