@@ -531,16 +531,16 @@ class WindowManager {
     await _channel.invokeMethod('setProgressBar', arguments);
   }
 
-  /// Returns `bool` - Whether the window has a shadow.
+  /// Returns `bool` - Whether the window has a shadow. On Windows, always returns true unless window is frameless.
   ///
-  /// @platforms macos
+  /// @platforms macos,windows
   Future<bool> hasShadow() async {
     return await _channel.invokeMethod('hasShadow');
   }
 
-  /// Sets whether the window should have a shadow.
+  /// Sets whether the window should have a shadow. On Windows, doesn't do anything unless window is frameless.
   ///
-  /// @platforms macos
+  /// @platforms macos,windows
   Future<void> setHasShadow(bool hasShadow) async {
     final Map<String, dynamic> arguments = {
       'hasShadow': hasShadow,

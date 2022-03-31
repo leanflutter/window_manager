@@ -35,6 +35,7 @@ class WindowManager {
 
   int last_state = STATE_NORMAL;
 
+  bool has_shadow_ = false;
   bool is_frameless_ = false;
   bool is_prevent_close_ = false;
   double aspect_ratio_ = 0;
@@ -127,28 +128,12 @@ void WindowManager::SetAsFrameless() {
   HWND hWnd = GetMainWindow();
 
   RECT rect;
-  MARGINS margins = {0, 0, 0, 0};
 
   GetWindowRect(hWnd, &rect);
-  SetWindowLong(hWnd, GWL_STYLE,
-                WS_POPUP | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU |
-                    WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_VISIBLE);
-  DwmExtendFrameIntoClientArea(hWnd, &margins);
   SetWindowPos(hWnd, nullptr, rect.left, rect.top, rect.right - rect.left,
                rect.bottom - rect.top,
                SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOSIZE |
                    SWP_FRAMECHANGED);
-
-  flutter::EncodableMap args = flutter::EncodableMap();
-  args[flutter::EncodableValue("backgroundColorA")] =
-      flutter::EncodableValue(0);
-  args[flutter::EncodableValue("backgroundColorR")] =
-      flutter::EncodableValue(0);
-  args[flutter::EncodableValue("backgroundColorG")] =
-      flutter::EncodableValue(0);
-  args[flutter::EncodableValue("backgroundColorB")] =
-      flutter::EncodableValue(0);
-  SetBackgroundColor(args);
 }
 
 void WindowManager::WaitUntilReadyToShow() {
@@ -569,31 +554,15 @@ void WindowManager::SetTitle(const flutter::EncodableMap& args) {
 void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args) {
   title_bar_style_ =
       std::get<std::string>(args.at(flutter::EncodableValue("titleBarStyle")));
-
-  HWND hWnd = GetMainWindow();
-  DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
   // Enables the ability to go from setAsFrameless() to
   // TitleBarStyle.normal/hidden
   is_frameless_ = false;
-  if (title_bar_style_ == "hidden") {
-    gwlStyle = WS_POPUP | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU |
-               WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_VISIBLE;
-    SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
-    BOOL composition_enabled = FALSE;
-    bool success = DwmIsCompositionEnabled(&composition_enabled) == S_OK;
-    if (composition_enabled && success) {
-      static const MARGINS shadow_state[2]{{0, 0, 0, 0}, {1, 1, 1, 1}};
-      DwmExtendFrameIntoClientArea(hWnd, &shadow_state[0]);
-      ShowWindow(hWnd, SW_SHOW);
-    }
-  } else {
-    gwlStyle = WS_OVERLAPPEDWINDOW | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU |
-               WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_VISIBLE;
-    SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
-  }
 
+  MARGINS margins = {0, 0, 0, 0};
+  HWND hWnd = GetMainWindow();
   RECT rect;
   GetWindowRect(hWnd, &rect);
+  DwmExtendFrameIntoClientArea(hWnd, &margins);
   SetWindowPos(hWnd, nullptr, rect.left, rect.top, 0, 0,
                SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOSIZE |
                    SWP_FRAMECHANGED);
@@ -650,6 +619,24 @@ void WindowManager::SetProgressBar(const flutter::EncodableMap& args) {
     taskbar_->SetProgressState(hWnd, TBPF_INDETERMINATE);
     taskbar_->SetProgressValue(hWnd, static_cast<int32_t>(progress * 100),
                                static_cast<int32_t>(100));
+  }
+}
+
+bool WindowManager::HasShadow() {
+  if (is_frameless_)
+    return has_shadow_;
+  return true;
+}
+
+void WindowManager::SetHasShadow(const flutter::EncodableMap& args) {
+  if (is_frameless_) {
+    has_shadow_ = std::get<bool>(args.at(flutter::EncodableValue("hasShadow")));
+
+    HWND hWnd = GetMainWindow();
+
+    MARGINS margins[2]{{0, 0, 0, 0}, {0, 0, 1, 0}};
+
+    DwmExtendFrameIntoClientArea(hWnd, &margins[has_shadow_]);
   }
 }
 
