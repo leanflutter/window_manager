@@ -730,8 +730,12 @@ flutter::EncodableMap WindowManager::GetPrimaryDisplay(
   double visibleHeight =
       (info.rcWork.bottom - info.rcWork.top) / devicePixelRatio;
 
+  double x = (info.rcWork.left) / devicePixelRatio;
+  double y = (info.rcWork.top) / devicePixelRatio;
+
   flutter::EncodableMap size = flutter::EncodableMap();
   flutter::EncodableMap visibleSize = flutter::EncodableMap();
+  flutter::EncodableMap visiblePosition = flutter::EncodableMap();
 
   size[flutter::EncodableValue("width")] = flutter::EncodableValue(width);
   size[flutter::EncodableValue("height")] = flutter::EncodableValue(height);
@@ -741,10 +745,15 @@ flutter::EncodableMap WindowManager::GetPrimaryDisplay(
   visibleSize[flutter::EncodableValue("height")] =
       flutter::EncodableValue(visibleHeight);
 
+  visiblePosition[flutter::EncodableValue("x")] = flutter::EncodableValue(x);
+  visiblePosition[flutter::EncodableValue("y")] = flutter::EncodableValue(y);
+
   flutter::EncodableMap display = flutter::EncodableMap();
   display[flutter::EncodableValue("size")] = flutter::EncodableValue(size);
   display[flutter::EncodableValue("visibleSize")] =
       flutter::EncodableValue(visibleSize);
+  display[flutter::EncodableValue("visiblePosition")] =
+      flutter::EncodableValue(visiblePosition);
 
   return display;
 }
