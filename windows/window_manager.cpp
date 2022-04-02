@@ -720,15 +720,31 @@ flutter::EncodableMap WindowManager::GetPrimaryDisplay(
   info.cbSize = sizeof(MONITORINFO);
   ::GetMonitorInfo(monitor, &info);
 
-  double width = (info.rcWork.right - info.rcWork.left) / devicePixelRatio;
-  double height = (info.rcWork.bottom - info.rcWork.top) / devicePixelRatio;
+  double width =
+      (info.rcMonitor.right - info.rcMonitor.left) / devicePixelRatio;
+  double height =
+      (info.rcMonitor.bottom - info.rcMonitor.top) / devicePixelRatio;
+
+  double visibleWidth =
+      (info.rcWork.right - info.rcWork.left) / devicePixelRatio;
+  double visibleHeight =
+      (info.rcWork.bottom - info.rcWork.top) / devicePixelRatio;
 
   flutter::EncodableMap size = flutter::EncodableMap();
+  flutter::EncodableMap visibleSize = flutter::EncodableMap();
+
   size[flutter::EncodableValue("width")] = flutter::EncodableValue(width);
   size[flutter::EncodableValue("height")] = flutter::EncodableValue(height);
 
+  visibleSize[flutter::EncodableValue("width")] =
+      flutter::EncodableValue(visibleWidth);
+  visibleSize[flutter::EncodableValue("height")] =
+      flutter::EncodableValue(visibleHeight);
+
   flutter::EncodableMap display = flutter::EncodableMap();
   display[flutter::EncodableValue("size")] = flutter::EncodableValue(size);
+  display[flutter::EncodableValue("visibleSize")] =
+      flutter::EncodableValue(visibleSize);
 
   return display;
 }
