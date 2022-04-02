@@ -256,6 +256,7 @@ class WindowManager {
 
     num visibleWidth = primaryDisplay['size']['width'];
     num visibleHeight = primaryDisplay['size']['height'];
+    num visibleStartX = 0;
     num visibleStartY = 0;
 
     if (primaryDisplay['visibleSize'] != null) {
@@ -263,6 +264,7 @@ class WindowManager {
       visibleHeight = primaryDisplay['visibleSize']['height'];
     }
     if (primaryDisplay['visiblePosition'] != null) {
+      visibleStartX = primaryDisplay['visiblePosition']['x'];
       visibleStartY = primaryDisplay['visiblePosition']['y'];
     }
     Offset position = Offset(0, 0);
@@ -271,42 +273,42 @@ class WindowManager {
       position = Offset(0, 0);
     } else if (alignment == Alignment.topCenter) {
       position = Offset(
-        (visibleWidth / 2) - (windowSize.width / 2),
+        visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),
         visibleStartY + 0,
       );
     } else if (alignment == Alignment.topRight) {
       position = Offset(
-        visibleWidth - windowSize.width,
+        visibleStartX + visibleWidth - windowSize.width,
         visibleStartY + 0,
       );
     } else if (alignment == Alignment.centerLeft) {
       position = Offset(
-        0,
+        visibleStartX + 0,
         visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
       );
     } else if (alignment == Alignment.center) {
       position = Offset(
-        (visibleWidth / 2) - (windowSize.width / 2),
+        visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),
         visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
       );
     } else if (alignment == Alignment.centerRight) {
       position = Offset(
-        visibleWidth - windowSize.width,
+        visibleStartX + visibleWidth - windowSize.width,
         visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
       );
     } else if (alignment == Alignment.bottomLeft) {
       position = Offset(
-        0,
+        visibleStartX + 0,
         visibleStartY + (visibleHeight - windowSize.height),
       );
     } else if (alignment == Alignment.bottomCenter) {
       position = Offset(
-        (visibleWidth / 2) - (windowSize.width / 2),
+        visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),
         visibleStartY + (visibleHeight - windowSize.height),
       );
     } else if (alignment == Alignment.bottomRight) {
       position = Offset(
-        visibleWidth - windowSize.width,
+        visibleStartX + visibleWidth - windowSize.width,
         visibleStartY + (visibleHeight - windowSize.height),
       );
     }
@@ -321,6 +323,7 @@ class WindowManager {
 
     num visibleWidth = primaryDisplay['size']['width'];
     num visibleHeight = primaryDisplay['size']['height'];
+    num visibleStartX = 0;
     num visibleStartY = 0;
 
     if (primaryDisplay['visibleSize'] != null) {
@@ -328,11 +331,12 @@ class WindowManager {
       visibleHeight = primaryDisplay['visibleSize']['height'];
     }
     if (primaryDisplay['visiblePosition'] != null) {
+      visibleStartX = primaryDisplay['visiblePosition']['x'];
       visibleStartY = primaryDisplay['visiblePosition']['y'];
     }
 
     Offset position = Offset(
-      (visibleWidth / 2) - (windowSize.width / 2),
+      visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),
       visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
     );
 
