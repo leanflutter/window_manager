@@ -720,10 +720,8 @@ flutter::EncodableMap WindowManager::GetPrimaryDisplay(
   info.cbSize = sizeof(MONITORINFO);
   ::GetMonitorInfo(monitor, &info);
 
-  double width =
-      (info.rcMonitor.right - info.rcMonitor.left) / devicePixelRatio;
-  double height =
-      (info.rcMonitor.bottom - info.rcMonitor.top) / devicePixelRatio;
+  double width = (info.rcWork.right - info.rcWork.left) / devicePixelRatio;
+  double height = (info.rcWork.bottom - info.rcWork.top) / devicePixelRatio;
 
   flutter::EncodableMap size = flutter::EncodableMap();
   size[flutter::EncodableValue("width")] = flutter::EncodableValue(width);
