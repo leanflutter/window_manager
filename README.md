@@ -75,16 +75,16 @@ English | [简体中文](./README-ZH.md)
         - [setClosable  `macos`  `windows`](#setclosable--macos--windows)
         - [isAlwaysOnTop](#isalwaysontop)
         - [setAlwaysOnTop](#setalwaysontop)
-        - [isAlwaysOnBottom `linux`](#isalwaysonbottom-linux)
-        - [setAlwaysOnBottom `linux`](#setalwaysonbottom-linux)
+        - [isAlwaysOnBottom](#isalwaysonbottom)
+        - [setAlwaysOnBottom  `linux`](#setalwaysonbottom--linux)
         - [getTitle](#gettitle)
         - [setTitle](#settitle)
         - [setTitleBarStyle  `macos`  `windows`](#settitlebarstyle--macos--windows)
-        - [getTitleBarHeight  `macos`  `windows`](#gettitlebarheight--macos--windows)
+        - [getTitleBarHeight](#gettitlebarheight)
         - [setSkipTaskbar](#setskiptaskbar)
         - [setProgressBar  `macos`](#setprogressbar--macos)
-        - [hasShadow  `macos`](#hasshadow--macos)
-        - [setHasShadow  `macos`](#sethasshadow--macos)
+        - [hasShadow  `macos`  `windows`](#hasshadow--macos--windows)
+        - [setHasShadow  `macos`  `windows`](#sethasshadow--macos--windows)
         - [getOpacity  `macos`  `windows`](#getopacity--macos--windows)
         - [setOpacity  `macos`  `windows`](#setopacity--macos--windows)
         - [setBrightness  `macos`  `windows`](#setbrightness--macos--windows)
@@ -101,7 +101,9 @@ English | [简体中文](./README-ZH.md)
         - [onWindowMinimize](#onwindowminimize)
         - [onWindowRestore](#onwindowrestore)
         - [onWindowResize](#onwindowresize)
+        - [onWindowResized  `macos`  `windows`](#onwindowresized--macos--windows)
         - [onWindowMove](#onwindowmove)
+        - [onWindowMoved  `macos`  `windows`](#onwindowmoved--macos--windows)
         - [onWindowEnterFullScreen](#onwindowenterfullscreen)
         - [onWindowLeaveFullScreen](#onwindowleavefullscreen)
         - [onWindowEvent](#onwindowevent)
@@ -123,7 +125,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.2.0
+  window_manager: ^0.2.1
 ```
 
 Or
@@ -618,13 +620,14 @@ Returns `bool` - Whether the window is always on top of other windows.
 
 Sets whether the window should show always on top of other windows.
 
-##### isAlwaysOnBottom `linux`
+##### isAlwaysOnBottom
 
 Returns `bool` - Whether the window is always below other windows.
 
-##### setAlwaysOnBottom `linux`
+##### setAlwaysOnBottom  `linux`
 
 Sets whether the window should show always below other windows.
+
 
 ##### getTitle
 
@@ -639,10 +642,9 @@ Changes the title of native window to title.
 Changes the title bar style of native window.
 
 
-##### getTitleBarHeight  `macos`  `windows`
+##### getTitleBarHeight
 
 Returns `int` - The title bar height of the native window.
-
 
 ##### setSkipTaskbar
 
@@ -729,9 +731,19 @@ Emitted when the window is restored from a minimized state.
 
 Emitted after the window has been resized.
 
+##### onWindowResized  `macos`  `windows`
+
+Emitted once when the window has finished being resized.
+
+
 ##### onWindowMove
 
 Emitted when the window is being moved to a new position.
+
+##### onWindowMoved  `macos`  `windows`
+
+Emitted once when the window is moved to a new position.
+
 
 ##### onWindowEnterFullScreen
 

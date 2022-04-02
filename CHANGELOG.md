@@ -1,3 +1,16 @@
+## 0.2.1
+
+- Compatible with lower versions of dart #98
+- [macos & windows] Add `resized`, `moved` events. #28
+- [linux] Implement `getTitleBarHeight` metnod #49
+- [linux] Implement `getOpacity` metnod #44
+- Add `TitleBarStyle` enum #99
+- [linux] Implement `setAlwaysOnBottom` method #100
+- [windows] Removes crazy jittering when resizing window #103
+- [windows] Fix overflow on fullscreen and maximize #105
+- [windows] Implement `setHasShadow` and `hasShadow` methods #110
+- [windows] Fix setAlignment(Alignment.bottomRight) display position is not correct #112 #113
+
 ## 0.2.0
 
 - [linux] Implement `setTitleBarStyle` method

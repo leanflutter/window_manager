@@ -478,6 +478,8 @@ class WindowManager {
   }
 
   /// Sets whether the window should show always below other windows.
+  ///
+  /// @platforms linux
   Future<void> setAlwaysOnBottom(bool isAlwaysOnBottom) async {
     final Map<String, dynamic> arguments = {
       'isAlwaysOnBottom': isAlwaysOnBottom,
