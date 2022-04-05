@@ -519,6 +519,11 @@ class WindowManager {
     return await _channel.invokeMethod('getTitleBarHeight');
   }
 
+  /// Returns `bool` - Whether skipping taskbar is enabled.
+  Future<bool> isSkipTaskbar() async {
+    return await _channel.invokeMethod('isSkipTaskbar');
+  }
+
   /// Makes the window not show in the taskbar / dock.
   Future<void> setSkipTaskbar(bool isSkipTaskbar) async {
     final Map<String, dynamic> arguments = {

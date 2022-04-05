@@ -631,6 +631,15 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('isSkipTaskbar'),
+              onTap: () async {
+                bool isSkipping = await windowManager.isSkipTaskbar();
+                BotToast.showText(
+                  text: 'isSkipTaskbar: $isSkipping',
+                );
+              },
+            ),
+            PreferenceListItem(
               title: Text('setSkipTaskbar'),
               onTap: () async {
                 setState(() {

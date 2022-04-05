@@ -420,6 +420,12 @@ static FlMethodResponse* get_title_bar_height(WindowManagerPlugin* self,
       fl_method_success_response_new(fl_value_new_int(title_bar_height)));
 }
 
+static FlMethodResponse* is_skip_taskbar(WindowManagerPlugin* self) {
+  const gboolean skipping = gtk_window_get_skip_taskbar_hint(get_window(self));
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_bool(skipping)));
+}
+
 static FlMethodResponse* set_skip_taskbar(WindowManagerPlugin* self,
                                           FlValue* args) {
   bool isSkipTaskbar =
@@ -601,6 +607,8 @@ static void window_manager_plugin_handle_method_call(
     response = set_title_bar_style(self, args);
   } else if (strcmp(method, "getTitleBarHeight") == 0) {
     response = get_title_bar_height(self, args);
+  } else if (strcmp(method, "isSkipTaskbar") == 0) {
+    response = is_skip_taskbar(self);
   } else if (strcmp(method, "setSkipTaskbar") == 0) {
     response = set_skip_taskbar(self, args);
   } else if (strcmp(method, "getOpacity") == 0) {
