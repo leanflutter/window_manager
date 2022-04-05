@@ -373,6 +373,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
         return Int(windowHeight - mainWindow.contentRect(forFrameRect: frame).height)
     }
     
+    public func isSkipTaskbar() -> Bool {
+        return NSApplication.shared.activationPolicy() == .accessory
+    }
+    
     public func setSkipTaskbar(_ args: [String: Any]) {
         let isSkipTaskbar: Bool = args["isSkipTaskbar"] as! Bool
         NSApplication.shared.setActivationPolicy(isSkipTaskbar ? .accessory : .regular)

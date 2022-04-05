@@ -201,6 +201,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         case "getTitleBarHeight":
             result(windowManager.getTitleBarHeight())
             break
+        case "isSkipTaskbar":
+            result(windowManager.isSkipTaskbar())
+            break
         case "setSkipTaskbar":
             windowManager.setSkipTaskbar(args)
             result(true)
