@@ -42,6 +42,7 @@ class WindowManager {
   POINT minimum_size_ = {0, 0};
   POINT maximum_size_ = {-1, -1};
   bool is_resizable_ = true;
+  bool is_skip_taskbar_ = true;
   std::string title_bar_style_ = "normal";
   double opacity_ = 1;
 
@@ -91,6 +92,7 @@ class WindowManager {
   void WindowManager::SetTitle(const flutter::EncodableMap& args);
   void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args);
   int WindowManager::GetTitleBarHeight();
+  bool WindowManager::IsSkipTaskbar();
   void WindowManager::SetSkipTaskbar(const flutter::EncodableMap& args);
   void WindowManager::SetProgressBar(const flutter::EncodableMap& args);
   bool WindowManager::HasShadow();
@@ -582,8 +584,12 @@ int WindowManager::GetTitleBarHeight() {
   return height;
 }
 
+bool WindowManager::IsSkipTaskbar() {
+  return is_skip_taskbar_;
+}
+
 void WindowManager::SetSkipTaskbar(const flutter::EncodableMap& args) {
-  bool is_skip_taskbar =
+  is_skip_taskbar_ =
       std::get<bool>(args.at(flutter::EncodableValue("isSkipTaskbar")));
 
   HWND hWnd = GetMainWindow();
@@ -592,7 +598,7 @@ void WindowManager::SetSkipTaskbar(const flutter::EncodableMap& args) {
   CoInitialize(lp);
 
   taskbar_->HrInit();
-  if (!is_skip_taskbar)
+  if (!is_skip_taskbar_)
     taskbar_->AddTab(hWnd);
   else
     taskbar_->DeleteTab(hWnd);
