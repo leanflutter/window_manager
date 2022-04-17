@@ -21,6 +21,7 @@ extension NSWindow {
     }
 }
 
+
 extension NSRect {
     var topLeft: CGPoint {
         set {
@@ -54,7 +55,42 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     override public init() {
         super.init()
+        NSEvent.addLocalMonitorForEvents(matching: NSEvent.EventTypeMask.keyDown, handler: myKeyDownEvent)
+
     }
+
+    override func myKeyDownEvent(event: NSEvent) -> NSEvent {
+        
+        if (event.characters == "q") && event.modifierFlags.contains(.command) {
+            print("Comand Q")
+            
+
+            //  return event
+        }
+
+        return event
+        // if event.modifierFlags.contains(.command) {
+        //     switch event.charactersIgnoringModifiers! {
+        //     case "q":
+        //         print("Command W")
+        //     default:
+        //         break
+        //     }
+        // }
+        
+    }
+
+    // override func keyDown(theEvent: (NSEvent!))
+    // {
+    //     if theEvent.modifierFlags.contains(.CommandKeyMask) {
+    //         switch theEvent.charactersIgnoringModifiers! {
+    //         case "w":
+    //             print("Command W")
+    //         default:
+    //             break
+    //         }
+    //     }
+    // }
     
     public func waitUntilReadyToShow() {
         // nothing
@@ -158,10 +194,41 @@ public class WindowManager: NSObject, NSWindowDelegate {
         if (isFullScreen) {
             if (!mainWindow.styleMask.contains(.fullScreen)) {
                 mainWindow.toggleFullScreen(nil)
+
+                let application = NSApplication.shared
+                let autoHidden = application.presentationOptions.contains(.hideMenuBar)
+                if autoHidden {
+                    application.presentationOptions = []
+                } else {
+                    application.presentationOptions = [.hideDock, .hideMenuBar, .disableProcessSwitching, .disableForceQuit, .autoHideToolbar, .disableSessionTermination]
+
+                    // if NSEvent.modifierFlags.contains(.command) {
+                    //     switch NSEvent.modifierFlags.command {
+                    //     case "w":
+                    //         print("Close app")
+                    //     default:
+                    //         break
+                    //     }
+                    // }
+
+                    // if NSEvent.characters == "l" && NSEvent.modifierFlags.contains(.command) {
+                    //     print("command-L pressed")
+                    // }
+                }
+
+                print("Disable apple menu")
             }
         } else {
             if (mainWindow.styleMask.contains(.fullScreen)) {
                 mainWindow.toggleFullScreen(nil)
+
+                let application = NSApplication.shared
+                let autoHidden = application.presentationOptions.contains(.hideMenuBar)
+                if autoHidden {
+                    application.presentationOptions = []
+                } else {
+                    application.presentationOptions = [.autoHideDock, .autoHideMenuBar]
+                }
             }
         }
     }
