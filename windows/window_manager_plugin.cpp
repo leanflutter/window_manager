@@ -272,6 +272,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     } else if (wParam == SIZE_MINIMIZED) {
       _EmitEvent("minimize");
       window_manager->last_state = STATE_MINIMIZED;
+      return 0;
     } else if (wParam == SIZE_RESTORED) {
       if (window_manager->last_state == STATE_MAXIMIZED) {
         _EmitEvent("unmaximize");
