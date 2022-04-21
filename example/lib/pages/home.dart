@@ -30,6 +30,9 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+const _kIconTypeDefault = 'default';
+const _kIconTypeOriginal = 'original';
+
 class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   bool _isPreventClose = false;
   Size _size = _kSizes.first;
@@ -47,6 +50,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   bool _hasShadow = true;
   double _opacity = 1;
   bool _isIgnoreMouseEvents = false;
+  String _iconType = _kIconTypeOriginal;
 
   @override
   void initState() {
@@ -86,6 +90,20 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
     ];
     await trayManager.setContextMenu(items);
     setState(() {});
+  }
+
+  void _handleSetIcon(String iconType) async {
+    _iconType = iconType;
+    String iconPath =
+        Platform.isWindows ? 'images/tray_icon.ico' : 'images/tray_icon.png';
+
+    if (_iconType == 'original') {
+      iconPath = Platform.isWindows
+          ? 'images/tray_icon_original.ico'
+          : 'images/tray_icon_original.png';
+    }
+
+    await windowManager.setIcon(iconPath);
   }
 
   Widget _buildBody(BuildContext context) {
@@ -664,6 +682,22 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 await Future.delayed(Duration(milliseconds: 1000));
                 await windowManager.setProgressBar(-1);
               },
+            ),
+            PreferenceListItem(
+              title: Text('setIcon'),
+              accessoryView: Row(
+                children: [
+                  CupertinoButton(
+                    child: Text('Default'),
+                    onPressed: () => _handleSetIcon(_kIconTypeDefault),
+                  ),
+                  CupertinoButton(
+                    child: Text('Original'),
+                    onPressed: () => _handleSetIcon(_kIconTypeOriginal),
+                  ),
+                ],
+              ),
+              onTap: () => _handleSetIcon(_kIconTypeDefault),
             ),
             PreferenceListSwitchItem(
               title: Text('hasShadow / setHasShadow'),

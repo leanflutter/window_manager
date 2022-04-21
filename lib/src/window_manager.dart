@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 
 import 'resize_edge.dart';
 import 'title_bar_style.dart';
@@ -540,6 +542,21 @@ class WindowManager {
       'progress': progress,
     };
     await _channel.invokeMethod('setProgressBar', arguments);
+  }
+
+  /// Sets window/taskbar icon.
+  ///
+  /// @platforms windows
+  Future<void> setIcon(String iconPath) async {
+    final Map<String, dynamic> arguments = {
+      'iconPath': path.joinAll([
+        path.dirname(Platform.resolvedExecutable),
+        'data/flutter_assets',
+        iconPath,
+      ]),
+    };
+
+    await _channel.invokeMethod('setIcon', arguments);
   }
 
   /// Returns `bool` - Whether the window has a shadow. On Windows, always returns true unless window is frameless.

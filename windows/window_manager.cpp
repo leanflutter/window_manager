@@ -95,6 +95,7 @@ class WindowManager {
   bool WindowManager::IsSkipTaskbar();
   void WindowManager::SetSkipTaskbar(const flutter::EncodableMap& args);
   void WindowManager::SetProgressBar(const flutter::EncodableMap& args);
+  void WindowManager::SetIcon(const flutter::EncodableMap& args);
   bool WindowManager::HasShadow();
   void WindowManager::SetHasShadow(const flutter::EncodableMap& args);
   double WindowManager::GetOpacity();
@@ -626,6 +627,26 @@ void WindowManager::SetProgressBar(const flutter::EncodableMap& args) {
     taskbar_->SetProgressValue(hWnd, static_cast<int32_t>(progress * 100),
                                static_cast<int32_t>(100));
   }
+}
+
+void WindowManager::SetIcon(const flutter::EncodableMap& args) {
+  std::string iconPath =
+      std::get<std::string>(args.at(flutter::EncodableValue("iconPath")));
+
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
+  HICON hIconSmall =
+      (HICON)(LoadImage(NULL, (LPCWSTR)(converter.from_bytes(iconPath).c_str()),
+                        IMAGE_ICON, 16, 16, LR_LOADFROMFILE));
+
+  HICON hIconLarge =
+      (HICON)(LoadImage(NULL, (LPCWSTR)(converter.from_bytes(iconPath).c_str()),
+                        IMAGE_ICON, 32, 32, LR_LOADFROMFILE));
+
+  HWND hWnd = GetMainWindow();
+
+  SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
+  SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIconLarge);
 }
 
 bool WindowManager::HasShadow() {
