@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:window_manager/window_manager.dart';
@@ -12,15 +10,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
-  // Use it only after calling `hiddenWindowAtLaunch`
-  windowManager.waitUntilReadyToShow().then((_) async {
-    await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-    await windowManager.setBackgroundColor(Colors.transparent);
-    await windowManager.setSize(Size(800, 600));
-    await windowManager.center();
+  WindowOptions windowOptions = WindowOptions(
+    size: Size(800, 600),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
-    await windowManager.setSkipTaskbar(false);
   });
 
   runApp(MyApp());

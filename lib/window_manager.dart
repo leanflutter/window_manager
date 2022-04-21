@@ -8,3 +8,4 @@ export 'src/sub_window.dart';
 export 'src/title_bar_style.dart';
 export 'src/window_listener.dart';
 export 'src/window_manager.dart';
+export 'src/window_options.dart';
