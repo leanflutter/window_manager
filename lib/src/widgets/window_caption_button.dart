@@ -24,6 +24,7 @@ class WindowCaptionButtonIcon extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class WindowCaptionButton extends StatefulWidget {
   final Brightness? brightness;
   final Widget? icon;

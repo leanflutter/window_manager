@@ -3,6 +3,26 @@ import 'package:flutter/material.dart';
 import '../resize_edge.dart';
 import '../window_manager.dart';
 
+/// A widget for drag to resize window.
+///
+/// Use the widget to simulate dragging the edges to resize the window.
+///
+/// {@tool snippet}
+///
+/// The sample creates a grey box, drag the box to resize the window.
+///
+/// ```dart
+/// DragToResizeArea(
+///   child: Container(
+///     width: double.infinity,
+///     height: double.infinity,
+///     color: Colors.grey,
+///   ),
+///   resizeEdgeSize: 6,
+///   resizeEdgeColor: Colors.red.withOpacity(0.2),
+/// )
+/// ```
+/// {@end-tool}
 class DragToResizeArea extends StatelessWidget {
   final Widget child;
   final double resizeEdgeSize;

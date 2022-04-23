@@ -7,6 +7,22 @@ import '../window_manager.dart';
 
 const double kWindowCaptionHeight = 32;
 
+/// A widget to simulate the title bar of windows 11.
+///
+/// {@tool snippet}
+///
+/// ```dart
+/// Scaffold(
+///   appBar: PreferredSize(
+///     child: WindowCaption(
+///       brightness: Theme.of(context).brightness,
+///       title: Text('window_manager_example'),
+///     ),
+///     preferredSize: const Size.fromHeight(kWindowCaptionHeight),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 class WindowCaption extends StatefulWidget {
   final Widget? title;
   final Color? backgroundColor;
