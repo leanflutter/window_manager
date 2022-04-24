@@ -8,7 +8,7 @@
 [discord-image]: https://img.shields.io/discord/884679008049037342.svg
 [discord-url]: https://discord.gg/zPa6EZ2jqb
 
-这个插件允许 Flutter **桌面** 应用调整窗口的大小和位置。
+这个插件允许 Flutter 桌面应用调整窗口的大小和位置。
 
 ---
 
@@ -35,6 +35,7 @@
   - [API](#api)
     - [WindowManager](#windowmanager)
       - [Methods](#methods)
+        - [waitUntilReadyToShow](#waituntilreadytoshow)
         - [destroy  `macos`  `windows`](#destroy--macos--windows)
         - [close](#close)
         - [isPreventClose](#ispreventclose)
@@ -81,8 +82,10 @@
         - [setTitle](#settitle)
         - [setTitleBarStyle  `macos`  `windows`](#settitlebarstyle--macos--windows)
         - [getTitleBarHeight](#gettitlebarheight)
+        - [isSkipTaskbar](#isskiptaskbar)
         - [setSkipTaskbar](#setskiptaskbar)
         - [setProgressBar  `macos`](#setprogressbar--macos)
+        - [setIcon  `windows`](#seticon--windows)
         - [hasShadow  `macos`  `windows`](#hasshadow--macos--windows)
         - [setHasShadow  `macos`  `windows`](#sethasshadow--macos--windows)
         - [getOpacity  `macos`  `windows`](#getopacity--macos--windows)
@@ -149,14 +152,16 @@ void main() async {
   // 必须加上这一行。
   await windowManager.ensureInitialized();
 
-  // Use it only after calling `hiddenWindowAtLaunch`
-  windowManager.waitUntilReadyToShow().then((_) async{
-    // 隐藏窗口标题栏
-    await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-    await windowManager.setSize(Size(800, 600));
-    await windowManager.center();
+  WindowOptions windowOptions = WindowOptions(
+    size: Size(800, 600),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
-    await windowManager.setSkipTaskbar(false);
+    await windowManager.focus();
   });
 
   runApp(MyApp());
@@ -450,6 +455,10 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
 #### Methods
 
+##### waitUntilReadyToShow
+
+Wait until ready to show.
+
 ##### destroy  `macos`  `windows`
 
 Force closing the window.
@@ -646,6 +655,10 @@ Changes the title bar style of native window.
 
 Returns `int` - The title bar height of the native window.
 
+##### isSkipTaskbar
+
+Returns `bool` - Whether skipping taskbar is enabled.
+
 ##### setSkipTaskbar
 
 Makes the window not show in the taskbar / dock.
@@ -653,6 +666,11 @@ Makes the window not show in the taskbar / dock.
 ##### setProgressBar  `macos`
 
 Sets progress value in progress bar. Valid range is [0, 1.0].
+
+
+##### setIcon  `windows`
+
+Sets window/taskbar icon.
 
 
 ##### hasShadow  `macos`  `windows`
