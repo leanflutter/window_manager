@@ -239,6 +239,8 @@ class WindowManager {
       'isFullScreen': isFullScreen,
     };
     await _channel.invokeMethod('setFullScreen', arguments);
+    if (!isFullScreen && Platform.isWindows)
+      await _channel.invokeMethod('forceRefresh', arguments);
   }
 
   /// This will make a window maintain an aspect ratio.
@@ -654,7 +656,8 @@ class WindowManager {
   /// Starts a window resize based on the specified mouse-down & mouse-move event.
   ///
   /// @platforms linux,windows
-  Future<void> startResizing(ResizeEdge resizeEdge) {
+  Future<void> startResizing(ResizeEdge resizeEdge,
+      [bool isDoubleClick = false]) {
     return _channel.invokeMethod<bool>(
       'startResizing',
       {
@@ -671,6 +674,7 @@ class WindowManager {
         "left": resizeEdge == ResizeEdge.left ||
             resizeEdge == ResizeEdge.topLeft ||
             resizeEdge == ResizeEdge.bottomLeft,
+        "isDoubleClick": isDoubleClick,
       },
     );
   }
