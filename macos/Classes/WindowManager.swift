@@ -172,7 +172,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
         
         // Reset the behaviour to default if aspect_ratio is set to 0 or less.
         if (aspectRatio > 0.0) {
-            let aspectRatioSize: NSSize = NSMakeSize(aspectRatio, 1.0)
+            let aspectRatioSize: NSSize = NSMakeSize(CGFloat(aspectRatio), 1.0)
             if (hasFrame) {
                 mainWindow.contentAspectRatio = aspectRatioSize
             } else {
