@@ -102,6 +102,7 @@ class WindowManager {
   void WindowManager::SetOpacity(const flutter::EncodableMap& args);
   void WindowManager::SetBrightness(const flutter::EncodableMap& args);
   void WindowManager::SetIgnoreMouseEvents(const flutter::EncodableMap& args);
+  void WindowManager::PopUpWindowMenu(const flutter::EncodableMap& args);
   void WindowManager::StartDragging();
   void WindowManager::StartResizing(const flutter::EncodableMap& args);
   flutter::EncodableMap WindowManager::GetPrimaryDisplay(
@@ -702,6 +703,26 @@ void WindowManager::SetIgnoreMouseEvents(const flutter::EncodableMap& args) {
     ex_style &= ~(WS_EX_TRANSPARENT | WS_EX_LAYERED);
 
   ::SetWindowLong(hwnd, GWL_EXSTYLE, ex_style);
+}
+
+void WindowManager::PopUpWindowMenu(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
+  HMENU hMenu = GetSystemMenu(hWnd, false);
+
+  double x, y;
+
+  POINT cursorPos;
+  GetCursorPos(&cursorPos);
+  x = cursorPos.x;
+  y = cursorPos.y;
+
+  int cmd =
+      TrackPopupMenu(hMenu, TPM_LEFTBUTTON | TPM_RIGHTBUTTON | TPM_RETURNCMD,
+                     static_cast<int>(x), static_cast<int>(y), 0, hWnd, NULL);
+
+  if (cmd) {
+    PostMessage(hWnd, WM_SYSCOMMAND, cmd, 0);
+  }
 }
 
 void WindowManager::StartDragging() {

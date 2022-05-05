@@ -646,6 +646,11 @@ class WindowManager {
     await _channel.invokeMethod('setIgnoreMouseEvents', arguments);
   }
 
+  Future<void> popUpWindowMenu() async {
+    final Map<String, dynamic> arguments = {};
+    await _channel.invokeMethod('popUpWindowMenu', arguments);
+  }
+
   /// Starts a window drag based on the specified mouse-down event.
   Future<void> startDragging() async {
     await _channel.invokeMethod('startDragging');

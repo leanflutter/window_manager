@@ -764,6 +764,12 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('popUpWindowMenu'),
+              onTap: () async {
+                await windowManager.popUpWindowMenu();
+              },
+            ),
+            PreferenceListItem(
               title: Text('createSubWindow'),
               onTap: () async {
                 SubWindow subWindow = await SubWindow.create(
