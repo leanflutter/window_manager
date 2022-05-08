@@ -1,3 +1,8 @@
+## 0.2.3
+
+* Fixed cannot convert type Double to type CGFloat #138
+* [linux & windows] Implement `popUpWindowMenu` metnod #141
+
 ## 0.2.2
 
 * Fixed overflow error after minimize #55, #119, #125 
