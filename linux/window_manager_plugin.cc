@@ -357,23 +357,19 @@ static FlMethodResponse* set_always_on_top(WindowManagerPlugin* self,
 
 static FlMethodResponse* is_always_on_bottom(WindowManagerPlugin* self) {
   return FL_METHOD_RESPONSE(fl_method_success_response_new(
-      fl_value_new_bool(self->_is_always_on_bottom))
-  );
+      fl_value_new_bool(self->_is_always_on_bottom)));
 }
 
-static FlMethodResponse* set_always_on_bottom(
-  WindowManagerPlugin* self,
-  FlValue* args) {
-  bool isAlwaysOnBottom = fl_value_get_bool(
-    fl_value_lookup_string(args, "isAlwaysOnBottom")
-  );
+static FlMethodResponse* set_always_on_bottom(WindowManagerPlugin* self,
+                                              FlValue* args) {
+  bool isAlwaysOnBottom =
+      fl_value_get_bool(fl_value_lookup_string(args, "isAlwaysOnBottom"));
 
   gtk_window_set_keep_below(get_window(self), isAlwaysOnBottom);
   self->_is_always_on_bottom = isAlwaysOnBottom;
 
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(
-      fl_value_new_bool(true)
-    ));
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
 static FlMethodResponse* get_title(WindowManagerPlugin* self) {
@@ -436,6 +432,24 @@ static FlMethodResponse* set_skip_taskbar(WindowManagerPlugin* self,
 }
 
 static FlMethodResponse* get_opacity(WindowManagerPlugin* self) {
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_float(1)));
+}
+
+static FlMethodResponse* pop_up_window_menu(WindowManagerPlugin* self) {
+  GdkDisplay* display = gdk_display_get_default();
+  GdkSeat* seat = gdk_display_get_default_seat(display);
+  GdkDevice* pointer = gdk_seat_get_pointer(seat);
+
+  int x, y;
+  gdk_device_get_position(pointer, NULL, &x, &y);
+
+  GdkEvent* event = gdk_event_new(GDK_BUTTON_PRESS);
+  event->key.window = get_gdk_window(self);
+  event->button.x_root = x;
+  event->button.y_root = y;
+  gdk_window_show_window_menu(get_gdk_window(self), event);
+
   return FL_METHOD_RESPONSE(
       fl_method_success_response_new(fl_value_new_float(1)));
 }
@@ -613,6 +627,8 @@ static void window_manager_plugin_handle_method_call(
     response = set_skip_taskbar(self, args);
   } else if (strcmp(method, "getOpacity") == 0) {
     response = get_opacity(self);
+  } else if (strcmp(method, "popUpWindowMenu") == 0) {
+    response = pop_up_window_menu(self);
   } else if (strcmp(method, "startDragging") == 0) {
     response = start_dragging(self);
   } else if (strcmp(method, "startResizing") == 0) {
