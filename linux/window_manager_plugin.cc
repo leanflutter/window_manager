@@ -437,6 +437,7 @@ static FlMethodResponse* get_opacity(WindowManagerPlugin* self) {
 }
 
 static FlMethodResponse* pop_up_window_menu(WindowManagerPlugin* self) {
+  GdkWindow* window = get_gdk_window(self);
   GdkDisplay* display = gdk_display_get_default();
   GdkSeat* seat = gdk_display_get_default_seat(display);
   GdkDevice* pointer = gdk_seat_get_pointer(seat);
@@ -444,11 +445,17 @@ static FlMethodResponse* pop_up_window_menu(WindowManagerPlugin* self) {
   int x, y;
   gdk_device_get_position(pointer, NULL, &x, &y);
 
+  int origin_x, origin_y;
+  gdk_window_get_origin(window, &origin_x, &origin_y);
+
   GdkEvent* event = gdk_event_new(GDK_BUTTON_PRESS);
-  event->key.window = get_gdk_window(self);
+  event->button.window = window;
+  event->button.device = pointer;
   event->button.x_root = x;
   event->button.y_root = y;
-  gdk_window_show_window_menu(get_gdk_window(self), event);
+  event->button.x = x - origin_x;
+  event->button.y = y - origin_y;
+  gdk_window_show_window_menu(window, event);
 
   return FL_METHOD_RESPONSE(
       fl_method_success_response_new(fl_value_new_float(1)));
