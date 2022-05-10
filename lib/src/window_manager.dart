@@ -268,9 +268,9 @@ class WindowManager {
   }
 
   /// Resizes and moves the window to the supplied bounds.
-  Future<void> setBounds(Rect bounds, {animate = false}) async {
-    await setPosition(bounds.topLeft);
-    await setSize(bounds.size);
+  Future<void> setBounds(Rect bounds, {bool animate = false}) async {
+    await setPosition(bounds.topLeft, animate: animate);
+    await setSize(bounds.size, animate: animate);
   }
 
   /// Returns `Offset` - Contains the window's current position.
@@ -351,7 +351,7 @@ class WindowManager {
   }
 
   /// Moves window to the center of the screen.
-  Future<void> center() async {
+  Future<void> center([bool animate = false]) async {
     Size windowSize = await getSize();
     Map<String, dynamic> primaryDisplay = await _getPrimaryDisplay();
 
@@ -374,11 +374,11 @@ class WindowManager {
       visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
     );
 
-    await this.setPosition(position);
+    await this.setPosition(position, animate: animate);
   }
 
   /// Moves window to position.
-  Future<void> setPosition(Offset position, {animate = false}) async {
+  Future<void> setPosition(Offset position, {bool animate = false}) async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
       'x': position.dx,
@@ -399,11 +399,17 @@ class WindowManager {
   }
 
   /// Resizes the window to `width` and `height`.
-  Future<void> setSize(Size size, {animate = false}) async {
+  Future<void> setSize(
+    Size size, {
+    bool animate = false,
+    Offset? position,
+  }) async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
       'width': size.width,
       'height': size.height,
+      'x': position?.dx,
+      'y': position?.dy,
       'animate': animate,
     }..removeWhere((key, value) => value == null);
     await _channel.invokeMethod('setSize', arguments);

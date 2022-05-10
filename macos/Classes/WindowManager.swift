@@ -247,6 +247,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     public func setSize(_ args: [String: Any]) {
         let animate = args["animate"] as? Bool ?? false
+        let center = args["center"] as? Bool ?? false
         
         var frameRect = mainWindow.frame
         if (args["width"] != nil && args["height"] != nil) {
@@ -257,6 +258,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
             frameRect.size.width = width
             frameRect.size.height = height
             
+        }
+        if (args["x"] != nil && args["y"] != nil) {
+            frameRect.topLeft.x = CGFloat(args["x"] as! Float)
+            frameRect.topLeft.y = CGFloat(args["y"] as! Float)
         }
         
         if (animate) {
