@@ -270,7 +270,7 @@ class WindowManager {
   /// Resizes and moves the window to the supplied bounds.
   Future<void> setBounds(Rect bounds, {animate = false}) async {
     await setPosition(bounds.topLeft);
-    await setSize(bounds.size);
+    await setSize(bounds.size, animate: animate);
   }
 
   /// Returns `Offset` - Contains the window's current position.
