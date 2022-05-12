@@ -471,6 +471,11 @@ void WindowManagerPlugin::HandleMethodCall(
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->SetProgressBar(args);
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("setIcon") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->SetIcon(args);
+    result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("hasShadow") == 0) {
     bool value = window_manager->HasShadow();
     result->Success(flutter::EncodableValue(value));
