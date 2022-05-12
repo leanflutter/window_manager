@@ -239,6 +239,8 @@ class WindowManager {
       'isFullScreen': isFullScreen,
     };
     await _channel.invokeMethod('setFullScreen', arguments);
+    if (!isFullScreen && Platform.isWindows)
+      await _channel.invokeMethod('forceRefresh', arguments);
   }
 
   /// This will make a window maintain an aspect ratio.
