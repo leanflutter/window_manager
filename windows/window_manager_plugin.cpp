@@ -304,12 +304,6 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("waitUntilReadyToShow") == 0) {
     window_manager->WaitUntilReadyToShow();
     result->Success(flutter::EncodableValue(true));
-  } else if (method_name.compare("forceRefresh") == 0) {
-    window_manager->ForceRefresh();
-    result->Success(flutter::EncodableValue(true));
-  } else if (method_name.compare("forceChildRefresh") == 0) {
-    window_manager->ForceChildRefresh();
-    result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("setAsFrameless") == 0) {
     window_manager->SetAsFrameless();
     result->Success(flutter::EncodableValue(true));
