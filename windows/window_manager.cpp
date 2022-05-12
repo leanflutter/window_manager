@@ -50,6 +50,8 @@ class WindowManager {
   bool is_moving_ = false;
 
   HWND GetMainWindow();
+  void WindowManager::ForceRefresh();
+  void WindowManager::ForceChildRefresh();
   void WindowManager::SetAsFrameless();
   void WindowManager::WaitUntilReadyToShow();
   void WindowManager::Destroy();
@@ -125,6 +127,38 @@ WindowManager::~WindowManager() {}
 
 HWND WindowManager::GetMainWindow() {
   return native_window;
+}
+
+void WindowManager::ForceRefresh() {
+  HWND hWnd = GetMainWindow();
+
+  RECT rect;
+
+  GetWindowRect(hWnd, &rect);
+  SetWindowPos(
+      hWnd, nullptr, rect.left, rect.top, rect.right - rect.left + 1,
+      rect.bottom - rect.top,
+      SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
+  SetWindowPos(
+      hWnd, nullptr, rect.left, rect.top, rect.right - rect.left,
+      rect.bottom - rect.top,
+      SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
+}
+
+void WindowManager::ForceChildRefresh() {
+  HWND hWnd = GetWindow(GetMainWindow(), GW_CHILD);
+
+  RECT rect;
+
+  GetWindowRect(hWnd, &rect);
+  SetWindowPos(
+      hWnd, nullptr, rect.left, rect.top, rect.right - rect.left + 1,
+      rect.bottom - rect.top,
+      SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
+  SetWindowPos(
+      hWnd, nullptr, rect.left, rect.top, rect.right - rect.left,
+      rect.bottom - rect.top,
+      SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
 }
 
 void WindowManager::SetAsFrameless() {
@@ -286,6 +320,9 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
     g_maximized_before_fullscreen = !!::IsZoomed(mainWindow);
     g_style_before_fullscreen = GetWindowLong(mainWindow, GWL_STYLE);
     g_ex_style_before_fullscreen = GetWindowLong(mainWindow, GWL_EXSTYLE);
+    if (g_maximized_before_fullscreen) {
+      SendMessage(mainWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
+    }
     ::GetWindowRect(mainWindow, &g_frame_before_fullscreen);
     g_title_bar_style_before_fullscreen = title_bar_style_;
     g_is_frameless_before_fullscreen = is_frameless_;
@@ -316,26 +353,31 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
                    SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     ::SendMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
   } else {
-    if (g_is_frameless_before_fullscreen) {
-      SetAsFrameless();
-    } else {
+    ::SetWindowLong(mainWindow, GWL_STYLE, g_style_before_fullscreen);
+    ::SetWindowLong(mainWindow, GWL_EXSTYLE, g_ex_style_before_fullscreen);
+
+    SendMessage(mainWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
+
+    if (title_bar_style_ != g_title_bar_style_before_fullscreen) {
       flutter::EncodableMap args2 = flutter::EncodableMap();
       args2[flutter::EncodableValue("titleBarStyle")] =
           flutter::EncodableValue(g_title_bar_style_before_fullscreen);
       SetTitleBarStyle(args2);
     }
 
-    ::SetWindowLong(mainWindow, GWL_STYLE, g_style_before_fullscreen);
-    ::SetWindowLong(mainWindow, GWL_EXSTYLE, g_ex_style_before_fullscreen);
+    if (g_is_frameless_before_fullscreen)
+      SetAsFrameless();
 
-    ::SetWindowPos(
-        mainWindow, NULL, g_frame_before_fullscreen.left,
-        g_frame_before_fullscreen.top,
-        g_frame_before_fullscreen.right - g_frame_before_fullscreen.left,
-        g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top,
-        SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     if (g_maximized_before_fullscreen)
-      ::SendMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+      Maximize();
+    else {
+      ::SetWindowPos(
+          mainWindow, NULL, g_frame_before_fullscreen.left,
+          g_frame_before_fullscreen.top,
+          g_frame_before_fullscreen.right - g_frame_before_fullscreen.left,
+          g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top,
+          SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+    }
   }
 
   g_is_window_fullscreen = isFullScreen;
