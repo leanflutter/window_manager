@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:bot_toast/bot_toast.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' hide MenuItem;
+import 'package:flutter/material.dart' hide MenuItem;
 import 'package:preference_list/preference_list.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -73,22 +73,24 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
           ? 'images/tray_icon_original.ico'
           : 'images/tray_icon_original.png',
     );
-    List<MenuItem> items = [
-      MenuItem(
-        key: 'show_window',
-        title: 'Show Window',
-      ),
-      MenuItem(
-        key: 'set_ignore_mouse_events',
-        title: 'setIgnoreMouseEvents(false)',
-      ),
-      MenuItem.separator,
-      MenuItem(
-        key: 'exit_app',
-        title: 'Exit App',
-      ),
-    ];
-    await trayManager.setContextMenu(items);
+    Menu menu = Menu(
+      items: [
+        MenuItem(
+          key: 'show_window',
+          label: 'Show Window',
+        ),
+        MenuItem(
+          key: 'set_ignore_mouse_events',
+          label: 'setIgnoreMouseEvents(false)',
+        ),
+        MenuItem.separator(),
+        MenuItem(
+          key: 'exit_app',
+          label: 'Exit App',
+        ),
+      ],
+    );
+    await trayManager.setContextMenu(menu);
     setState(() {});
   }
 
