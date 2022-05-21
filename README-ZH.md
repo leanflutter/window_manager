@@ -33,6 +33,7 @@
       - [在启动时隐藏](#在启动时隐藏)
         - [macOS](#macos-1)
         - [Windows](#windows)
+  - [文章](#文章)
   - [谁在用使用它？](#谁在用使用它)
   - [API](#api)
     - [WindowManager](#windowmanager)
@@ -440,6 +441,11 @@ class _HomePageState extends State<HomePage> with WindowListener {
 }
 
 ```
+
+## 文章
+
+- [关闭窗口后点击Dock图标进行恢复](https://leanflutter.org/zh/blog/click-dock-icon-to-restore-after-closing-the-window)
+- [让应用成为单实例](https://leanflutter.org/zh/blog/making-the-app-single-instanced)
 
 ## 谁在用使用它？
 

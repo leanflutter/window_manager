@@ -33,6 +33,7 @@ English | [简体中文](./README-ZH.md)
       - [Hidden at launch](#hidden-at-launch)
         - [macOS](#macos-1)
         - [Windows](#windows)
+  - [Articles](#articles)
   - [Who's using it?](#whos-using-it)
   - [API](#api)
     - [WindowManager](#windowmanager)
@@ -440,6 +441,11 @@ class _HomePageState extends State<HomePage> with WindowListener {
 }
 
 ```
+
+## Articles
+
+- [Click the dock icon to restore after closing the window](https://leanflutter.org/blog/click-dock-icon-to-restore-after-closing-the-window)
+- [Making the app single-instanced](https://leanflutter.org/blog/making-the-app-single-instanced)
 
 ## Who's using it?
 
