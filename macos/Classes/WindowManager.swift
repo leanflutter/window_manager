@@ -209,43 +209,19 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
     }
     
-    public func getPosition() -> NSDictionary {
+    public func getBounds() -> NSDictionary {
         let frameRect: NSRect = mainWindow.frame;
         
         let data: NSDictionary = [
             "x": frameRect.topLeft.x,
             "y": frameRect.topLeft.y,
-        ]
-        return data;
-    }
-    
-    public func setPosition(_ args: [String: Any]) {
-        let animate = args["animate"] as? Bool ?? false
-        
-        var frameRect = mainWindow.frame
-        if (args["x"] != nil && args["y"] != nil) {
-            frameRect.topLeft.x = CGFloat(args["x"] as! Float)
-            frameRect.topLeft.y = CGFloat(args["y"] as! Float)
-        }
-        
-        if (animate) {
-            mainWindow.animator().setFrame(frameRect, display: true, animate: true)
-        } else {
-            mainWindow.setFrame(frameRect, display: true)
-        }
-    }
-    
-    public func getSize() -> NSDictionary {
-        let frameRect: NSRect = mainWindow.frame;
-        
-        let data: NSDictionary = [
             "width": frameRect.size.width,
             "height": frameRect.size.height,
         ]
         return data;
     }
     
-    public func setSize(_ args: [String: Any]) {
+    public func setBounds(_ args: [String: Any]) {
         let animate = args["animate"] as? Bool ?? false
         
         var frameRect = mainWindow.frame
@@ -256,7 +232,11 @@ public class WindowManager: NSObject, NSWindowDelegate {
             frameRect.origin.y += (frameRect.size.height - height)
             frameRect.size.width = width
             frameRect.size.height = height
-            
+        }
+        
+        if (args["x"] != nil && args["y"] != nil) {
+            frameRect.topLeft.x = CGFloat(args["x"] as! Float)
+            frameRect.topLeft.y = CGFloat(args["y"] as! Float)
         }
         
         if (animate) {

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 
+import 'utils/calc_window_position.dart';
 import 'resize_edge.dart';
 import 'title_bar_style.dart';
 import 'window_listener.dart';
@@ -260,153 +261,89 @@ class WindowManager {
     await _channel.invokeMethod('setBackgroundColor', arguments);
   }
 
-  /// Returns `Rect` - The bounds of the window as Object.
-  Future<Rect> getBounds() async {
-    Offset position = await getPosition();
-    Size size = await getSize();
-    return Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
-  }
-
-  /// Resizes and moves the window to the supplied bounds.
-  Future<void> setBounds(Rect bounds, {animate = false}) async {
-    await setPosition(bounds.topLeft);
-    await setSize(bounds.size, animate: animate);
-  }
-
-  /// Returns `Offset` - Contains the window's current position.
-  Future<Offset> getPosition() async {
-    final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
-    };
-    final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('getPosition', arguments);
-    return Offset(resultData['x'], resultData['y']);
-  }
-
   /// Move the window to a position aligned with the screen.
-  Future<void> setAlignment(Alignment alignment) async {
+  Future<void> setAlignment(
+    Alignment alignment, {
+    bool animate = false,
+  }) async {
     Size windowSize = await getSize();
-    Map<String, dynamic> primaryDisplay = await _getPrimaryDisplay();
-
-    num visibleWidth = primaryDisplay['size']['width'];
-    num visibleHeight = primaryDisplay['size']['height'];
-    num visibleStartX = 0;
-    num visibleStartY = 0;
-
-    if (primaryDisplay['visibleSize'] != null) {
-      visibleWidth = primaryDisplay['visibleSize']['width'];
-      visibleHeight = primaryDisplay['visibleSize']['height'];
-    }
-    if (primaryDisplay['visiblePosition'] != null) {
-      visibleStartX = primaryDisplay['visiblePosition']['x'];
-      visibleStartY = primaryDisplay['visiblePosition']['y'];
-    }
-    Offset position = Offset(0, 0);
-
-    if (alignment == Alignment.topLeft) {
-      position = Offset(0, 0);
-    } else if (alignment == Alignment.topCenter) {
-      position = Offset(
-        visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),
-        visibleStartY + 0,
-      );
-    } else if (alignment == Alignment.topRight) {
-      position = Offset(
-        visibleStartX + visibleWidth - windowSize.width,
-        visibleStartY + 0,
-      );
-    } else if (alignment == Alignment.centerLeft) {
-      position = Offset(
-        visibleStartX + 0,
-        visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
-      );
-    } else if (alignment == Alignment.center) {
-      position = Offset(
-        visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),
-        visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
-      );
-    } else if (alignment == Alignment.centerRight) {
-      position = Offset(
-        visibleStartX + visibleWidth - windowSize.width,
-        visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
-      );
-    } else if (alignment == Alignment.bottomLeft) {
-      position = Offset(
-        visibleStartX + 0,
-        visibleStartY + (visibleHeight - windowSize.height),
-      );
-    } else if (alignment == Alignment.bottomCenter) {
-      position = Offset(
-        visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),
-        visibleStartY + (visibleHeight - windowSize.height),
-      );
-    } else if (alignment == Alignment.bottomRight) {
-      position = Offset(
-        visibleStartX + visibleWidth - windowSize.width,
-        visibleStartY + (visibleHeight - windowSize.height),
-      );
-    }
-
-    await this.setPosition(position);
+    Offset position = await calcWindowPosition(windowSize, alignment);
+    await this.setPosition(position, animate: animate);
   }
 
   /// Moves window to the center of the screen.
-  Future<void> center() async {
+  Future<void> center({
+    bool animate = false,
+  }) async {
     Size windowSize = await getSize();
-    Map<String, dynamic> primaryDisplay = await _getPrimaryDisplay();
-
-    num visibleWidth = primaryDisplay['size']['width'];
-    num visibleHeight = primaryDisplay['size']['height'];
-    num visibleStartX = 0;
-    num visibleStartY = 0;
-
-    if (primaryDisplay['visibleSize'] != null) {
-      visibleWidth = primaryDisplay['visibleSize']['width'];
-      visibleHeight = primaryDisplay['visibleSize']['height'];
-    }
-    if (primaryDisplay['visiblePosition'] != null) {
-      visibleStartX = primaryDisplay['visiblePosition']['x'];
-      visibleStartY = primaryDisplay['visiblePosition']['y'];
-    }
-
-    Offset position = Offset(
-      visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),
-      visibleStartY + ((visibleHeight / 2) - (windowSize.height / 2)),
-    );
-
-    await this.setPosition(position);
+    Offset position = await calcWindowPosition(windowSize, Alignment.center);
+    await this.setPosition(position, animate: animate);
   }
 
-  /// Moves window to position.
-  Future<void> setPosition(Offset position, {animate = false}) async {
+  /// Returns `Rect` - The bounds of the window as Object.
+  Future<Rect> getBounds() async {
     final Map<String, dynamic> arguments = {
       'devicePixelRatio': window.devicePixelRatio,
-      'x': position.dx,
-      'y': position.dy,
+    };
+    final Map<dynamic, dynamic> resultData = await _channel.invokeMethod(
+      'getBounds',
+      arguments,
+    );
+
+    return Rect.fromLTWH(
+      resultData['x'],
+      resultData['y'],
+      resultData['width'],
+      resultData['height'],
+    );
+  }
+
+  /// Resizes and moves the window to the supplied bounds.
+  Future<void> setBounds(
+    Rect? bounds, {
+    Offset? position,
+    Size? size,
+    bool animate = false,
+  }) async {
+    final Map<String, dynamic> arguments = {
+      'devicePixelRatio': window.devicePixelRatio,
+      'x': bounds?.topLeft.dx ?? position?.dx,
+      'y': bounds?.topLeft.dy ?? position?.dy,
+      'width': bounds?.size.width ?? size?.width,
+      'height': bounds?.size.height ?? size?.height,
       'animate': animate,
     }..removeWhere((key, value) => value == null);
-    await _channel.invokeMethod('setPosition', arguments);
+    await _channel.invokeMethod('setBounds', arguments);
   }
 
   /// Returns `Size` - Contains the window's width and height.
   Future<Size> getSize() async {
-    final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
-    };
-    final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('getSize', arguments);
-    return Size(resultData['width'], resultData['height']);
+    Rect bounds = await getBounds();
+    return bounds.size;
   }
 
   /// Resizes the window to `width` and `height`.
   Future<void> setSize(Size size, {animate = false}) async {
-    final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
-      'width': size.width,
-      'height': size.height,
-      'animate': animate,
-    }..removeWhere((key, value) => value == null);
-    await _channel.invokeMethod('setSize', arguments);
+    await setBounds(
+      null,
+      size: size,
+      animate: animate,
+    );
+  }
+
+  /// Returns `Offset` - Contains the window's current position.
+  Future<Offset> getPosition() async {
+    Rect bounds = await getBounds();
+    return bounds.topLeft;
+  }
+
+  /// Moves window to position.
+  Future<void> setPosition(Offset position, {bool animate = false}) async {
+    await setBounds(
+      null,
+      position: position,
+      animate: animate,
+    );
   }
 
   /// Sets the minimum size of window to `width` and `height`.

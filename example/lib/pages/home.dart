@@ -324,14 +324,21 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 ],
                 onPressed: (int index) async {
                   _size = _kSizes[index];
-                  Rect bounds = await windowManager.getBounds();
-                  windowManager.setBounds(
-                    Rect.fromLTWH(
-                      bounds.left,
-                      bounds.top,
-                      _size.width,
-                      _size.height,
-                    ),
+                  Offset newPosition = await calcWindowPosition(
+                    _size,
+                    Alignment.center,
+                  );
+                  await windowManager.setBounds(
+                    // Rect.fromLTWH(
+                    //   bounds.left + 10,
+                    //   bounds.top + 10,
+                    //   _size.width,
+                    //   _size.height,
+                    // ),
+                    null,
+                    position: newPosition,
+                    size: _size,
+                    animate: true,
                   );
                   setState(() {});
                 },
@@ -355,56 +362,82 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                     CupertinoButton(
                       child: Text('topLeft'),
                       onPressed: () async {
-                        await windowManager.setAlignment(Alignment.topLeft);
+                        await windowManager.setAlignment(
+                          Alignment.topLeft,
+                          animate: true,
+                        );
                       },
                     ),
                     CupertinoButton(
                       child: Text('topCenter'),
                       onPressed: () async {
-                        await windowManager.setAlignment(Alignment.topCenter);
+                        await windowManager.setAlignment(
+                          Alignment.topCenter,
+                          animate: true,
+                        );
                       },
                     ),
                     CupertinoButton(
                       child: Text('topRight'),
                       onPressed: () async {
-                        await windowManager.setAlignment(Alignment.topRight);
+                        await windowManager.setAlignment(
+                          Alignment.topRight,
+                          animate: true,
+                        );
                       },
                     ),
                     CupertinoButton(
                       child: Text('centerLeft'),
                       onPressed: () async {
-                        await windowManager.setAlignment(Alignment.centerLeft);
+                        await windowManager.setAlignment(
+                          Alignment.centerLeft,
+                          animate: true,
+                        );
                       },
                     ),
                     CupertinoButton(
                       child: Text('center'),
                       onPressed: () async {
-                        await windowManager.setAlignment(Alignment.center);
+                        await windowManager.setAlignment(
+                          Alignment.center,
+                          animate: true,
+                        );
                       },
                     ),
                     CupertinoButton(
                       child: Text('centerRight'),
                       onPressed: () async {
-                        await windowManager.setAlignment(Alignment.centerRight);
+                        await windowManager.setAlignment(
+                          Alignment.centerRight,
+                          animate: true,
+                        );
                       },
                     ),
                     CupertinoButton(
                       child: Text('bottomLeft'),
                       onPressed: () async {
-                        await windowManager.setAlignment(Alignment.bottomLeft);
+                        await windowManager.setAlignment(
+                          Alignment.bottomLeft,
+                          animate: true,
+                        );
                       },
                     ),
                     CupertinoButton(
                       child: Text('bottomCenter'),
                       onPressed: () async {
-                        await windowManager
-                            .setAlignment(Alignment.bottomCenter);
+                        await windowManager.setAlignment(
+                          Alignment.bottomCenter,
+                          animate: true,
+                        );
                       },
                     ),
                     CupertinoButton(
                       child: Text('bottomRight'),
                       onPressed: () async {
-                        await windowManager.setAlignment(Alignment.bottomRight);
+                        await windowManager.setAlignment(
+                          Alignment.bottomRight,
+                          animate: true,
+                        );
                       },
                     ),
                   ],

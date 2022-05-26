@@ -130,18 +130,11 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setBackgroundColor(args)
             result(true)
             break
-        case "getPosition":
-            result(windowManager.getPosition())
+        case "getBounds":
+            result(windowManager.getBounds())
             break
-        case "setPosition":
-            windowManager.setPosition(args)
-            result(true)
-            break
-        case "getSize":
-            result(windowManager.getSize())
-            break
-        case "setSize":
-            windowManager.setSize(args)
+        case "setBounds":
+            windowManager.setBounds(args)
             result(true)
             break
         case "setMinimumSize":
