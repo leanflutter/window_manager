@@ -432,8 +432,16 @@ static FlMethodResponse* set_skip_taskbar(WindowManagerPlugin* self,
 }
 
 static FlMethodResponse* get_opacity(WindowManagerPlugin* self) {
+  gdouble opacity = gtk_widget_get_opacity(GTK_WIDGET(get_window(self)));
   return FL_METHOD_RESPONSE(
-      fl_method_success_response_new(fl_value_new_float(1)));
+      fl_method_success_response_new(fl_value_new_float(opacity)));
+}
+
+static FlMethodResponse* set_opacity(WindowManagerPlugin* self, FlValue* args) {
+  gdouble opacity = fl_value_get_float(fl_value_lookup_string(args, "opacity"));
+  gtk_widget_set_opacity(GTK_WIDGET(get_window(self)), opacity);
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
 static FlMethodResponse* pop_up_window_menu(WindowManagerPlugin* self) {
@@ -634,6 +642,8 @@ static void window_manager_plugin_handle_method_call(
     response = set_skip_taskbar(self, args);
   } else if (strcmp(method, "getOpacity") == 0) {
     response = get_opacity(self);
+  } else if (strcmp(method, "setOpacity") == 0) {
+    response = set_opacity(self, args);
   } else if (strcmp(method, "popUpWindowMenu") == 0) {
     response = pop_up_window_menu(self);
   } else if (strcmp(method, "startDragging") == 0) {
