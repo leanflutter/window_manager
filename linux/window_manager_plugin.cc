@@ -222,46 +222,35 @@ static FlMethodResponse* set_background_color(WindowManagerPlugin* self,
       fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
-static FlMethodResponse* get_position(WindowManagerPlugin* self) {
-  gint x, y;
+static FlMethodResponse* get_bounds(WindowManagerPlugin* self) {
+  gint x, y, width, height;
   gtk_window_get_position(get_window(self), &x, &y);
+  gtk_window_get_size(get_window(self), &width, &height);
 
   g_autoptr(FlValue) result_data = fl_value_new_map();
   fl_value_set_string_take(result_data, "x", fl_value_new_float(x));
   fl_value_set_string_take(result_data, "y", fl_value_new_float(y));
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(result_data));
-}
-
-static FlMethodResponse* set_position(WindowManagerPlugin* self,
-                                      FlValue* args) {
-  const float x = fl_value_get_float(fl_value_lookup_string(args, "x"));
-  const float y = fl_value_get_float(fl_value_lookup_string(args, "y"));
-
-  gtk_window_move(get_window(self), static_cast<gint>(x), static_cast<gint>(y));
-
-  return FL_METHOD_RESPONSE(
-      fl_method_success_response_new(fl_value_new_bool(true)));
-}
-
-static FlMethodResponse* get_size(WindowManagerPlugin* self) {
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
-
-  g_autoptr(FlValue) result_data = fl_value_new_map();
   fl_value_set_string_take(result_data, "width", fl_value_new_float(width));
   fl_value_set_string_take(result_data, "height", fl_value_new_float(height));
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result_data));
 }
 
-static FlMethodResponse* set_size(WindowManagerPlugin* self, FlValue* args) {
-  const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
-  const float height =
-      fl_value_get_float(fl_value_lookup_string(args, "height"));
+static FlMethodResponse* set_bounds(WindowManagerPlugin* self, FlValue* args) {
+  FlValue* x = fl_value_lookup_string(args, "x");
+  FlValue* y = fl_value_lookup_string(args, "y");
+  if (x != nullptr && y != nullptr) {
+    gtk_window_move(get_window(self), static_cast<gint>(fl_value_get_float(x)),
+                    static_cast<gint>(fl_value_get_float(y)));
+  }
 
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
+  FlValue* width = fl_value_lookup_string(args, "width");
+  FlValue* height = fl_value_lookup_string(args, "height");
+  if (width != nullptr && height != nullptr) {
+    gtk_window_resize(get_window(self),
+                      static_cast<gint>(fl_value_get_float(width)),
+                      static_cast<gint>(fl_value_get_float(height)));
+  }
 
   return FL_METHOD_RESPONSE(
       fl_method_success_response_new(fl_value_new_bool(true)));
@@ -592,14 +581,10 @@ static void window_manager_plugin_handle_method_call(
     response = set_aspect_ratio(self, args);
   } else if (strcmp(method, "setBackgroundColor") == 0) {
     response = set_background_color(self, args);
-  } else if (strcmp(method, "getPosition") == 0) {
-    response = get_position(self);
-  } else if (strcmp(method, "setPosition") == 0) {
-    response = set_position(self, args);
-  } else if (strcmp(method, "getSize") == 0) {
-    response = get_size(self);
-  } else if (strcmp(method, "setSize") == 0) {
-    response = set_size(self, args);
+  } else if (strcmp(method, "getBounds") == 0) {
+    response = get_bounds(self);
+  } else if (strcmp(method, "setBounds") == 0) {
+    response = set_bounds(self, args);
   } else if (strcmp(method, "setMinimumSize") == 0) {
     response = set_minimum_size(self, args);
   } else if (strcmp(method, "setMaximumSize") == 0) {
