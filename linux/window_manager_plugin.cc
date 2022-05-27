@@ -73,6 +73,13 @@ static FlMethodResponse* set_as_frameless(WindowManagerPlugin* self,
       fl_method_success_response_new(fl_value_new_bool(true)));
 }
 
+static FlMethodResponse* destroy(WindowManagerPlugin* self) {
+  self->_is_prevent_close = false;
+  gtk_window_close(get_window(self));
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
 static FlMethodResponse* close(WindowManagerPlugin* self) {
   gtk_window_close(get_window(self));
   return FL_METHOD_RESPONSE(
@@ -556,6 +563,8 @@ static void window_manager_plugin_handle_method_call(
         fl_method_success_response_new(fl_value_new_bool(true)));
   } else if (strcmp(method, "setAsFrameless") == 0) {
     response = set_as_frameless(self, args);
+  } else if (strcmp(method, "destroy") == 0) {
+    response = destroy(self);
   } else if (strcmp(method, "close") == 0) {
     response = close(self);
   } else if (strcmp(method, "setPreventClose") == 0) {
