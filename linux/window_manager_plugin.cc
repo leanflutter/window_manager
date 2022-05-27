@@ -73,6 +73,13 @@ static FlMethodResponse* set_as_frameless(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* destroy(WindowManagerPlugin* self) {
+  self->_is_prevent_close = false;
+  gtk_window_close(get_window(self));
+  return FL_METHOD_RESPONSE(
+      fl_method_success_response_new(fl_value_new_bool(true)));
+}
+
 static FlMethodResponse* close(WindowManagerPlugin* self) {
   gtk_window_close(get_window(self));
   g_autoptr(FlValue) result = fl_value_new_bool(true);
@@ -222,46 +229,35 @@ static FlMethodResponse* set_background_color(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
-static FlMethodResponse* get_position(WindowManagerPlugin* self) {
-  gint x, y;
+static FlMethodResponse* get_bounds(WindowManagerPlugin* self) {
+  gint x, y, width, height;
   gtk_window_get_position(get_window(self), &x, &y);
+  gtk_window_get_size(get_window(self), &width, &height);
 
   g_autoptr(FlValue) result_data = fl_value_new_map();
   fl_value_set_string_take(result_data, "x", fl_value_new_float(x));
   fl_value_set_string_take(result_data, "y", fl_value_new_float(y));
-
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(result_data));
-}
-
-static FlMethodResponse* set_position(WindowManagerPlugin* self,
-                                      FlValue* args) {
-  const float x = fl_value_get_float(fl_value_lookup_string(args, "x"));
-  const float y = fl_value_get_float(fl_value_lookup_string(args, "y"));
-
-  gtk_window_move(get_window(self), static_cast<gint>(x), static_cast<gint>(y));
-
-  g_autoptr(FlValue) result = fl_value_new_bool(true);
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
-}
-
-static FlMethodResponse* get_size(WindowManagerPlugin* self) {
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
-
-  g_autoptr(FlValue) result_data = fl_value_new_map();
   fl_value_set_string_take(result_data, "width", fl_value_new_float(width));
   fl_value_set_string_take(result_data, "height", fl_value_new_float(height));
 
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result_data));
 }
 
-static FlMethodResponse* set_size(WindowManagerPlugin* self, FlValue* args) {
-  const float width = fl_value_get_float(fl_value_lookup_string(args, "width"));
-  const float height =
-      fl_value_get_float(fl_value_lookup_string(args, "height"));
+static FlMethodResponse* set_bounds(WindowManagerPlugin* self, FlValue* args) {
+  FlValue* x = fl_value_lookup_string(args, "x");
+  FlValue* y = fl_value_lookup_string(args, "y");
+  if (x != nullptr && y != nullptr) {
+    gtk_window_move(get_window(self), static_cast<gint>(fl_value_get_float(x)),
+                    static_cast<gint>(fl_value_get_float(y)));
+  }
 
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
+  FlValue* width = fl_value_lookup_string(args, "width");
+  FlValue* height = fl_value_lookup_string(args, "height");
+  if (width != nullptr && height != nullptr) {
+    gtk_window_resize(get_window(self),
+                      static_cast<gint>(fl_value_get_float(width)),
+                      static_cast<gint>(fl_value_get_float(height)));
+  }
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -436,6 +432,13 @@ static FlMethodResponse* get_opacity(WindowManagerPlugin* self) {
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* set_opacity(WindowManagerPlugin* self, FlValue* args) {
+  gdouble opacity = fl_value_get_float(fl_value_lookup_string(args, "opacity"));
+  gtk_widget_set_opacity(GTK_WIDGET(get_window(self)), opacity);
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
 static FlMethodResponse* pop_up_window_menu(WindowManagerPlugin* self) {
   GdkWindow* window = get_gdk_window(self);
   GdkDisplay* display = gdk_display_get_default();
@@ -555,6 +558,8 @@ static void window_manager_plugin_handle_method_call(
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   } else if (strcmp(method, "setAsFrameless") == 0) {
     response = set_as_frameless(self, args);
+  } else if (strcmp(method, "destroy") == 0) {
+    response = destroy(self);
   } else if (strcmp(method, "close") == 0) {
     response = close(self);
   } else if (strcmp(method, "setPreventClose") == 0) {
@@ -591,14 +596,10 @@ static void window_manager_plugin_handle_method_call(
     response = set_aspect_ratio(self, args);
   } else if (strcmp(method, "setBackgroundColor") == 0) {
     response = set_background_color(self, args);
-  } else if (strcmp(method, "getPosition") == 0) {
-    response = get_position(self);
-  } else if (strcmp(method, "setPosition") == 0) {
-    response = set_position(self, args);
-  } else if (strcmp(method, "getSize") == 0) {
-    response = get_size(self);
-  } else if (strcmp(method, "setSize") == 0) {
-    response = set_size(self, args);
+  } else if (strcmp(method, "getBounds") == 0) {
+    response = get_bounds(self);
+  } else if (strcmp(method, "setBounds") == 0) {
+    response = set_bounds(self, args);
   } else if (strcmp(method, "setMinimumSize") == 0) {
     response = set_minimum_size(self, args);
   } else if (strcmp(method, "setMaximumSize") == 0) {
@@ -633,6 +634,8 @@ static void window_manager_plugin_handle_method_call(
     response = set_skip_taskbar(self, args);
   } else if (strcmp(method, "getOpacity") == 0) {
     response = get_opacity(self);
+  } else if (strcmp(method, "setOpacity") == 0) {
+    response = set_opacity(self, args);
   } else if (strcmp(method, "popUpWindowMenu") == 0) {
     response = pop_up_window_menu(self);
   } else if (strcmp(method, "startDragging") == 0) {
