@@ -25,6 +25,16 @@
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 19
 
 namespace {
+
+const flutter::EncodableValue* ValueOrNull(const flutter::EncodableMap& map,
+                                           const char* key) {
+  auto it = map.find(flutter::EncodableValue(key));
+  if (it == map.end()) {
+    return nullptr;
+  }
+  return &(it->second);
+}
+
 class WindowManager {
  public:
   WindowManager();
@@ -74,12 +84,9 @@ class WindowManager {
   void WindowManager::SetFullScreen(const flutter::EncodableMap& args);
   void WindowManager::SetAspectRatio(const flutter::EncodableMap& args);
   void WindowManager::SetBackgroundColor(const flutter::EncodableMap& args);
-  flutter::EncodableMap WindowManager::GetPosition(
+  flutter::EncodableMap WindowManager::GetBounds(
       const flutter::EncodableMap& args);
-  void WindowManager::SetPosition(const flutter::EncodableMap& args);
-  flutter::EncodableMap WindowManager::GetSize(
-      const flutter::EncodableMap& args);
-  void WindowManager::SetSize(const flutter::EncodableMap& args);
+  void WindowManager::SetBounds(const flutter::EncodableMap& args);
   void WindowManager::SetMinimumSize(const flutter::EncodableMap& args);
   void WindowManager::SetMaximumSize(const flutter::EncodableMap& args);
   bool WindowManager::IsResizable();
@@ -107,8 +114,6 @@ class WindowManager {
   void WindowManager::PopUpWindowMenu(const flutter::EncodableMap& args);
   void WindowManager::StartDragging();
   void WindowManager::StartResizing(const flutter::EncodableMap& args);
-  flutter::EncodableMap WindowManager::GetPrimaryDisplay(
-      const flutter::EncodableMap& args);
 
  private:
   bool g_is_window_fullscreen = false;
@@ -444,44 +449,22 @@ void WindowManager::SetBackgroundColor(const flutter::EncodableMap& args) {
   }
 }
 
-flutter::EncodableMap WindowManager::GetPosition(
+flutter::EncodableMap WindowManager::GetBounds(
     const flutter::EncodableMap& args) {
+  HWND hwnd = GetMainWindow();
   double devicePixelRatio =
       std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
 
   flutter::EncodableMap resultMap = flutter::EncodableMap();
   RECT rect;
-  if (GetWindowRect(GetMainWindow(), &rect)) {
+  if (GetWindowRect(hwnd, &rect)) {
     double x = rect.left / devicePixelRatio * 1.0f;
     double y = rect.top / devicePixelRatio * 1.0f;
-
-    resultMap[flutter::EncodableValue("x")] = flutter::EncodableValue(x);
-    resultMap[flutter::EncodableValue("y")] = flutter::EncodableValue(y);
-  }
-  return resultMap;
-}
-
-void WindowManager::SetPosition(const flutter::EncodableMap& args) {
-  double devicePixelRatio =
-      std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
-  double x = std::get<double>(args.at(flutter::EncodableValue("x")));
-  double y = std::get<double>(args.at(flutter::EncodableValue("y")));
-
-  SetWindowPos(GetMainWindow(), HWND_TOP, int(x * devicePixelRatio),
-               int(y * devicePixelRatio), 0, 0, SWP_NOSIZE);
-}
-
-flutter::EncodableMap WindowManager::GetSize(
-    const flutter::EncodableMap& args) {
-  double devicePixelRatio =
-      std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
-
-  flutter::EncodableMap resultMap = flutter::EncodableMap();
-  RECT rect;
-  if (GetWindowRect(GetMainWindow(), &rect)) {
     double width = (rect.right - rect.left) / devicePixelRatio * 1.0f;
     double height = (rect.bottom - rect.top) / devicePixelRatio * 1.0f;
 
+    resultMap[flutter::EncodableValue("x")] = flutter::EncodableValue(x);
+    resultMap[flutter::EncodableValue("y")] = flutter::EncodableValue(y);
     resultMap[flutter::EncodableValue("width")] =
         flutter::EncodableValue(width);
     resultMap[flutter::EncodableValue("height")] =
@@ -490,14 +473,40 @@ flutter::EncodableMap WindowManager::GetSize(
   return resultMap;
 }
 
-void WindowManager::SetSize(const flutter::EncodableMap& args) {
+void WindowManager::SetBounds(const flutter::EncodableMap& args) {
+  HWND hwnd = GetMainWindow();
+
   double devicePixelRatio =
       std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
-  double width = std::get<double>(args.at(flutter::EncodableValue("width")));
-  double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
-  SetWindowPos(GetMainWindow(), HWND_TOP, 0, 0, int(width * devicePixelRatio),
-               int(height * devicePixelRatio), SWP_NOMOVE);
+  auto* null_or_x = std::get_if<double>(ValueOrNull(args, "x"));
+  auto* null_or_y = std::get_if<double>(ValueOrNull(args, "y"));
+  auto* null_or_width = std::get_if<double>(ValueOrNull(args, "width"));
+  auto* null_or_height = std::get_if<double>(ValueOrNull(args, "height"));
+
+  int x = 0;
+  int y = 0;
+  int width = 0;
+  int height = 0;
+  UINT uFlags = NULL;
+
+  if (null_or_x != nullptr && null_or_y != nullptr) {
+    x = static_cast<int>(*null_or_x * devicePixelRatio);
+    y = static_cast<int>(*null_or_y * devicePixelRatio);
+  }
+  if (null_or_width != nullptr && null_or_height != nullptr) {
+    width = static_cast<int>(*null_or_width * devicePixelRatio);
+    height = static_cast<int>(*null_or_height * devicePixelRatio);
+  }
+
+  if (null_or_x == nullptr || null_or_y == nullptr) {
+    uFlags = SWP_NOMOVE;
+  }
+  if (null_or_width == nullptr || null_or_height == nullptr) {
+    uFlags = SWP_NOSIZE;
+  }
+
+  SetWindowPos(hwnd, HWND_TOP, x, y, width, height, uFlags);
 }
 
 void WindowManager::SetMinimumSize(const flutter::EncodableMap& args) {
@@ -798,54 +807,6 @@ void WindowManager::StartResizing(const flutter::EncodableMap& args) {
     command |= WMSZ_BOTTOMRIGHT;
   }
   SendMessage(hWnd, WM_SYSCOMMAND, command, 0);
-}
-
-flutter::EncodableMap WindowManager::GetPrimaryDisplay(
-    const flutter::EncodableMap& args) {
-  double devicePixelRatio =
-      std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
-  POINT ptZero = {0, 0};
-  HMONITOR monitor = MonitorFromPoint(ptZero, MONITOR_DEFAULTTOPRIMARY);
-  MONITORINFO info;
-  info.cbSize = sizeof(MONITORINFO);
-  ::GetMonitorInfo(monitor, &info);
-
-  double width =
-      (info.rcMonitor.right - info.rcMonitor.left) / devicePixelRatio;
-  double height =
-      (info.rcMonitor.bottom - info.rcMonitor.top) / devicePixelRatio;
-
-  double visibleWidth =
-      (info.rcWork.right - info.rcWork.left) / devicePixelRatio;
-  double visibleHeight =
-      (info.rcWork.bottom - info.rcWork.top) / devicePixelRatio;
-
-  double x = (info.rcWork.left) / devicePixelRatio;
-  double y = (info.rcWork.top) / devicePixelRatio;
-
-  flutter::EncodableMap size = flutter::EncodableMap();
-  flutter::EncodableMap visibleSize = flutter::EncodableMap();
-  flutter::EncodableMap visiblePosition = flutter::EncodableMap();
-
-  size[flutter::EncodableValue("width")] = flutter::EncodableValue(width);
-  size[flutter::EncodableValue("height")] = flutter::EncodableValue(height);
-
-  visibleSize[flutter::EncodableValue("width")] =
-      flutter::EncodableValue(visibleWidth);
-  visibleSize[flutter::EncodableValue("height")] =
-      flutter::EncodableValue(visibleHeight);
-
-  visiblePosition[flutter::EncodableValue("x")] = flutter::EncodableValue(x);
-  visiblePosition[flutter::EncodableValue("y")] = flutter::EncodableValue(y);
-
-  flutter::EncodableMap display = flutter::EncodableMap();
-  display[flutter::EncodableValue("size")] = flutter::EncodableValue(size);
-  display[flutter::EncodableValue("visibleSize")] =
-      flutter::EncodableValue(visibleSize);
-  display[flutter::EncodableValue("visiblePosition")] =
-      flutter::EncodableValue(visiblePosition);
-
-  return display;
 }
 
 }  // namespace

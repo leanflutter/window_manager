@@ -375,25 +375,15 @@ void WindowManagerPlugin::HandleMethodCall(
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->SetBackgroundColor(args);
     result->Success(flutter::EncodableValue(true));
-  } else if (method_name.compare("getPosition") == 0) {
+  } else if (method_name.compare("getBounds") == 0) {
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
-    flutter::EncodableMap value = window_manager->GetPosition(args);
+    flutter::EncodableMap value = window_manager->GetBounds(args);
     result->Success(flutter::EncodableValue(value));
-  } else if (method_name.compare("setPosition") == 0) {
+  } else if (method_name.compare("setBounds") == 0) {
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
-    window_manager->SetPosition(args);
-    result->Success(flutter::EncodableValue(true));
-  } else if (method_name.compare("getSize") == 0) {
-    const flutter::EncodableMap& args =
-        std::get<flutter::EncodableMap>(*method_call.arguments());
-    flutter::EncodableMap value = window_manager->GetSize(args);
-    result->Success(flutter::EncodableValue(value));
-  } else if (method_name.compare("setSize") == 0) {
-    const flutter::EncodableMap& args =
-        std::get<flutter::EncodableMap>(*method_call.arguments());
-    window_manager->SetSize(args);
+    window_manager->SetBounds(args);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("setMinimumSize") == 0) {
     const flutter::EncodableMap& args =
@@ -510,11 +500,6 @@ void WindowManagerPlugin::HandleMethodCall(
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->StartResizing(args);
     result->Success(flutter::EncodableValue(true));
-  } else if (method_name.compare("getPrimaryDisplay") == 0) {
-    const flutter::EncodableMap& args =
-        std::get<flutter::EncodableMap>(*method_call.arguments());
-    flutter::EncodableMap value = window_manager->GetPrimaryDisplay(args);
-    result->Success(flutter::EncodableValue(value));
   } else {
     result->NotImplemented();
   }

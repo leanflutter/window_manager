@@ -447,28 +447,6 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
     }
     
-    public func getPrimaryDisplay() -> NSDictionary {
-        let screen = NSScreen.main!
-        let size: NSDictionary = [
-            "width": screen.frame.width,
-            "height": screen.frame.height,
-        ]
-        let visiblePosition: NSDictionary = [
-            "x": screen.visibleFrame.topLeft.x,
-            "y": screen.visibleFrame.topLeft.y,
-        ]
-        let visibleSize: NSDictionary = [
-            "width": screen.visibleFrame.width,
-            "height": screen.visibleFrame.height,
-        ]
-        let dict: NSDictionary = [
-            "size": size,
-            "visiblePosition": visiblePosition,
-            "visibleSize": visibleSize,
-        ]
-        return dict;
-    }
-    
     public func isSubWindow() -> Bool {
         let identifier: String = mainWindow.identifier?.rawValue ?? "";
         return identifier == "subwindow"

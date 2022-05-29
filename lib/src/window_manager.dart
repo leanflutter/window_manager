@@ -617,15 +617,6 @@ class WindowManager {
     );
   }
 
-  Future<Map<String, dynamic>> _getPrimaryDisplay() async {
-    final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
-    };
-    final Map<dynamic, dynamic> resultData =
-        await _channel.invokeMethod('getPrimaryDisplay', arguments);
-    return Map<String, dynamic>.from(resultData);
-  }
-
   Future<bool> isSubWindow() async {
     return await _channel.invokeMethod('isSubWindow');
   }

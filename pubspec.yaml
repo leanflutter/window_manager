@@ -17,7 +17,7 @@ dependencies:
     sdk: flutter
 
   path: ^1.8.0
-  screen_retriever: ^0.1.1
+  screen_retriever: ^0.1.2
 
 dev_dependencies:
   flutter_test:

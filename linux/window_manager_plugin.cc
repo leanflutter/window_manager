@@ -642,8 +642,6 @@ static void window_manager_plugin_handle_method_call(
     response = start_dragging(self);
   } else if (strcmp(method, "startResizing") == 0) {
     response = start_resizing(self, args);
-  } else if (strcmp(method, "getPrimaryDisplay") == 0) {
-    response = get_primary_display(self, args);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
