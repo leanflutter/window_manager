@@ -524,23 +524,6 @@ static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
-static FlMethodResponse* get_primary_display(WindowManagerPlugin* self,
-                                             FlValue* args) {
-  GdkDisplay* display = gdk_display_get_default();
-  GdkMonitor* monitor = gdk_display_get_primary_monitor(display);
-
-  GdkRectangle frame;
-  gdk_monitor_get_geometry(monitor, &frame);
-
-  auto size = fl_value_new_map();
-  fl_value_set_string_take(size, "width", fl_value_new_float(frame.width));
-  fl_value_set_string_take(size, "height", fl_value_new_float(frame.height));
-
-  g_autoptr(FlValue) result = fl_value_new_map();
-  fl_value_set_string_take(result, "size", size);
-  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
-}
-
 // Called when a method call is received from Flutter.
 static void window_manager_plugin_handle_method_call(
     WindowManagerPlugin* self,
