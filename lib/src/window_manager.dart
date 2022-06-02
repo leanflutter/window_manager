@@ -133,8 +133,6 @@ class WindowManager {
   }
 
   /// Force closing the window.
-  ///
-  /// @platforms macos,windows
   Future<void> destroy() async {
     await _channel.invokeMethod('destroy');
   }
@@ -472,8 +470,6 @@ class WindowManager {
   }
 
   /// Changes the title bar style of native window.
-  ///
-  /// @platforms macos,windows
   Future<void> setTitleBarStyle(
     TitleBarStyle titleBarStyle, {
     bool windowButtonVisibility = true,
@@ -545,16 +541,12 @@ class WindowManager {
     await _channel.invokeMethod('setHasShadow', arguments);
   }
 
-  /// Returns `double` - between 0.0 (fully transparent) and 1.0 (fully opaque). On Linux, always returns 1.
-  ///
-  /// @platforms macos,windows
+  /// Returns `double` - between 0.0 (fully transparent) and 1.0 (fully opaque).
   Future<double> getOpacity() async {
     return await _channel.invokeMethod('getOpacity');
   }
 
   /// Sets the opacity of the window.
-  ///
-  /// @platforms macos,windows
   Future<void> setOpacity(double opacity) async {
     final Map<String, dynamic> arguments = {
       'opacity': opacity,

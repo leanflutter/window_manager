@@ -1,3 +1,14 @@
+## 0.2.5
+
+* [linux] fix method response memory leaks (#159)
+* [linux] Implement destroy #158
+* [linux] Implement getOpacity & setOpacity #157
+* [macos] Reimplement setBounds & getBounds method. #156
+* Make WindowOptions constructor to const constructor. #147
+* [windows] fix window overflow #131
+* [macos] Add the animate parameter to setBounds method #142
+* [linux] fix popUpWindowMenu() on Wayland #145
+
 ## 0.2.3
 
 * Fixed cannot convert type Double to type CGFloat #138

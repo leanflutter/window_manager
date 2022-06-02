@@ -39,7 +39,7 @@
     - [WindowManager](#windowmanager)
       - [Methods](#methods)
         - [waitUntilReadyToShow](#waituntilreadytoshow)
-        - [destroy  `macos`  `windows`](#destroy--macos--windows)
+        - [destroy](#destroy)
         - [close](#close)
         - [isPreventClose](#ispreventclose)
         - [setPreventClose](#setpreventclose)
@@ -59,14 +59,14 @@
         - [setFullScreen](#setfullscreen)
         - [setAspectRatio](#setaspectratio)
         - [setBackgroundColor](#setbackgroundcolor)
-        - [getBounds](#getbounds)
-        - [setBounds](#setbounds)
-        - [getPosition](#getposition)
         - [setAlignment](#setalignment)
         - [center](#center)
-        - [setPosition](#setposition)
+        - [getBounds](#getbounds)
+        - [setBounds](#setbounds)
         - [getSize](#getsize)
         - [setSize](#setsize)
+        - [getPosition](#getposition)
+        - [setPosition](#setposition)
         - [setMinimumSize](#setminimumsize)
         - [setMaximumSize](#setmaximumsize)
         - [isResizable](#isresizable)
@@ -83,7 +83,7 @@
         - [setAlwaysOnBottom  `linux`](#setalwaysonbottom--linux)
         - [getTitle](#gettitle)
         - [setTitle](#settitle)
-        - [setTitleBarStyle  `macos`  `windows`](#settitlebarstyle--macos--windows)
+        - [setTitleBarStyle](#settitlebarstyle)
         - [getTitleBarHeight](#gettitlebarheight)
         - [isSkipTaskbar](#isskiptaskbar)
         - [setSkipTaskbar](#setskiptaskbar)
@@ -91,8 +91,8 @@
         - [setIcon  `windows`](#seticon--windows)
         - [hasShadow  `macos`  `windows`](#hasshadow--macos--windows)
         - [setHasShadow  `macos`  `windows`](#sethasshadow--macos--windows)
-        - [getOpacity  `macos`  `windows`](#getopacity--macos--windows)
-        - [setOpacity  `macos`  `windows`](#setopacity--macos--windows)
+        - [getOpacity](#getopacity)
+        - [setOpacity](#setopacity)
         - [setBrightness  `macos`  `windows`](#setbrightness--macos--windows)
         - [setIgnoreMouseEvents](#setignoremouseevents)
         - [startDragging](#startdragging)
@@ -131,7 +131,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.2.3
+  window_manager: ^0.2.5
 ```
 
 或
@@ -452,9 +452,9 @@ class _HomePageState extends State<HomePage> with WindowListener {
 - [AuthPass](https://authpass.app/) - 基于Flutter的密码管理器，适用于所有平台。兼容Keepass 2.x（kdbx 3.x）。
 - [Biyi (比译)](https://biyidev.com/) - 一个便捷的翻译和词典应用程序。
 - [BlueBubbles](https://github.com/BlueBubblesApp/bluebubbles-app) - BlueBubbles is an ecosystem of apps bringing iMessage to Android, Windows, and Linux
-- [Yukino](https://github.com/yukino-app/yukino/tree/flutter-rewrite) - Yukino lets you read manga or stream anime ad-free from multiple sources.
 - [LunaSea](https://github.com/CometTools/LunaSea) - A self-hosted controller for mobile and macOS built using the Flutter framework.
 - [Linwood Butterfly](https://github.com/LinwoodCloud/Butterfly) - 用 Flutter 编写的开源笔记应用
+- [RustDesk](https://github.com/rustdesk/rustdesk) - 远程桌面软件，开箱即用，无需任何配置。您完全掌控数据，不用担心安全问题。
 
 ## API
 
@@ -467,10 +467,9 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
 Wait until ready to show.
 
-##### destroy  `macos`  `windows`
+##### destroy
 
 Force closing the window.
-
 
 ##### close
 
@@ -551,18 +550,6 @@ This will make a window maintain an aspect ratio.
 
 Sets the background color of the window.
 
-##### getBounds
-
-Returns `Rect` - The bounds of the window as Object.
-
-##### setBounds
-
-Resizes and moves the window to the supplied bounds.
-
-##### getPosition
-
-Returns `Offset` - Contains the window's current position.
-
 ##### setAlignment
 
 Move the window to a position aligned with the screen.
@@ -571,9 +558,13 @@ Move the window to a position aligned with the screen.
 
 Moves window to the center of the screen.
 
-##### setPosition
+##### getBounds
 
-Moves window to position.
+Returns `Rect` - The bounds of the window as Object.
+
+##### setBounds
+
+Resizes and moves the window to the supplied bounds.
 
 ##### getSize
 
@@ -582,6 +573,14 @@ Returns `Size` - Contains the window's width and height.
 ##### setSize
 
 Resizes the window to `width` and `height`.
+
+##### getPosition
+
+Returns `Offset` - Contains the window's current position.
+
+##### setPosition
+
+Moves window to position.
 
 ##### setMinimumSize
 
@@ -654,10 +653,9 @@ Returns `String` - The title of the native window.
 
 Changes the title of native window to title.
 
-##### setTitleBarStyle  `macos`  `windows`
+##### setTitleBarStyle
 
 Changes the title bar style of native window.
-
 
 ##### getTitleBarHeight
 
@@ -691,15 +689,13 @@ Returns `bool` - Whether the window has a shadow. On Windows, always returns tru
 Sets whether the window should have a shadow. On Windows, doesn't do anything unless window is frameless.
 
 
-##### getOpacity  `macos`  `windows`
+##### getOpacity
 
-Returns `double` - between 0.0 (fully transparent) and 1.0 (fully opaque). On Linux, always returns 1.
+Returns `double` - between 0.0 (fully transparent) and 1.0 (fully opaque).
 
-
-##### setOpacity  `macos`  `windows`
+##### setOpacity
 
 Sets the opacity of the window.
-
 
 ##### setBrightness  `macos`  `windows`
 
