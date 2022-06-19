@@ -217,8 +217,9 @@ class WindowManager {
           "isDoubleClick": true,
         },
       );
+    } else {
+      await _channel.invokeMethod('maximize');
     }
-    await _channel.invokeMethod('maximize');
   }
 
   /// Unmaximizes the window.
