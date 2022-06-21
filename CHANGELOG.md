@@ -1,3 +1,7 @@
+## 0.2.6
+
+* [windows] Added `vertically` param to the `maximize` method.
+
 ## 0.2.5
 
 * [linux] fix method response memory leaks (#159)

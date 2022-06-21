@@ -343,7 +343,9 @@ void WindowManagerPlugin::HandleMethodCall(
     bool value = window_manager->IsMaximized();
     result->Success(flutter::EncodableValue(value));
   } else if (method_name.compare("maximize") == 0) {
-    window_manager->Maximize();
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->Maximize(args);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("unmaximize") == 0) {
     window_manager->Unmaximize();
