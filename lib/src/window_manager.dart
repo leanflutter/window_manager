@@ -202,9 +202,23 @@ class WindowManager {
     return await _channel.invokeMethod('isMaximized');
   }
 
-  /// Maximizes the window.
-  Future<void> maximize() async {
-    await _channel.invokeMethod('maximize');
+  /// Maximizes the window. `vertically` simulates aero snap, only works on Windows
+  Future<void> maximize({bool vertically = false}) async {
+    if (vertically) {
+      await _channel.invokeMethod(
+        'startResizing',
+        {
+          "resizeEdge": describeEnum(ResizeEdge.top),
+          "top": true,
+          "bottom": false,
+          "right": false,
+          "left": false,
+          "isDoubleClick": true,
+        },
+      );
+    } else {
+      await _channel.invokeMethod('maximize');
+    }
   }
 
   /// Unmaximizes the window.

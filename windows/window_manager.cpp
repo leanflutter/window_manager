@@ -786,27 +786,31 @@ void WindowManager::StartResizing(const flutter::EncodableMap& args) {
   bool bottom = std::get<bool>(args.at(flutter::EncodableValue("bottom")));
   bool left = std::get<bool>(args.at(flutter::EncodableValue("left")));
   bool right = std::get<bool>(args.at(flutter::EncodableValue("right")));
+  bool isDoubleClick =
+      std::get<bool>(args.at(flutter::EncodableValue("isDoubleClick")));
   HWND hWnd = GetMainWindow();
   ReleaseCapture();
-  LONG command = SC_SIZE;
+  LONG command;
   if (top && !bottom && !right && !left) {
-    command |= WMSZ_TOP;
+    command = HTTOP;
   } else if (top && left && !bottom && !right) {
-    command |= WMSZ_TOPLEFT;
+    command = HTTOPLEFT;
   } else if (left && !top && !bottom && !right) {
-    command |= WMSZ_LEFT;
+    command = HTLEFT;
   } else if (right && !top && !left && !bottom) {
-    command |= WMSZ_RIGHT;
+    command = HTRIGHT;
   } else if (top && right && !left && !bottom) {
-    command |= WMSZ_TOPRIGHT;
+    command = HTTOPRIGHT;
   } else if (bottom && !top && !right && !left) {
-    command |= WMSZ_BOTTOM;
+    command = HTBOTTOM;
   } else if (bottom && left && !top && !right) {
-    command |= WMSZ_BOTTOMLEFT;
-  } else if (bottom && right && !top && !left) {
-    command |= WMSZ_BOTTOMRIGHT;
-  }
-  SendMessage(hWnd, WM_SYSCOMMAND, command, 0);
+    command = HTBOTTOMLEFT;
+  } else
+    command = HTBOTTOMRIGHT;
+  POINT cursorPos;
+  GetCursorPos(&cursorPos);
+  PostMessage(hWnd, isDoubleClick ? WM_NCLBUTTONDBLCLK : WM_NCLBUTTONDOWN,
+              command, MAKELPARAM(cursorPos.x, cursorPos.y));
 }
 
 }  // namespace
