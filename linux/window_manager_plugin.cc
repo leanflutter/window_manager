@@ -110,6 +110,12 @@ static FlMethodResponse* blur(WindowManagerPlugin* self) {
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* is_focused(WindowManagerPlugin* self) {
+  bool is_focused = gtk_window_is_active(get_window(self));
+  g_autoptr(FlValue) result = fl_value_new_bool(is_focused);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
 static FlMethodResponse* show(WindowManagerPlugin* self) {
   gtk_widget_show(GTK_WIDGET(get_window(self)));
   g_autoptr(FlValue) result = fl_value_new_bool(true);
@@ -427,6 +433,15 @@ static FlMethodResponse* set_skip_taskbar(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* set_icon(WindowManagerPlugin* self,
+                                          FlValue* args) {
+  const gchar* file_name =
+      fl_value_get_string(fl_value_lookup_string(args, "iconPath"));
+  const gboolean gtk_result = gtk_window_set_icon_from_file(get_window(self), file_name, NULL);
+  g_autoptr(FlValue) result = fl_value_new_bool(gtk_result);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
 static FlMethodResponse* get_opacity(WindowManagerPlugin* self) {
   g_autoptr(FlValue) result = fl_value_new_float(1);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -553,6 +568,8 @@ static void window_manager_plugin_handle_method_call(
     response = focus(self);
   } else if (strcmp(method, "blur") == 0) {
     response = blur(self);
+  } else if (strcmp(method, "isFocused") == 0) {
+    response = is_focused(self);
   } else if (strcmp(method, "show") == 0) {
     response = show(self);
   } else if (strcmp(method, "hide") == 0) {
@@ -615,6 +632,8 @@ static void window_manager_plugin_handle_method_call(
     response = is_skip_taskbar(self);
   } else if (strcmp(method, "setSkipTaskbar") == 0) {
     response = set_skip_taskbar(self, args);
+  } else if (strcmp(method, "setIcon") == 0) {
+    response = set_icon(self, args);
   } else if (strcmp(method, "getOpacity") == 0) {
     response = get_opacity(self);
   } else if (strcmp(method, "setOpacity") == 0) {
