@@ -468,6 +468,10 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
 Wait until ready to show.
 
+##### forceRefresh `windows`
+
+Force refreshing the app or Flutter View window.
+
 ##### destroy
 
 Force closing the window.
