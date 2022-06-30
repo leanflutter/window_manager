@@ -94,6 +94,8 @@ class WindowManager {
   }
 
   /// Force refreshing the window or the Flutter View.
+  ///
+  /// @platforms windows
   Future<void> forceRefresh({bool flutterView = false}) async {
     final Map<String, dynamic> arguments = {
       'flutterView': flutterView,
@@ -268,8 +270,6 @@ class WindowManager {
   }
 
   /// Move the window to a position aligned with the screen.
-  ///
-  /// @platforms windows
   Future<void> setAlignment(
     Alignment alignment, {
     bool animate = false,
