@@ -329,6 +329,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
     }
     
     public func setTitleBarStyle(_ args: [String: Any]) {
+        //we should bring back titleBarView first. titlebar view may be hidden when setAsFrameless called
+        let titleBarView: NSView = (mainWindow.standardWindowButton(.closeButton)?.superview)!.superview!
+        titleBarView.isHidden = false
+        
         let titleBarStyle: String = args["titleBarStyle"] as! String
         let windowButtonVisibility: Bool = args["windowButtonVisibility"] as! Bool
         
