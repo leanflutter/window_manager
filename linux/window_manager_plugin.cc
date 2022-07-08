@@ -157,6 +157,28 @@ static FlMethodResponse* minimize(WindowManagerPlugin* self) {
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* is_dockable(WindowManagerPlugin* self) {
+  bool is_docked = false;
+  g_autoptr(FlValue) result = fl_value_new_bool(is_docked);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* is_docked(WindowManagerPlugin* self) {
+  bool is_docked = false;
+  g_autoptr(FlValue) result = fl_value_new_bool(is_docked);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* dock(WindowManagerPlugin* self) {
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* undock(WindowManagerPlugin* self) {
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
 static FlMethodResponse* restore(WindowManagerPlugin* self) {
   gtk_window_deiconify(get_window(self));
   gtk_window_present(get_window(self));
@@ -571,6 +593,14 @@ static void window_manager_plugin_handle_method_call(
     response = minimize(self);
   } else if (strcmp(method, "restore") == 0) {
     response = restore(self);
+  } else if (strcmp(method, "isDockable") == 0) {
+    response = is_dockable(self);
+  } else if (strcmp(method, "isDocked") == 0) {
+    response = is_docked(self);
+  } else if (strcmp(method, "dock") == 0) {
+    response = dock(self);
+  } else if (strcmp(method, "undock") == 0) {
+    response = undock(self);
   } else if (strcmp(method, "isFullScreen") == 0) {
     response = is_full_screen(self);
   } else if (strcmp(method, "setFullScreen") == 0) {

@@ -27,6 +27,11 @@ const kWindowEventMoved = 'moved';
 const kWindowEventEnterFullScreen = 'enter-full-screen';
 const kWindowEventLeaveFullScreen = 'leave-full-screen';
 
+const kWindowEventDocked = 'docked';
+const kWindowEventUndocked = 'undocked';
+
+enum DockSide { LEFT, RIGHT }
+
 // WindowManager
 class WindowManager {
   WindowManager._() {
@@ -66,6 +71,8 @@ class WindowManager {
         kWindowEventMoved: listener.onWindowMoved,
         kWindowEventEnterFullScreen: listener.onWindowEnterFullScreen,
         kWindowEventLeaveFullScreen: listener.onWindowLeaveFullScreen,
+        kWindowEventDocked: listener.onWindowDocked,
+        kWindowEventUndocked: listener.onWindowUndocked,
       };
       funcMap[eventName]!();
     }
@@ -241,6 +248,31 @@ class WindowManager {
       'isFullScreen': isFullScreen,
     };
     await _channel.invokeMethod('setFullScreen', arguments);
+  }
+
+  /// Returns `bool` - Whether the window is dockable or not.
+  Future<bool> isDockable() async {
+    return await _channel.invokeMethod('isDockable');
+  }
+
+  /// Returns `bool` - Whether the window is docked.
+  Future<DockSide?> isDocked() async {
+    return await _channel.invokeMethod('isDocked');
+  }
+
+  /// Docks the window. only works on Windows
+  Future<void> dock({required DockSide side, required double width}) async {
+    final Map<String, dynamic> arguments = {
+      'left': side == DockSide.LEFT,
+      'right': side == DockSide.RIGHT,
+      'width': width,
+    };
+    await _channel.invokeMethod('dock', arguments);
+  }
+
+  /// Undocks the window. only works on Windows
+  Future<void> undock() async {
+    await _channel.invokeMethod('undock');
   }
 
   /// This will make a window maintain an aspect ratio.
