@@ -307,6 +307,11 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("setAsFrameless") == 0) {
     window_manager->SetAsFrameless();
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("setAlwaysShow") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->SetAlwaysShow(args);
+    result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("destroy") == 0) {
     window_manager->Destroy();
     result->Success(flutter::EncodableValue(true));

@@ -50,6 +50,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   bool _hasShadow = true;
   double _opacity = 1;
   bool _isIgnoreMouseEvents = false;
+  bool _isAlwaysShow = false;
   String _iconType = _kIconTypeOriginal;
 
   @override
@@ -802,6 +803,15 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               title: Text('popUpWindowMenu'),
               onTap: () async {
                 await windowManager.popUpWindowMenu();
+              },
+            ),
+            PreferenceListItem(
+              title: Text('alwaysShow'),
+              onTap: () async {
+                setState(() {
+                  _isAlwaysShow = !_isAlwaysShow;
+                });
+                await windowManager.setAlwaysShow(_isAlwaysShow);
               },
             ),
             PreferenceListItem(

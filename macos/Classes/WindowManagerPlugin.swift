@@ -56,6 +56,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setAsFrameless()
             result(true)
             break
+        case "setAlwaysShow":
+            windowManager.setAlwaysShow(args)
+            result(true)
         case "destroy":
             windowManager.destroy()
             result(true)

@@ -97,6 +97,13 @@ class WindowManager {
     await _channel.invokeMethod('setAsFrameless');
   }
 
+  Future<void> setAlwaysShow(bool isAvaible) async {
+    final Map<String, dynamic> arguments = {
+      'isAlwaysShow': isAvaible,
+    };
+    await _channel.invokeMethod('setAlwaysShow', arguments);
+  }
+
   /// Wait until ready to show.
   Future<void> waitUntilReadyToShow([
     WindowOptions? options,
