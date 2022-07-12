@@ -72,6 +72,21 @@ public class WindowManager: NSObject, NSWindowDelegate {
             titleBarView.isHidden = true
         }
     }
+
+    public func setAlwaysShow(_ args: [String: Any]) {
+        let isAvaible: Bool = args["isAlwaysShow"] as! Bool
+        if(isAvaible) {
+            NSApplication.shared.setActivationPolicy(.accessory)
+            mainWindow.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.mainMenuWindow)))
+            mainWindow.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        } else {
+            NSApplication.shared.setActivationPolicy(.regular)
+            mainWindow.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.normalWindow)))
+    //        mainWindow.styleMask.remove(.borderless)
+    //        mainWindow.styleMask = [.titled]
+            mainWindow.collectionBehavior = [.participatesInCycle, .managed]
+        }
+    }
     
     public func destroy() {
         NSApp.terminate(nil)

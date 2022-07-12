@@ -113,6 +113,7 @@ class WindowManager {
   void WindowManager::SetIgnoreMouseEvents(const flutter::EncodableMap& args);
   void WindowManager::PopUpWindowMenu(const flutter::EncodableMap& args);
   void WindowManager::StartDragging();
+  void windowManager::SetAlwaysShow(const flutter::EncodableMap& args);
   void WindowManager::StartResizing(const flutter::EncodableMap& args);
 
  private:
@@ -792,6 +793,21 @@ void WindowManager::PopUpWindowMenu(const flutter::EncodableMap& args) {
 void WindowManager::StartDragging() {
   ReleaseCapture();
   SendMessage(GetMainWindow(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+}
+
+void WindowManager::SetAlwaysShow(const flutter::EncodableMap& args) {
+  bool isShow =
+      std::get<bool>(args.at(flutter::EncodableValue("isAlwaysShow")));
+  if (isShow)
+  {
+    SetAlwaysOnTop(true);
+    SetSkipTaskbar(true);
+  } 
+  else
+  {
+    SetAlwaysOnTop(false);
+    SetSkipTaskbar(false);
+  }
 }
 
 void WindowManager::StartResizing(const flutter::EncodableMap& args) {
