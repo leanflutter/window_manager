@@ -82,9 +82,8 @@ public class WindowManager: NSObject, NSWindowDelegate {
         } else {
             NSApplication.shared.setActivationPolicy(.regular)
             mainWindow.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.normalWindow)))
-    //        mainWindow.styleMask.remove(.borderless)
-    //        mainWindow.styleMask = [.titled]
-            mainWindow.collectionBehavior = [.participatesInCycle, .managed]
+            mainWindow.collectionBehavior.remove(.fullScreenAuxiliary)
+            mainWindow.collectionBehavior.remove(.canJoinAllSpaces)
         }
     }
     
