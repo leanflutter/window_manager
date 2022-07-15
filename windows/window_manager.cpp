@@ -86,9 +86,9 @@ class WindowManager {
   void WindowManager::Minimize();
   void WindowManager::Restore();
   bool WindowManager::IsDockable();
-  bool WindowManager::IsDocked();
+  int WindowManager::IsDocked();
   void WindowManager::Dock(const flutter::EncodableMap& args);
-  void WindowManager::Undock();
+  bool WindowManager::Undock();
   bool WindowManager::IsFullScreen();
   void WindowManager::SetFullScreen(const flutter::EncodableMap& args);
   void WindowManager::SetAspectRatio(const flutter::EncodableMap& args);
@@ -133,6 +133,12 @@ class WindowManager {
   LONG g_style_before_fullscreen;
   LONG g_ex_style_before_fullscreen;
   ITaskbarList3* taskbar_ = nullptr;
+  BOOL WindowManager::RegisterAccessBar(HWND hwnd, BOOL fRegister);
+  void PASCAL WindowManager::AppBarQuerySetPos(HWND hwnd,
+                                               UINT uEdge,
+                                               LPRECT lprc,
+                                               PAPPBARDATA pabd);
+  void WindowManager::DockAccessBar(HWND hwnd, UINT edge, UINT windowWidth);
 };
 
 WindowManager::WindowManager() {}
@@ -329,34 +335,23 @@ bool WindowManager::IsDockable() {
   return true;
 }
 
-bool WindowManager::IsDocked() {
-  return is_docked_ != 0;
+int WindowManager::IsDocked() {
+  return is_docked_;
 }
 
 void WindowManager::Dock(const flutter::EncodableMap& args) {
   HWND mainWindow = GetMainWindow();
 
-  auto* null_or_left = std::get<bool>(args.at(flutter::EncodableValue("left")));
-  auto* null_or_right =
-      std::get<bool>(args.at(flutter::EncodableValue("right")));
-  auto* null_or_width =
-      std::get<double>(args.at(flutter::EncodableValue("width")));
-
-  if (null_or_left == nullptr && null_or_right == nullptr) {
-    null_or_left = true;
-    null_or_right = false;
-  }
-
-  if (null_or_width == nullptr || null_or_width < 0) {
-    return;
-  }
+  bool left = std::get<bool>(args.at(flutter::EncodableValue("left")));
+  bool right = std::get<bool>(args.at(flutter::EncodableValue("right")));
+  int width = std::get<int>(args.at(flutter::EncodableValue("width")));
 
   // first register bar
   RegisterAccessBar(mainWindow, true);
 
   //
   UINT edge = ABE_LEFT;
-  if (side) {
+  if (right && !left) {
     edge = ABE_RIGHT;
   }
 
@@ -364,16 +359,17 @@ void WindowManager::Dock(const flutter::EncodableMap& args) {
   DockAccessBar(mainWindow, edge, width);
 }
 
-void WindowManager::Undock() {
+bool WindowManager::Undock() {
   HWND mainWindow = GetMainWindow();
-  RegisterAccessBar(mainWindow, true);
+  bool result = RegisterAccessBar(mainWindow, false);
   is_docked_ = 0;
+  return result;
 }
 
-void PASCAL AppBarQuerySetPos(HWND hwnd,
-                              UINT uEdge,
-                              LPRECT lprc,
-                              PAPPBARDATA pabd) {
+void PASCAL WindowManager::AppBarQuerySetPos(HWND hwnd,
+                                             UINT uEdge,
+                                             LPRECT lprc,
+                                             PAPPBARDATA pabd) {
   int iHeight = 0;
   int iWidth = 0;
 
@@ -427,7 +423,8 @@ void PASCAL AppBarQuerySetPos(HWND hwnd,
                uFlags);
 }
 
-BOOL RegisterAccessBar(HWND hwnd, BOOL fRegister) {
+BOOL WindowManager::RegisterAccessBar(HWND hwnd, BOOL fRegister) {
+
   APPBARDATA abd;
 
   // Specify the structure size and handle to the appbar.
@@ -435,18 +432,19 @@ BOOL RegisterAccessBar(HWND hwnd, BOOL fRegister) {
   abd.hWnd = hwnd;
 
   if (fRegister && is_registered_for_docking_) {
-    return true;
+    return false;
   }
 
   if (!fRegister && !is_registered_for_docking_) {
-    return true;
+    return false;
   }
 
   if (!fRegister && is_registered_for_docking_) {
     // Unregister the appbar.
     SHAppBarMessage(ABM_REMOVE, &abd);
-    is_registered_for_docking_ = FALSE;
+    is_registered_for_docking_ = false;
     is_docked_ = 0;
+    return true;
   }
 
   if (fRegister && !is_registered_for_docking_) {
@@ -455,14 +453,17 @@ BOOL RegisterAccessBar(HWND hwnd, BOOL fRegister) {
 
     // Register the appbar.
     if (!SHAppBarMessage(ABM_NEW, &abd))
-      return FALSE;
+      return false;
 
     is_docked_ = 1;  // default edge
-    is_registered_for_docking_ = TRUE;
+    is_registered_for_docking_ = true;
+    return false;
   }
+
+  return false;
 }
 
-void DockAccessBar(HWND hwnd, UINT edge, UINT windowWidth) {
+void WindowManager::DockAccessBar(HWND hwnd, UINT edge, UINT windowWidth) {
   APPBARDATA abd;
   RECT lprc;
 

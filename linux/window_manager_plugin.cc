@@ -164,8 +164,7 @@ static FlMethodResponse* is_dockable(WindowManagerPlugin* self) {
 }
 
 static FlMethodResponse* is_docked(WindowManagerPlugin* self) {
-  bool is_docked = false;
-  g_autoptr(FlValue) result = fl_value_new_bool(is_docked);
+  g_autoptr(FlValue) result = fl_value_new_null();
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 

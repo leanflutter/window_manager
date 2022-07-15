@@ -152,8 +152,8 @@ public class WindowManager: NSObject, NSWindowDelegate {
         return false
     }
 
-    public func isDocked() -> Bool {
-        return false
+    public func isDocked() -> Int {
+        return 0;
     }
     
     public func dock(_ args: [String: Any]) {

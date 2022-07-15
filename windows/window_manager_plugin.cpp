@@ -363,7 +363,7 @@ void WindowManagerPlugin::HandleMethodCall(
     bool value = window_manager->IsDockable();
     result->Success(flutter::EncodableValue(value));
   } else if (method_name.compare("isDocked") == 0) {
-    bool value = window_manager->isDocked();
+    int value = window_manager->IsDocked();
     result->Success(flutter::EncodableValue(value));
   } else if (method_name.compare("dock") == 0) {
     const flutter::EncodableMap& args =
@@ -371,8 +371,8 @@ void WindowManagerPlugin::HandleMethodCall(
     window_manager->Dock(args);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("undock") == 0) {
-    window_manager->Undock();
-    result->Success(flutter::EncodableValue(true));
+    bool value = window_manager->Undock();
+    result->Success(flutter::EncodableValue(value));
   } else if (method_name.compare("isFullScreen") == 0) {
     bool value = window_manager->IsFullScreen();
     result->Success(flutter::EncodableValue(value));

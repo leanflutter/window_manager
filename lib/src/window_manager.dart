@@ -257,11 +257,15 @@ class WindowManager {
 
   /// Returns `bool` - Whether the window is docked.
   Future<DockSide?> isDocked() async {
-    return await _channel.invokeMethod('isDocked');
+    int? docked = await _channel.invokeMethod('isDocked');
+    if (docked == 0) return null;
+    if (docked == 1) return DockSide.LEFT;
+    if (docked == 2) return DockSide.RIGHT;
+    return null;
   }
 
   /// Docks the window. only works on Windows
-  Future<void> dock({required DockSide side, required double width}) async {
+  Future<void> dock({required DockSide side, required int width}) async {
     final Map<String, dynamic> arguments = {
       'left': side == DockSide.LEFT,
       'right': side == DockSide.RIGHT,
@@ -271,8 +275,8 @@ class WindowManager {
   }
 
   /// Undocks the window. only works on Windows
-  Future<void> undock() async {
-    await _channel.invokeMethod('undock');
+  Future<bool> undock() async {
+    return await _channel.invokeMethod('undock');
   }
 
   /// This will make a window maintain an aspect ratio.
