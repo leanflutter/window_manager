@@ -39,6 +39,7 @@ English | [简体中文](./README-ZH.md)
     - [WindowManager](#windowmanager)
       - [Methods](#methods)
         - [waitUntilReadyToShow](#waituntilreadytoshow)
+        - [forceRefresh  `windows`](#forcerefresh--windows)
         - [destroy](#destroy)
         - [close](#close)
         - [isPreventClose](#ispreventclose)
@@ -467,6 +468,10 @@ class _HomePageState extends State<HomePage> with WindowListener {
 ##### waitUntilReadyToShow
 
 Wait until ready to show.
+
+##### forceRefresh  `windows`
+
+Force refreshing the app or Flutter View window.
 
 ##### destroy
 

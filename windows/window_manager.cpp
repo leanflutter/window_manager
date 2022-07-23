@@ -60,8 +60,7 @@ class WindowManager {
   bool is_moving_ = false;
 
   HWND GetMainWindow();
-  void WindowManager::ForceRefresh();
-  void WindowManager::ForceChildRefresh();
+  void WindowManager::ForceRefresh(const flutter::EncodableMap& args);
   void WindowManager::SetAsFrameless();
   void WindowManager::WaitUntilReadyToShow();
   void WindowManager::Destroy();
@@ -134,24 +133,13 @@ HWND WindowManager::GetMainWindow() {
   return native_window;
 }
 
-void WindowManager::ForceRefresh() {
+void WindowManager::ForceRefresh(const flutter::EncodableMap& args) {
+  bool refreshFlutterView =
+      std::get<bool>(args.at(flutter::EncodableValue("flutterView")));
+
   HWND hWnd = GetMainWindow();
-
-  RECT rect;
-
-  GetWindowRect(hWnd, &rect);
-  SetWindowPos(
-      hWnd, nullptr, rect.left, rect.top, rect.right - rect.left + 1,
-      rect.bottom - rect.top,
-      SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
-  SetWindowPos(
-      hWnd, nullptr, rect.left, rect.top, rect.right - rect.left,
-      rect.bottom - rect.top,
-      SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
-}
-
-void WindowManager::ForceChildRefresh() {
-  HWND hWnd = GetWindow(GetMainWindow(), GW_CHILD);
+  if (refreshFlutterView)
+    hWnd = GetWindow(GetMainWindow(), GW_CHILD);
 
   RECT rect;
 

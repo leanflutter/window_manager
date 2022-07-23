@@ -93,6 +93,16 @@ class WindowManager {
     await _channel.invokeMethod('ensureInitialized');
   }
 
+  /// Force refreshing the window or the Flutter View.
+  ///
+  /// @platforms windows
+  Future<void> forceRefresh({bool flutterView = false}) async {
+    final Map<String, dynamic> arguments = {
+      'flutterView': flutterView,
+    };
+    await _channel.invokeMethod('forceRefresh', arguments);
+  }
+
   Future<void> setAsFrameless() async {
     await _channel.invokeMethod('setAsFrameless');
   }

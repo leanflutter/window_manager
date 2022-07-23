@@ -142,6 +142,25 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               },
             ),
             PreferenceListItem(
+              title: Text('forceRefresh'),
+              accessoryView: Row(
+                children: [
+                  CupertinoButton(
+                    child: Text('window'),
+                    onPressed: () async {
+                      windowManager.forceRefresh();
+                    },
+                  ),
+                  CupertinoButton(
+                    child: Text('Flutter view'),
+                    onPressed: () async {
+                      windowManager.forceRefresh(flutterView: true);
+                    },
+                  ),
+                ],
+              ),
+            ),
+            PreferenceListItem(
               title: Text('close'),
               onTap: () async {
                 await windowManager.close();

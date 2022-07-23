@@ -264,7 +264,10 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       window_manager->last_state = STATE_FULLSCREEN_ENTERED;
     } else if (window_manager->last_state == STATE_FULLSCREEN_ENTERED &&
                wParam == SIZE_RESTORED) {
-      window_manager->ForceChildRefresh();
+      flutter::EncodableMap args = flutter::EncodableMap();
+      args[flutter::EncodableValue("flutterView")] =
+          flutter::EncodableValue("true");
+      window_manager->ForceRefresh(args);
       _EmitEvent("leave-full-screen");
       window_manager->last_state = STATE_NORMAL;
     } else if (wParam == SIZE_MAXIMIZED) {
@@ -303,6 +306,11 @@ void WindowManagerPlugin::HandleMethodCall(
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("waitUntilReadyToShow") == 0) {
     window_manager->WaitUntilReadyToShow();
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("forceRefresh") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->ForceRefresh(args);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("setAsFrameless") == 0) {
     window_manager->SetAsFrameless();
