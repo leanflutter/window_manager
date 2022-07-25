@@ -1,6 +1,8 @@
 #include "include/window_manager/window_manager_plugin.h"
 
 // This must be included before many other Windows headers.
+#pragma once
+
 #include <Windows.h>
 #include <ShellScalingApi.h>
 
@@ -17,6 +19,9 @@
 #include <sstream>
 
 #pragma comment(lib, "dwmapi.lib")
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "shcore.lib")
+#pragma comment(lib, "Gdi32.lib")
 
 #define STATE_NORMAL 0
 #define STATE_MAXIMIZED 1
