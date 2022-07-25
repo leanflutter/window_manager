@@ -348,7 +348,7 @@ void WindowManager::Dock(const flutter::EncodableMap& args) {
   HRESULT temp2 = GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
 
   if (S_OK == temp2) {
-    dpiY = 96.0;
+    dpiY = 96;
   }
 
   double scalingFactor = dpiY / 96.0;
