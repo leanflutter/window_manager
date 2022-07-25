@@ -2,6 +2,7 @@
 
 // This must be included before many other Windows headers.
 #include <windows.h>
+#include <shellscalingapi.h>
 
 #include <shobjidl_core.h>
 
@@ -360,8 +361,10 @@ void WindowManager::Dock(const flutter::EncodableMap& args) {
     edge = ABE_RIGHT;
   }
 
+  UINT uw = static_cast<UINT>(width * scalingFactor + 0.5);
+
   // dock window
-  DockAccessBar(mainWindow, edge, width * scalingFactor);
+  DockAccessBar(mainWindow, edge, uw);
 }
 
 bool WindowManager::Undock() {
