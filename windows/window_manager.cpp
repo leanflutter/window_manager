@@ -2,7 +2,6 @@
 
 // This must be included before many other Windows headers.
 #include <windows.h>
-#include <shellscalingapi.h>
 
 #include <shobjidl_core.h>
 
@@ -342,15 +341,8 @@ int WindowManager::IsDocked() {
 
 void WindowManager::Dock(const flutter::EncodableMap& args) {
   HWND mainWindow = GetMainWindow();
-  HMONITOR monitor = MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST);
 
-  UINT dpiX, dpiY;
-  HRESULT temp2 = GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
-
-  if (S_OK == temp2) {
-    dpiY = 96;
-  }
-
+  double dpi = GetDpiForHwnd(mainWindow);
   double scalingFactor = dpiY / 96.0;
 
   bool left = std::get<bool>(args.at(flutter::EncodableValue("left")));
@@ -377,6 +369,19 @@ bool WindowManager::Undock() {
   bool result = RegisterAccessBar(mainWindow, false);
   is_docked_ = 0;
   return result;
+}
+
+double WindowManager::GetDpiForHwnd(HWND hWnd)
+{
+	auto monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+	UINT newDpiX;
+	UINT newDpiY;
+	if (FAILED(GetDpiForMonitor(monitor, MONITOR_DPI_TYPE::MDT_EFFECTIVE_DPI, &newDpiX, &newDpiY)))
+	{
+		newDpiX = 96;
+		newDpiY = 96;
+	}
+	return ((double) newDpiX);
 }
 
 void PASCAL WindowManager::AppBarQuerySetPos(HWND hwnd,
