@@ -341,6 +341,11 @@ int WindowManager::IsDocked() {
 
 void WindowManager::Dock(const flutter::EncodableMap& args) {
   HWND mainWindow = GetMainWindow();
+  HMONITOR monitor = MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST);
+
+  UINT dpiX, dpiY;
+  HRESULT temp2 = GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+  double scalingFactor = dpiY / 96.0;
 
   bool left = std::get<bool>(args.at(flutter::EncodableValue("left")));
   bool right = std::get<bool>(args.at(flutter::EncodableValue("right")));
@@ -356,7 +361,7 @@ void WindowManager::Dock(const flutter::EncodableMap& args) {
   }
 
   // dock window
-  DockAccessBar(mainWindow, edge, width);
+  DockAccessBar(mainWindow, edge, width * scalingFactor);
 }
 
 bool WindowManager::Undock() {
