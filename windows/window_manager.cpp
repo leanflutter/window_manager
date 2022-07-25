@@ -134,6 +134,7 @@ class WindowManager {
   LONG g_style_before_fullscreen;
   LONG g_ex_style_before_fullscreen;
   ITaskbarList3* taskbar_ = nullptr;
+  double GetDpiForHwnd(HWND hWnd);
   BOOL WindowManager::RegisterAccessBar(HWND hwnd, BOOL fRegister);
   void PASCAL WindowManager::AppBarQuerySetPos(HWND hwnd,
                                                UINT uEdge,
@@ -340,11 +341,24 @@ int WindowManager::IsDocked() {
   return is_docked_;
 }
 
+double WindowManager::GetDpiForHwnd(HWND hWnd)
+{
+	auto monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+	UINT newDpiX;
+	UINT newDpiY;
+	if (FAILED(GetDpiForMonitor(monitor, MONITOR_DPI_TYPE::MDT_EFFECTIVE_DPI, &newDpiX, &newDpiY)))
+	{
+		newDpiX = 96;
+		newDpiY = 96;
+	}
+	return ((double) newDpiX);
+} 
+
 void WindowManager::Dock(const flutter::EncodableMap& args) {
   HWND mainWindow = GetMainWindow();
 
   double dpi = GetDpiForHwnd(mainWindow);
-  double scalingFactor = dpiY / 96.0;
+  double scalingFactor = dpi / 96.0;
 
   bool left = std::get<bool>(args.at(flutter::EncodableValue("left")));
   bool right = std::get<bool>(args.at(flutter::EncodableValue("right")));
@@ -370,19 +384,6 @@ bool WindowManager::Undock() {
   bool result = RegisterAccessBar(mainWindow, false);
   is_docked_ = 0;
   return result;
-}
-
-double WindowManager::GetDpiForHwnd(HWND hWnd)
-{
-	auto monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-	UINT newDpiX;
-	UINT newDpiY;
-	if (FAILED(GetDpiForMonitor(monitor, MONITOR_DPI_TYPE::MDT_EFFECTIVE_DPI, &newDpiX, &newDpiY)))
-	{
-		newDpiX = 96;
-		newDpiY = 96;
-	}
-	return ((double) newDpiX);
 }
 
 void PASCAL WindowManager::AppBarQuerySetPos(HWND hwnd,
