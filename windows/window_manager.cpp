@@ -1,7 +1,8 @@
 #include "include/window_manager/window_manager_plugin.h"
 
 // This must be included before many other Windows headers.
-#include <windows.h>
+#include <Windows.h>
+#include <ShellScalingApi.h>
 
 #include <shobjidl_core.h>
 
