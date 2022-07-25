@@ -346,6 +346,11 @@ void WindowManager::Dock(const flutter::EncodableMap& args) {
 
   UINT dpiX, dpiY;
   HRESULT temp2 = GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+
+  if (S_OK == temp2) {
+    dpiY = 96.0;
+  }
+
   double scalingFactor = dpiY / 96.0;
 
   bool left = std::get<bool>(args.at(flutter::EncodableValue("left")));
