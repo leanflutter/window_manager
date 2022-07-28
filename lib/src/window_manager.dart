@@ -324,7 +324,7 @@ class WindowManager {
   }
 
   /// Resizes the window to `width` and `height`.
-  Future<void> setSize(Size size, {animate = false}) async {
+  Future<void> setSize(Size size, {bool animate = false}) async {
     await setBounds(
       null,
       size: size,
@@ -373,7 +373,7 @@ class WindowManager {
   }
 
   /// Sets whether the window can be manually resized by the user.
-  setResizable(isResizable) {
+  setResizable(bool isResizable) {
     final Map<String, dynamic> arguments = {
       'isResizable': isResizable,
     };
@@ -390,7 +390,7 @@ class WindowManager {
   /// Sets whether the window can be moved by user.
   ///
   /// @platforms macos
-  setMovable(isMovable) {
+  setMovable(bool isMovable) {
     final Map<String, dynamic> arguments = {
       'isMovable': isMovable,
     };
@@ -407,7 +407,7 @@ class WindowManager {
   /// Sets whether the window can be manually minimized by user.
   ///
   /// @platforms macos,windows
-  setMinimizable(isMinimizable) {
+  setMinimizable(bool isMinimizable) {
     final Map<String, dynamic> arguments = {
       'isMinimizable': isMinimizable,
     };
