@@ -49,25 +49,28 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
       margin: (_isMaximized || _isFullScreen)
           ? EdgeInsets.zero
           : EdgeInsets.all(kVirtualWindowFrameMargin),
-      decoration: (_isMaximized || _isFullScreen)
-          ? BoxDecoration()
-          : BoxDecoration(
-              color: Colors.transparent,
-              border:
-                  Border.all(color: Theme.of(context).dividerColor, width: 1),
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  offset: Offset(0.0, _isFocused ? 4 : 2),
-                  blurRadius: 6,
-                ),
-              ],
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(
+          color: Theme.of(context).dividerColor,
+          width: (_isMaximized || _isFullScreen) ? 0 : 1,
+        ),
+        borderRadius: BorderRadius.circular(
+          (_isMaximized || _isFullScreen) ? 0 : 6,
+        ),
+        boxShadow: <BoxShadow>[
+          if (!_isMaximized && !_isFullScreen)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              offset: Offset(0.0, _isFocused ? 4 : 2),
+              blurRadius: 6,
             ),
+        ],
+      ),
       child: ClipRRect(
-        borderRadius: (_isMaximized || _isFullScreen)
-            ? BorderRadius.zero
-            : BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(
+          (_isMaximized || _isFullScreen) ? 0 : 6,
+        ),
         child: widget.child,
       ),
     );
