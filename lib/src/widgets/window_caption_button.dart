@@ -9,7 +9,7 @@ class WindowCaptionButtonIcon extends StatelessWidget {
     Key? key,
     required this.name,
     this.color,
-    this.package = 'window_manager',
+    required this.package,
   }) : super(key: key);
 
   @override
@@ -29,6 +29,7 @@ class WindowCaptionButton extends StatefulWidget {
   final Brightness? brightness;
   final Widget? icon;
   final String? iconName;
+  final String package;
   final VoidCallback? onPressed;
 
   _ButtonBgColorScheme _lightButtonBgColorScheme = _ButtonBgColorScheme(
@@ -59,6 +60,7 @@ class WindowCaptionButton extends StatefulWidget {
     this.brightness,
     this.icon,
     this.iconName,
+    required this.package,
     required this.onPressed,
   }) : super(key: key);
 
@@ -68,6 +70,7 @@ class WindowCaptionButton extends StatefulWidget {
     this.icon,
     this.onPressed,
   })  : this.iconName = 'images/ic_chrome_minimize.png',
+        this.package = 'window_manager',
         super(key: key);
 
   WindowCaptionButton.maximize({
@@ -76,6 +79,7 @@ class WindowCaptionButton extends StatefulWidget {
     this.icon,
     this.onPressed,
   })  : this.iconName = 'images/ic_chrome_maximize.png',
+        this.package = 'window_manager',
         super(key: key);
 
   WindowCaptionButton.unmaximize({
@@ -84,6 +88,7 @@ class WindowCaptionButton extends StatefulWidget {
     this.icon,
     this.onPressed,
   })  : this.iconName = 'images/ic_chrome_unmaximize.png',
+        this.package = 'window_manager',
         super(key: key);
 
   WindowCaptionButton.close({
@@ -92,6 +97,7 @@ class WindowCaptionButton extends StatefulWidget {
     this.icon,
     this.onPressed,
   })  : this.iconName = 'images/ic_chrome_close.png',
+        this.package = 'window_manager',
         _lightButtonBgColorScheme = _ButtonBgColorScheme(
           normal: Colors.transparent,
           hovered: Color(0xffC42B1C),
@@ -173,6 +179,7 @@ class _WindowCaptionButtonState extends State<WindowCaptionButton> {
             child: WindowCaptionButtonIcon(
               name: widget.iconName!,
               color: iconColor,
+              package: widget.package
             ),
           ),
         ),
