@@ -443,7 +443,9 @@ public class WindowManager: NSObject, NSWindowDelegate {
     public func startDragging() {
         DispatchQueue.main.async {
             let window: NSWindow  = self.mainWindow
-            window.performDrag(with: window.currentEvent!)
+            if(window.currentEvent != nil) {
+                window.performDrag(with: window.currentEvent!)
+            }
         }
     }
     
