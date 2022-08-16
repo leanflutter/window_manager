@@ -416,9 +416,24 @@ class WindowManager {
 
   /// Returns `bool` - Whether the window can be manually closed by user.
   ///
-  /// @platforms macos,windows
+  /// @platforms windows
   Future<bool> isClosable() async {
     return await _channel.invokeMethod('isClosable');
+  }
+
+  /// Returns `bool` - Whether the window can be manually maximized by the user.
+  ///
+  /// @platforms windows
+  Future<bool> isMaximizable() async {
+    return await _channel.invokeMethod('isMaximizable');
+  }
+
+  /// Sets whether the window can be manually maximized by the user.
+  setMaximizable(bool isMaximizable) {
+    final Map<String, dynamic> arguments = {
+      'isMaximizable': isMaximizable,
+    };
+    _channel.invokeListMethod('setMaximizable', arguments);
   }
 
   /// Sets whether the window can be manually closed by user.
