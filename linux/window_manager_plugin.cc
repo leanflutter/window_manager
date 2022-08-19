@@ -23,6 +23,7 @@ struct _WindowManagerPlugin {
   FlPluginRegistrar* registrar;
   FlMethodChannel* channel;
   GdkGeometry window_geometry;
+  GtkWidget* _event_box = nullptr;
   bool _is_prevent_close = false;
   bool _is_frameless = false;
   bool _is_maximized = false;
@@ -30,6 +31,7 @@ struct _WindowManagerPlugin {
   bool _is_fullscreen = false;
   bool _is_always_on_top = false;
   bool _is_always_on_bottom = false;
+  bool _is_dragging = false;
   gchar* title_bar_style_ = strdup("normal");
   GdkEventButton _event_button = GdkEventButton{};
 };
@@ -491,9 +493,31 @@ static FlMethodResponse* start_dragging(WindowManagerPlugin* self) {
   guint32 timestamp = (guint32)g_get_monotonic_time();
 
   gtk_window_begin_move_drag(window, 1, root_x, root_y, timestamp);
+  self->_is_dragging = true;
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static void gtk_container_children_callback(GtkWidget* widget,
+                                            gpointer client_data) {
+  GList** children;
+  children = (GList**)client_data;
+  *children = g_list_prepend(*children, widget);
+}
+
+static void find_event_box(WindowManagerPlugin* plugin, GtkWidget* widget) {
+  GList* children = NULL;
+  GtkWidget* current_child;
+  gtk_container_forall(GTK_CONTAINER(widget), gtk_container_children_callback,
+                       &children);
+  while (children) {
+    current_child = (GtkWidget*)children->data;
+    if (GTK_IS_EVENT_BOX(current_child)) {
+      plugin->_event_box = current_child;
+    }
+    children = children->next;
+  }
 }
 
 static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
@@ -759,6 +783,31 @@ gboolean on_window_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
   return false;
 }
 
+gboolean on_event_after(GtkWidget* text_view,
+                        GdkEvent* event,
+                        WindowManagerPlugin* self) {
+  if (event->type == GDK_ENTER_NOTIFY) {
+    if (nullptr == self->_event_box) {
+      return FALSE;
+    }
+    if (self->_is_dragging) {
+      self->_is_dragging = false;
+      auto newEvent = (GdkEventButton*)gdk_event_new(GDK_BUTTON_RELEASE);
+      newEvent->x = self->_event_button.x;
+      newEvent->y = self->_event_button.y;
+      newEvent->button = self->_event_button.button;
+      newEvent->type = GDK_BUTTON_RELEASE;
+      newEvent->time = g_get_monotonic_time();
+      gboolean result;
+      g_signal_emit_by_name(self->_event_box, "button-release-event", newEvent,
+                            &result);
+      gdk_event_free((GdkEvent*)newEvent);
+    }
+  }
+
+  return FALSE;
+}
+
 gboolean on_mouse_press(GSignalInvocationHint* ihint,
                         guint n_param_values,
                         const GValue* param_values,
@@ -804,6 +853,9 @@ void window_manager_plugin_register_with_registrar(
                    G_CALLBACK(on_window_state_change), NULL);
   g_signal_connect(get_window(plugin), "draw", G_CALLBACK(on_window_draw),
                    NULL);
+  g_signal_connect(get_window(plugin), "event-after",
+                   G_CALLBACK(on_event_after), plugin);
+  find_event_box(plugin, GTK_WIDGET(fl_plugin_registrar_get_view(registrar)));
 
   g_signal_add_emission_hook(
       g_signal_lookup("button-press-event", GTK_TYPE_WIDGET), 0, on_mouse_press,
