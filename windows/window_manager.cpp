@@ -555,8 +555,16 @@ bool WindowManager::IsResizable() {
 }
 
 void WindowManager::SetResizable(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
   is_resizable_ =
       std::get<bool>(args.at(flutter::EncodableValue("isResizable")));
+  if (is_resizable_) {
+    ::SetWindowLong(hWnd, GWL_STYLE,
+                    GetWindowLong(hWnd, GWL_STYLE) & WS_SIZEBOX);
+  } else {
+    ::SetWindowLong(hWnd, GWL_STYLE,
+                    GetWindowLong(hWnd, GWL_STYLE) & ~WS_SIZEBOX);
+  }
 }
 
 bool WindowManager::IsMinimizable() {
