@@ -75,6 +75,8 @@ English | [简体中文](./README-ZH.md)
         - [setMovable  `macos`](#setmovable--macos)
         - [isMinimizable  `macos`  `windows`](#isminimizable--macos--windows)
         - [setMinimizable  `macos`  `windows`](#setminimizable--macos--windows)
+        - [isMaximizable  `windows`](#isMaximizable--windows)
+        - [setMaximizable  `windows`](#setMaximizable--windows)
         - [isClosable  `macos`  `windows`](#isclosable--macos--windows)
         - [setClosable  `macos`  `windows`](#setclosable--macos--windows)
         - [isAlwaysOnTop](#isalwaysontop)
@@ -617,6 +619,16 @@ Returns `bool` - Whether the window can be manually minimized by the user.
 ##### setMinimizable  `macos`  `windows`
 
 Sets whether the window can be manually minimized by user.
+
+
+##### isMaximizable  `windows`
+
+Returns `bool` - Whether the window can be manually maximized by the user.
+
+
+##### setMaximizable  `windows`
+
+Sets whether the window can be manually maximized by user.
 
 
 ##### isClosable  `macos`  `windows`

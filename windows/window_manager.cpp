@@ -93,6 +93,8 @@ class WindowManager {
   void WindowManager::SetResizable(const flutter::EncodableMap& args);
   bool WindowManager::IsMinimizable();
   void WindowManager::SetMinimizable(const flutter::EncodableMap& args);
+  bool WindowManager::IsMaximizable();
+  void WindowManager::SetMaximizable(const flutter::EncodableMap& args);
   bool WindowManager::IsClosable();
   void WindowManager::SetClosable(const flutter::EncodableMap& args);
   bool WindowManager::IsAlwaysOnTop();
@@ -572,6 +574,22 @@ void WindowManager::SetMinimizable(const flutter::EncodableMap& args) {
   DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
   gwlStyle =
       isMinimizable ? gwlStyle | WS_MINIMIZEBOX : gwlStyle & ~WS_MINIMIZEBOX;
+  SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
+}
+
+bool WindowManager::IsMaximizable() {
+  HWND hWnd = GetMainWindow();
+  DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
+  return (gwlStyle & WS_MAXIMIZEBOX) != 0;
+}
+
+void WindowManager::SetMaximizable(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
+  bool isMaximizable =
+      std::get<bool>(args.at(flutter::EncodableValue("isMaximizable")));
+  DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
+  gwlStyle =
+      isMaximizable ? gwlStyle | WS_MAXIMIZEBOX : gwlStyle & ~WS_MAXIMIZEBOX;
   SetWindowLong(hWnd, GWL_STYLE, gwlStyle);
 }
 

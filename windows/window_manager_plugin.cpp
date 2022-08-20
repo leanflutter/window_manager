@@ -178,7 +178,8 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       _EmitEvent("blur");
     }
 
-    if (window_manager->title_bar_style_ == "hidden")
+    if (window_manager->title_bar_style_ == "hidden" ||
+        window_manager->is_frameless_)
       return 1;
   } else if (message == WM_EXITSIZEMOVE) {
     if (window_manager->is_resizing_) {
@@ -412,6 +413,14 @@ void WindowManagerPlugin::HandleMethodCall(
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->SetMinimizable(args);
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("isMaximizable") == 0) {
+    bool value = window_manager->IsMaximizable();
+    result->Success(flutter::EncodableValue(value));
+  } else if (method_name.compare("setMaximizable") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->SetMaximizable(args);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("isClosable") == 0) {
     bool value = window_manager->IsClosable();

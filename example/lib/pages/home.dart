@@ -42,6 +42,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   bool _isResizable = true;
   bool _isMovable = true;
   bool _isMinimizable = true;
+  bool _isMaximizable = true;
   bool _isClosable = true;
   bool _isAlwaysOnTop = false;
   bool _isAlwaysOnBottom = false;
@@ -590,6 +591,21 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 await windowManager.setMinimizable(newValue);
                 _isMinimizable = await windowManager.isMinimizable();
                 print('isMinimizable: $_isMinimizable');
+                setState(() {});
+              },
+            ),
+            PreferenceListSwitchItem(
+              title: Text('isMaximizable / setMaximizable'),
+              onTap: () async {
+                _isMaximizable = await windowManager.isMaximizable();
+                setState(() {});
+                BotToast.showText(text: 'isClosable: $_isMaximizable');
+              },
+              value: _isMaximizable,
+              onChanged: (newValue) async {
+                await windowManager.setMaximizable(newValue);
+                _isMaximizable = await windowManager.isMaximizable();
+                print('isMaximizable: $_isMaximizable');
                 setState(() {});
               },
             ),
