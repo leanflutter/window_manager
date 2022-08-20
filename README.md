@@ -133,7 +133,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.2.5
+  window_manager: ^0.2.6
 ```
 
 Or
@@ -519,7 +519,7 @@ Returns `bool` - Whether the window is maximized.
 
 ##### maximize
 
-Maximizes the window.
+Maximizes the window. `vertically` simulates aero snap, only works on Windows
 
 ##### unmaximize
 
@@ -621,20 +621,19 @@ Returns `bool` - Whether the window can be manually minimized by the user.
 Sets whether the window can be manually minimized by user.
 
 
+##### isClosable  `windows`
+
+Returns `bool` - Whether the window can be manually closed by user.
+
+
 ##### isMaximizable  `windows`
 
 Returns `bool` - Whether the window can be manually maximized by the user.
 
 
-##### setMaximizable  `windows`
+##### setMaximizable
 
-Sets whether the window can be manually maximized by user.
-
-
-##### isClosable  `macos`  `windows`
-
-Returns `bool` - Whether the window can be manually closed by user.
-
+Sets whether the window can be manually maximized by the user.
 
 ##### setClosable  `macos`  `windows`
 

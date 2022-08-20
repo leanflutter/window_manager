@@ -1,6 +1,12 @@
 ## 0.2.6
 
 * [windows] Added `vertically` param to the `maximize` method.
+* [Linux] implementation of methods: setIcon, isFocused (#186)
+* [macos] fix crash lead by fast clicks (#198)
+* Remove decoration for maximized window (#191)
+* [linux] fix: cannot drag again after startDragging (#203)
+* [windows] Implement isMaximizable and setMaximizable (#200)
+* [windows] Implement SetResizable for windows (#204)
 
 ## 0.2.5
 
