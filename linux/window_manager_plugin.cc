@@ -32,6 +32,7 @@ struct _WindowManagerPlugin {
   bool _is_always_on_top = false;
   bool _is_always_on_bottom = false;
   bool _is_dragging = false;
+  bool _is_resizing = false;
   gchar* title_bar_style_ = strdup("normal");
   GdkEventButton _event_button = GdkEventButton{};
 };
@@ -558,6 +559,7 @@ static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
   gtk_window_begin_resize_drag(window, gdk_window_edge,
                                self->_event_button.button, root_x, root_y,
                                timestamp);
+  self->_is_resizing = true;
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -783,6 +785,19 @@ gboolean on_window_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
   return false;
 }
 
+void emit_button_release(WindowManagerPlugin* self) {
+  auto newEvent = (GdkEventButton*)gdk_event_new(GDK_BUTTON_RELEASE);
+  newEvent->x = self->_event_button.x;
+  newEvent->y = self->_event_button.y;
+  newEvent->button = self->_event_button.button;
+  newEvent->type = GDK_BUTTON_RELEASE;
+  newEvent->time = g_get_monotonic_time();
+  gboolean result;
+  g_signal_emit_by_name(self->_event_box, "button-release-event", newEvent,
+                        &result);
+  gdk_event_free((GdkEvent*)newEvent);
+}
+
 gboolean on_event_after(GtkWidget* text_view,
                         GdkEvent* event,
                         WindowManagerPlugin* self) {
@@ -792,19 +807,13 @@ gboolean on_event_after(GtkWidget* text_view,
     }
     if (self->_is_dragging) {
       self->_is_dragging = false;
-      auto newEvent = (GdkEventButton*)gdk_event_new(GDK_BUTTON_RELEASE);
-      newEvent->x = self->_event_button.x;
-      newEvent->y = self->_event_button.y;
-      newEvent->button = self->_event_button.button;
-      newEvent->type = GDK_BUTTON_RELEASE;
-      newEvent->time = g_get_monotonic_time();
-      gboolean result;
-      g_signal_emit_by_name(self->_event_box, "button-release-event", newEvent,
-                            &result);
-      gdk_event_free((GdkEvent*)newEvent);
+      emit_button_release(self);
+    }
+    if (self->_is_resizing) {
+      self->_is_resizing = false;
+      emit_button_release(self);
     }
   }
-
   return FALSE;
 }
 
