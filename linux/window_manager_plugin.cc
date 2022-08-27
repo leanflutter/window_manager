@@ -548,11 +548,11 @@ static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
     gdk_window_edge = GDK_WINDOW_EDGE_WEST;
   } else if (strcmp(resize_edge, "right") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_EAST;
-  } else if (strcmp(resize_edge, "bottomLeft")) {
+  } else if (strcmp(resize_edge, "bottomLeft") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_SOUTH_WEST;
-  } else if (strcmp(resize_edge, "bottom")) {
+  } else if (strcmp(resize_edge, "bottom") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_SOUTH;
-  } else if (strcmp(resize_edge, "bottomRight")) {
+  } else if (strcmp(resize_edge, "bottomRight") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_SOUTH_EAST;
   }
 
