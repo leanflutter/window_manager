@@ -1,3 +1,8 @@
+## 0.2.7
+
+* [linux] fix bottom edge resizing (#209)
+* [linux] fix: cannot resize again after startResizing (#205)
+
 ## 0.2.6
 
 * [windows] Added `vertically` param to the `maximize` method.

@@ -75,9 +75,9 @@ English | [简体中文](./README-ZH.md)
         - [setMovable  `macos`](#setmovable--macos)
         - [isMinimizable  `macos`  `windows`](#isminimizable--macos--windows)
         - [setMinimizable  `macos`  `windows`](#setminimizable--macos--windows)
-        - [isMaximizable  `windows`](#isMaximizable--windows)
-        - [setMaximizable  `windows`](#setMaximizable--windows)
-        - [isClosable  `macos`  `windows`](#isclosable--macos--windows)
+        - [isClosable  `windows`](#isclosable--windows)
+        - [isMaximizable  `windows`](#ismaximizable--windows)
+        - [setMaximizable](#setmaximizable)
         - [setClosable  `macos`  `windows`](#setclosable--macos--windows)
         - [isAlwaysOnTop](#isalwaysontop)
         - [setAlwaysOnTop](#setalwaysontop)
@@ -133,7 +133,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.2.6
+  window_manager: ^0.2.7
 ```
 
 Or
