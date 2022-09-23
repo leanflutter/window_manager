@@ -126,6 +126,8 @@ class WindowManager {
     if (options?.title != null) await setTitle(options!.title!);
     if (options?.titleBarStyle != null)
       await setTitleBarStyle(options!.titleBarStyle!);
+    if (options?.backgroundColor != null)
+      await setBackgroundColor(options!.backgroundColor!);
 
     if (callback != null) {
       callback();
