@@ -25,6 +25,7 @@ const double kWindowCaptionHeight = 32;
 /// {@end-tool}
 class WindowCaption extends StatefulWidget {
   final Image? ico;
+  final Widget? menu;
   final Widget? title;
   final Color? backgroundColor;
   final Brightness? brightness;
@@ -32,6 +33,7 @@ class WindowCaption extends StatefulWidget {
   const WindowCaption({
     Key? key,
     this.ico,
+    this.menu,
     this.title,
     this.backgroundColor,
     this.brightness,
@@ -74,6 +76,18 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
                     Container(
                       child: widget.ico,
                       padding: EdgeInsets.only(left: 2),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 2),
+                      child: DefaultTextStyle(
+                        style: TextStyle(
+                          color: widget.brightness == Brightness.light
+                              ? Colors.black.withOpacity(0.8956)
+                              : Colors.white,
+                          fontSize: 14,
+                        ),
+                        child: widget.menu ?? Container(),
+                      ),
                     ),
                     Container(
                       padding: EdgeInsets.only(left: 16),
