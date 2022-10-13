@@ -830,6 +830,18 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 );
               },
             ),
+            PreferenceListItem(
+              title: Text('grabKeyboard'),
+              onTap: () async {
+                await windowManager.grabKeyboard();
+              },
+            ),
+            PreferenceListItem(
+              title: Text('ungrabKeyboard'),
+              onTap: () async {
+                await windowManager.ungrabKeyboard();
+              },
+            ),
           ],
         ),
       ],

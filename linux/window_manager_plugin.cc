@@ -35,6 +35,7 @@ struct _WindowManagerPlugin {
   bool _is_resizing = false;
   gchar* title_bar_style_ = strdup("normal");
   GdkEventButton _event_button = GdkEventButton{};
+  GdkDevice* grab_pointer;
 };
 
 G_DEFINE_TYPE(WindowManagerPlugin, window_manager_plugin, g_object_get_type())
@@ -436,11 +437,11 @@ static FlMethodResponse* set_skip_taskbar(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
-static FlMethodResponse* set_icon(WindowManagerPlugin* self,
-                                          FlValue* args) {
+static FlMethodResponse* set_icon(WindowManagerPlugin* self, FlValue* args) {
   const gchar* file_name =
       fl_value_get_string(fl_value_lookup_string(args, "iconPath"));
-  const gboolean gtk_result = gtk_window_set_icon_from_file(get_window(self), file_name, NULL);
+  const gboolean gtk_result =
+      gtk_window_set_icon_from_file(get_window(self), file_name, NULL);
   g_autoptr(FlValue) result = fl_value_new_bool(gtk_result);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
@@ -565,6 +566,89 @@ static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static const gchar* gdk_grab_status_code(GdkGrabStatus status) {
+  switch (status) {
+    case GDK_GRAB_SUCCESS:
+      return "GDK_GRAB_SUCCESS";
+    case GDK_GRAB_ALREADY_GRABBED:
+      return "GDK_GRAB_ALREADY_GRABBED";
+    case GDK_GRAB_INVALID_TIME:
+      return "GDK_GRAB_INVALID_TIME";
+    case GDK_GRAB_NOT_VIEWABLE:
+      return "GDK_GRAB_NOT_VIEWABLE";
+    case GDK_GRAB_FROZEN:
+      return "GDK_GRAB_FROZEN";
+    case GDK_GRAB_FAILED:
+      return "GDK_GRAB_FAILED";
+    default:
+      return "GDK_GRAB_???";
+  }
+}
+
+static const gchar* gdk_grab_status_message(GdkGrabStatus status) {
+  switch (status) {
+    case GDK_GRAB_SUCCESS:
+      return "The resource was successfully grabbed.";
+    case GDK_GRAB_ALREADY_GRABBED:
+      return "The resource is actively grabbed by another client.";
+    case GDK_GRAB_INVALID_TIME:
+      return "The resource was grabbed more recently than the specified time.";
+    case GDK_GRAB_NOT_VIEWABLE:
+      return "The grab window or the confine_to window are not viewable.";
+    case GDK_GRAB_FROZEN:
+      return "The resource is frozen by an active grab of another client.";
+    case GDK_GRAB_FAILED:
+      return "The grab failed for some other reason.";
+    default:
+      return "The grab status is unknown.";
+  }
+}
+
+static GdkGrabStatus gdk_grab_keyboard(WindowManagerPlugin* self) {
+  g_return_val_if_fail(self->grab_pointer == nullptr, GDK_GRAB_FAILED);
+
+  auto window = get_window(self);
+  auto screen = gtk_window_get_screen(window);
+  auto display = gdk_screen_get_display(screen);
+  auto seat = gdk_display_get_default_seat(display);
+  auto gdk_window = get_gdk_window(self);
+
+  GdkGrabStatus status = gdk_seat_grab(
+      seat, gdk_window, GDK_SEAT_CAPABILITY_KEYBOARD, false /* owner_events */,
+      nullptr /* cursor */, nullptr /* event */, nullptr /*prepare_func */,
+      nullptr /* prepare_func_data */);
+
+  self->grab_pointer = gdk_seat_get_keyboard(seat);
+  if (!self->grab_pointer) {
+    self->grab_pointer = gdk_seat_get_pointer(seat);
+  }
+
+  return status;
+}
+
+static FlMethodResponse* grab_keyboard(WindowManagerPlugin* self) {
+  GdkGrabStatus status = gdk_grab_keyboard(self);
+
+  if (status != GDK_GRAB_SUCCESS) {
+    return FL_METHOD_RESPONSE(
+        fl_method_error_response_new(gdk_grab_status_code(status),
+                                     gdk_grab_status_message(status), nullptr));
+  }
+
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* ungrab_keyboard(WindowManagerPlugin* self) {
+  if (self->grab_pointer != nullptr) {
+    gdk_seat_ungrab(gdk_device_get_seat(self->grab_pointer));
+    self->grab_pointer = nullptr;
+  }
+
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
 // Called when a method call is received from Flutter.
 static void window_manager_plugin_handle_method_call(
     WindowManagerPlugin* self,
@@ -670,6 +754,10 @@ static void window_manager_plugin_handle_method_call(
     response = start_dragging(self);
   } else if (strcmp(method, "startResizing") == 0) {
     response = start_resizing(self, args);
+  } else if (strcmp(method, "grabKeyboard") == 0) {
+    response = grab_keyboard(self);
+  } else if (strcmp(method, "ungrabKeyboard") == 0) {
+    response = ungrab_keyboard(self);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
