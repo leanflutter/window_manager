@@ -51,6 +51,7 @@ class WindowManager {
   double aspect_ratio_ = 0;
   POINT minimum_size_ = {0, 0};
   POINT maximum_size_ = {-1, -1};
+  double pixel_ratio_ = 1;
   bool is_resizable_ = true;
   bool is_skip_taskbar_ = true;
   std::string title_bar_style_ = "normal";
