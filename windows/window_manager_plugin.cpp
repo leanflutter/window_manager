@@ -109,7 +109,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
   std::optional<LRESULT> result = std::nullopt;
 
   if (message == WM_DPICHANGED) {
-    window_manager->pixel_ratio_ = LOWORD(wParam) / 96.0;
+    window_manager->pixel_ratio_ = (float) LOWORD(wParam) / USER_DEFAULT_SCREEN_DPI;
   }
 
   if (message == WM_NCCALCSIZE) {
