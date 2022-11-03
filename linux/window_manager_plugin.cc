@@ -341,6 +341,45 @@ static FlMethodResponse* set_resizable(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* is_minimizable(WindowManagerPlugin* self) {
+  GdkWindowState state = gdk_window_get_state(get_gdk_window(self));
+  GdkWindowTypeHint type_hint = gtk_window_get_type_hint(get_window(self));
+  g_autoptr(FlValue) result =
+      fl_value_new_bool(!(state & GDK_WINDOW_STATE_ICONIFIED) &&
+                        type_hint == GDK_WINDOW_TYPE_HINT_NORMAL);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* set_minimizable(WindowManagerPlugin* self,
+                                         FlValue* args) {
+  gboolean minimizable =
+      fl_value_get_bool(fl_value_lookup_string(args, "isMinimizable"));
+  GdkWindowTypeHint type_hint =
+      minimizable ? GDK_WINDOW_TYPE_HINT_NORMAL : GDK_WINDOW_TYPE_HINT_DIALOG;
+  gtk_window_set_type_hint(get_window(self), type_hint);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
+static FlMethodResponse* is_maximizable(WindowManagerPlugin* self) {
+  gboolean resizable = gtk_window_get_resizable(get_window(self));
+  GdkWindowState state = gdk_window_get_state(get_gdk_window(self));
+  GdkWindowTypeHint type_hint = gtk_window_get_type_hint(get_window(self));
+  g_autoptr(FlValue) result =
+      fl_value_new_bool(resizable && !(state & GDK_WINDOW_STATE_MAXIMIZED) &&
+                        type_hint == GDK_WINDOW_TYPE_HINT_NORMAL);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* set_maximizable(WindowManagerPlugin* self,
+                                         FlValue* args) {
+  gboolean maximizable =
+      fl_value_get_bool(fl_value_lookup_string(args, "isMaximizable"));
+  GdkWindowTypeHint type_hint =
+      maximizable ? GDK_WINDOW_TYPE_HINT_NORMAL : GDK_WINDOW_TYPE_HINT_DIALOG;
+  gtk_window_set_type_hint(get_window(self), type_hint);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
 static FlMethodResponse* is_closable(WindowManagerPlugin* self) {
   bool is_closable = gtk_window_get_deletable(get_window(self));
   g_autoptr(FlValue) result = fl_value_new_bool(is_closable);
@@ -803,6 +842,14 @@ static void window_manager_plugin_handle_method_call(
     response = is_resizable(self);
   } else if (g_strcmp0(method, "setResizable") == 0) {
     response = set_resizable(self, args);
+  } else if (g_strcmp0(method, "isMinimizable") == 0) {
+    response = is_minimizable(self);
+  } else if (g_strcmp0(method, "setMinimizable") == 0) {
+    response = set_minimizable(self, args);
+  } else if (g_strcmp0(method, "isMaximizable") == 0) {
+    response = is_maximizable(self);
+  } else if (g_strcmp0(method, "setMaximizable") == 0) {
+    response = set_maximizable(self, args);
   } else if (g_strcmp0(method, "isClosable") == 0) {
     response = is_closable(self);
   } else if (g_strcmp0(method, "setClosable") == 0) {
