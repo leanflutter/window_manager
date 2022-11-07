@@ -341,12 +341,18 @@ public class WindowManager: NSObject, NSWindowDelegate {
             mainWindow.titlebarAppearsTransparent = false
             mainWindow.styleMask.remove(.fullSizeContentView)
         }
+
+        mainWindow.isOpaque = false
+        mainWindow.hasShadow = true
+
+         let titleBarView: NSView = (mainWindow.standardWindowButton(.closeButton)?.superview)!.superview!
+         titleBarView.isHidden = false
         
         mainWindow.standardWindowButton(.closeButton)?.isHidden = !windowButtonVisibility
         mainWindow.standardWindowButton(.miniaturizeButton)?.isHidden = !windowButtonVisibility
         mainWindow.standardWindowButton(.zoomButton)?.isHidden = !windowButtonVisibility
     }
-    
+
     public func getTitleBarHeight() -> Int {
         let frame = mainWindow.frame;
         let windowHeight: CGFloat = mainWindow.frame.height
