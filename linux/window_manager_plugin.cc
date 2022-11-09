@@ -126,7 +126,14 @@ static FlMethodResponse* show(WindowManagerPlugin* self) {
 }
 
 static FlMethodResponse* hide(WindowManagerPlugin* self) {
+  gint x, y, width, height;
+  // store the bound of window before hide
+  gtk_window_get_position(get_window(self), &x, &y);
+  gtk_window_get_size(get_window(self), &width, &height);
   gtk_widget_hide(GTK_WIDGET(get_window(self)));
+  // restore the bound of window after hide
+  gtk_window_move(get_window(self), x, y);
+  gtk_window_resize(get_window(self), width, height);
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
