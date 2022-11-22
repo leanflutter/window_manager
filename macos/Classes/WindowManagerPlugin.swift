@@ -35,6 +35,7 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
                 (eventName: String) in
                 self._emitEvent(eventName)
             }
+            windowManager.registerPowerEvents()
             _inited = true
         }
     }

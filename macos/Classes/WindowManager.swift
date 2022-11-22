@@ -551,7 +551,24 @@ public class WindowManager: NSObject, NSWindowDelegate {
     public func windowDidExitFullScreen(_ notification: Notification){
         _emitEvent("leave-full-screen");
     }
-    
+
+    public func registerPowerEvents() {
+
+          NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)),
+                                                            name: NSWorkspace.willSleepNotification, object: nil)
+          NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(sleepListener(_:)),
+                                                            name: NSWorkspace.didWakeNotification, object: nil)
+
+    }
+
+    @objc public func sleepListener(_ aNotification: Notification) {
+        if aNotification.name == NSWorkspace.willSleepNotification {
+            _emitEvent("sleep");
+        } else if aNotification.name == NSWorkspace.didWakeNotification {
+            _emitEvent("woke-up");
+        }
+    }
+
     public func _emitEvent(_ eventName: String) {
         if (onEvent != nil) {
             onEvent!(eventName)
