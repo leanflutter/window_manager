@@ -26,6 +26,8 @@ const kWindowEventMove = 'move';
 const kWindowEventMoved = 'moved';
 const kWindowEventEnterFullScreen = 'enter-full-screen';
 const kWindowEventLeaveFullScreen = 'leave-full-screen';
+const kWindowEventSleep = 'sleep';
+const kWindowEventWokeUp = 'woke-up';
 
 // WindowManager
 class WindowManager {
@@ -66,6 +68,8 @@ class WindowManager {
         kWindowEventMoved: listener.onWindowMoved,
         kWindowEventEnterFullScreen: listener.onWindowEnterFullScreen,
         kWindowEventLeaveFullScreen: listener.onWindowLeaveFullScreen,
+        kWindowEventSleep: listener.onSleep,
+        kWindowEventWokeUp: listener.onWokeUp,
       };
       funcMap[eventName]!();
     }

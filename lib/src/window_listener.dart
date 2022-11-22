@@ -44,4 +44,8 @@ abstract class WindowListener {
 
   /// Emitted all events.
   void onWindowEvent(String eventName) {}
+
+  void onSleep() {}
+
+  void onWokeUp() {}
 }

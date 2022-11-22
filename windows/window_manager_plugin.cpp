@@ -289,6 +289,12 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     if (window_manager->IsPreventClose()) {
       return -1;
     }
+  } else if (message == WM_POWERBROADCAST) {
+    if (wParam == PBT_APMSUSPEND) {
+        _EmitEvent("sleep");
+    } else if (wParam == PBT_APMRESUMEAUTOMATIC) {
+        _EmitEvent("woke-up");
+    }
   }
   return result;
 }
