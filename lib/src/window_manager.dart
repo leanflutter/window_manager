@@ -121,6 +121,8 @@ class WindowManager {
     if (options?.alwaysOnTop != null)
       await setAlwaysOnTop(options!.alwaysOnTop!);
     if (options?.fullScreen != null) await setFullScreen(options!.fullScreen!);
+    if (options?.backgroundColor != null)
+      await setBackgroundColor(options!.backgroundColor!);
     if (options?.skipTaskbar != null)
       await setSkipTaskbar(options!.skipTaskbar!);
     if (options?.title != null) await setTitle(options!.title!);
