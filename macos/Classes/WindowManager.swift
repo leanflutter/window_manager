@@ -235,8 +235,8 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
         
         if (args["x"] != nil && args["y"] != nil) {
-            frameRect.topLeft.x = CGFloat(args["x"] as! Float)
-            frameRect.topLeft.y = CGFloat(args["y"] as! Float)
+            frameRect.topLeft.x = CGFloat(truncating: args["x"] as! NSNumber)
+            frameRect.topLeft.y = CGFloat(truncating: args["y"] as! NSNumber)
         }
         
         if (animate) {
