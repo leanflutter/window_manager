@@ -24,7 +24,7 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
-  FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
+  FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
   tray_manager: 9064e219c56d75c476e46b9a21182087930baf90
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8

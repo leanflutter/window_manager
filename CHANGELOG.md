@@ -1,3 +1,11 @@
+## 0.2.8
+
+* Bump screen_retriever from 0.1.2 to 0.1.4
+* WindowOptions supports backgroundColor
+* [linux] fix: offset lost after invoking gtk hide on linux #241
+* [macos] Fix Unable to bridge NSNumber to Float #236
+* [linux] Introduce grabKeyboard() and ungrabKeyboard() #229
+
 ## 0.2.7
 
 * [linux] fix bottom edge resizing (#209)
