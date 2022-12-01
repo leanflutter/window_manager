@@ -649,6 +649,16 @@ class WindowManager {
     }..removeWhere((key, value) => value == null);
     await _channel.invokeMethod('createSubWindow', arguments);
   }
+
+  /// Grabs the keyboard.
+  Future<bool> grabKeyboard() async {
+    return await _channel.invokeMethod('grabKeyboard');
+  }
+
+  /// Ungrabs the keyboard.
+  Future<bool> ungrabKeyboard() async {
+    return await _channel.invokeMethod('ungrabKeyboard');
+  }
 }
 
 final windowManager = WindowManager.instance;
