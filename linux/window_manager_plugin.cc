@@ -65,13 +65,8 @@ static FlMethodResponse* set_as_frameless(WindowManagerPlugin* self,
 
   gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
 
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
-
-  // gtk_window_resize(get_window(self), static_cast<gint>(width),
-  // static_cast<gint>(height+1));
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
+  gtk_widget_queue_resize(GTK_WIDGET(get_window(self)));
+  gtk_widget_queue_draw(GTK_WIDGET(get_window(self)));
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -234,13 +229,8 @@ static FlMethodResponse* set_background_color(WindowManagerPlugin* self,
 
   gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
 
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
-
-  // gtk_window_resize(get_window(self), static_cast<gint>(width),
-  // static_cast<gint>(height+1));
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
+  gtk_widget_queue_resize(GTK_WIDGET(get_window(self)));
+  gtk_widget_queue_draw(GTK_WIDGET(get_window(self)));
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
