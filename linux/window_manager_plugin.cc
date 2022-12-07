@@ -401,13 +401,56 @@ static FlMethodResponse* set_title(WindowManagerPlugin* self, FlValue* args) {
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+// Returns true if the widget is GtkHeaderBar or HdyHeaderBar from libhandy.
+static gboolean is_header_bar(GtkWidget* widget) {
+  return widget != nullptr &&
+         (GTK_IS_HEADER_BAR(widget) ||
+          g_str_has_suffix(G_OBJECT_TYPE_NAME(widget), "HeaderBar"));
+}
+
+// Recursively searches for a Gtk/HdyHeaderBar in the widget tree.
+static GtkWidget* find_header_bar(GtkWidget* widget) {
+  if (is_header_bar(widget)) {
+    return widget;
+  }
+
+  if (GTK_IS_CONTAINER(widget)) {
+    g_autoptr(GList) children =
+        gtk_container_get_children(GTK_CONTAINER(widget));
+    for (GList* l = children; l != nullptr; l = l->next) {
+      GtkWidget* header_bar = find_header_bar(GTK_WIDGET(l->data));
+      if (header_bar != nullptr) {
+        return header_bar;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+// Returns the window's header bar which is typically a GtkHeaderBar used as
+// GtkWindow::titlebar, or a HdyHeaderBar as HdyWindow granchild.
+static GtkWidget* get_header_bar(GtkWindow* window) {
+  GtkWidget* titlebar = gtk_window_get_titlebar(window);
+  if (is_header_bar(titlebar)) {
+    return titlebar;
+  }
+  return find_header_bar(GTK_WIDGET(window));
+}
+
 static FlMethodResponse* set_title_bar_style(WindowManagerPlugin* self,
                                              FlValue* args) {
   const gchar* title_bar_style =
       fl_value_get_string(fl_value_lookup_string(args, "titleBarStyle"));
 
-  gtk_window_set_decorated(get_window(self),
-                           strcmp(title_bar_style, "hidden") != 0);
+  gboolean normal = strcmp(title_bar_style, "hidden") != 0;
+
+  GtkWidget* header_bar = get_header_bar(get_window(self));
+  if (header_bar != nullptr) {
+    gtk_widget_set_visible(header_bar, normal);
+  } else {
+    gtk_window_set_decorated(get_window(self), normal);
+  }
 
   self->title_bar_style_ = strdup(title_bar_style);
 
