@@ -212,8 +212,6 @@ static FlMethodResponse* set_background_color(WindowManagerPlugin* self,
                     fl_value_lookup_string(args, "backgroundColorA")) /
                 255.0);
 
-  gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
-
   g_autofree gchar* color = gdk_rgba_to_string(&rgba);
   g_autofree gchar* css = g_strdup_printf("* { background-color: %s; }", color);
 
