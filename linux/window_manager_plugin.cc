@@ -213,7 +213,8 @@ static FlMethodResponse* set_background_color(WindowManagerPlugin* self,
                 255.0);
 
   g_autofree gchar* color = gdk_rgba_to_string(&rgba);
-  g_autofree gchar* css = g_strdup_printf("* { background-color: %s; }", color);
+  g_autofree gchar* css =
+      g_strdup_printf("window { background-color: %s; }", color);
 
   if (self->css_provider == nullptr) {
     self->css_provider = gtk_css_provider_new();
