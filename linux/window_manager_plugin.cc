@@ -452,7 +452,8 @@ static FlMethodResponse* set_title_bar_style(WindowManagerPlugin* self,
     gtk_window_set_decorated(get_window(self), normal);
   }
 
-  self->title_bar_style_ = strdup(title_bar_style);
+  g_free(self->title_bar_style_);
+  self->title_bar_style_ = g_strdup(title_bar_style);
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -816,6 +817,8 @@ static void window_manager_plugin_handle_method_call(
 }
 
 static void window_manager_plugin_dispose(GObject* object) {
+  WindowManagerPlugin* self = WINDOW_MANAGER_PLUGIN(object);
+  g_free(self->title_bar_style_);
   G_OBJECT_CLASS(window_manager_plugin_parent_class)->dispose(object);
 }
 
