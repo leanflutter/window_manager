@@ -407,7 +407,7 @@ static FlMethodResponse* set_title_bar_style(WindowManagerPlugin* self,
       fl_value_get_string(fl_value_lookup_string(args, "titleBarStyle"));
 
   gtk_window_set_decorated(get_window(self),
-                           strcmp(title_bar_style, "hidden") != 0);
+                           g_strcmp0(title_bar_style, "hidden") != 0);
 
   self->title_bar_style_ = strdup(title_bar_style);
 
@@ -421,7 +421,7 @@ static FlMethodResponse* get_title_bar_height(WindowManagerPlugin* self,
 
   int title_bar_height = 0;
 
-  if (strcmp(self->title_bar_style_, "hidden") != 0) {
+  if (g_strcmp0(self->title_bar_style_, "hidden") != 0) {
     title_bar_height = gtk_widget_get_allocated_height(widget);
   }
 
@@ -546,21 +546,21 @@ static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
 
   GdkWindowEdge gdk_window_edge = GDK_WINDOW_EDGE_NORTH_WEST;
 
-  if (strcmp(resize_edge, "topLeft") == 0) {
+  if (g_strcmp0(resize_edge, "topLeft") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_NORTH_WEST;
-  } else if (strcmp(resize_edge, "top") == 0) {
+  } else if (g_strcmp0(resize_edge, "top") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_NORTH;
-  } else if (strcmp(resize_edge, "topRight") == 0) {
+  } else if (g_strcmp0(resize_edge, "topRight") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_NORTH_EAST;
-  } else if (strcmp(resize_edge, "left") == 0) {
+  } else if (g_strcmp0(resize_edge, "left") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_WEST;
-  } else if (strcmp(resize_edge, "right") == 0) {
+  } else if (g_strcmp0(resize_edge, "right") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_EAST;
-  } else if (strcmp(resize_edge, "bottomLeft") == 0) {
+  } else if (g_strcmp0(resize_edge, "bottomLeft") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_SOUTH_WEST;
-  } else if (strcmp(resize_edge, "bottom") == 0) {
+  } else if (g_strcmp0(resize_edge, "bottom") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_SOUTH;
-  } else if (strcmp(resize_edge, "bottomRight") == 0) {
+  } else if (g_strcmp0(resize_edge, "bottomRight") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_SOUTH_EAST;
   }
 
@@ -665,105 +665,105 @@ static void window_manager_plugin_handle_method_call(
   const gchar* method = fl_method_call_get_name(method_call);
   FlValue* args = fl_method_call_get_args(method_call);
 
-  if (strcmp(method, "ensureInitialized") == 0) {
+  if (g_strcmp0(method, "ensureInitialized") == 0) {
     g_autoptr(FlValue) result = fl_value_new_bool(true);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
-  } else if (strcmp(method, "waitUntilReadyToShow") == 0) {
+  } else if (g_strcmp0(method, "waitUntilReadyToShow") == 0) {
     g_autoptr(FlValue) result = fl_value_new_bool(true);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
-  } else if (strcmp(method, "setAsFrameless") == 0) {
+  } else if (g_strcmp0(method, "setAsFrameless") == 0) {
     response = set_as_frameless(self, args);
-  } else if (strcmp(method, "destroy") == 0) {
+  } else if (g_strcmp0(method, "destroy") == 0) {
     response = destroy(self);
-  } else if (strcmp(method, "close") == 0) {
+  } else if (g_strcmp0(method, "close") == 0) {
     response = close(self);
-  } else if (strcmp(method, "setPreventClose") == 0) {
+  } else if (g_strcmp0(method, "setPreventClose") == 0) {
     response = set_prevent_close(self, args);
-  } else if (strcmp(method, "isPreventClose") == 0) {
+  } else if (g_strcmp0(method, "isPreventClose") == 0) {
     response = is_prevent_close(self);
-  } else if (strcmp(method, "focus") == 0) {
+  } else if (g_strcmp0(method, "focus") == 0) {
     response = focus(self);
-  } else if (strcmp(method, "blur") == 0) {
+  } else if (g_strcmp0(method, "blur") == 0) {
     response = blur(self);
-  } else if (strcmp(method, "isFocused") == 0) {
+  } else if (g_strcmp0(method, "isFocused") == 0) {
     response = is_focused(self);
-  } else if (strcmp(method, "show") == 0) {
+  } else if (g_strcmp0(method, "show") == 0) {
     response = show(self);
-  } else if (strcmp(method, "hide") == 0) {
+  } else if (g_strcmp0(method, "hide") == 0) {
     response = hide(self);
-  } else if (strcmp(method, "isVisible") == 0) {
+  } else if (g_strcmp0(method, "isVisible") == 0) {
     response = is_visible(self);
-  } else if (strcmp(method, "isMaximized") == 0) {
+  } else if (g_strcmp0(method, "isMaximized") == 0) {
     response = is_maximized(self);
-  } else if (strcmp(method, "maximize") == 0) {
+  } else if (g_strcmp0(method, "maximize") == 0) {
     response = maximize(self);
-  } else if (strcmp(method, "unmaximize") == 0) {
+  } else if (g_strcmp0(method, "unmaximize") == 0) {
     response = unmaximize(self);
-  } else if (strcmp(method, "isMinimized") == 0) {
+  } else if (g_strcmp0(method, "isMinimized") == 0) {
     response = is_minimized(self);
-  } else if (strcmp(method, "minimize") == 0) {
+  } else if (g_strcmp0(method, "minimize") == 0) {
     response = minimize(self);
-  } else if (strcmp(method, "restore") == 0) {
+  } else if (g_strcmp0(method, "restore") == 0) {
     response = restore(self);
-  } else if (strcmp(method, "isFullScreen") == 0) {
+  } else if (g_strcmp0(method, "isFullScreen") == 0) {
     response = is_full_screen(self);
-  } else if (strcmp(method, "setFullScreen") == 0) {
+  } else if (g_strcmp0(method, "setFullScreen") == 0) {
     response = set_full_screen(self, args);
-  } else if (strcmp(method, "setAspectRatio") == 0) {
+  } else if (g_strcmp0(method, "setAspectRatio") == 0) {
     response = set_aspect_ratio(self, args);
-  } else if (strcmp(method, "setBackgroundColor") == 0) {
+  } else if (g_strcmp0(method, "setBackgroundColor") == 0) {
     response = set_background_color(self, args);
-  } else if (strcmp(method, "getBounds") == 0) {
+  } else if (g_strcmp0(method, "getBounds") == 0) {
     response = get_bounds(self);
-  } else if (strcmp(method, "setBounds") == 0) {
+  } else if (g_strcmp0(method, "setBounds") == 0) {
     response = set_bounds(self, args);
-  } else if (strcmp(method, "setMinimumSize") == 0) {
+  } else if (g_strcmp0(method, "setMinimumSize") == 0) {
     response = set_minimum_size(self, args);
-  } else if (strcmp(method, "setMaximumSize") == 0) {
+  } else if (g_strcmp0(method, "setMaximumSize") == 0) {
     response = set_maximum_size(self, args);
-  } else if (strcmp(method, "isResizable") == 0) {
+  } else if (g_strcmp0(method, "isResizable") == 0) {
     response = is_resizable(self);
-  } else if (strcmp(method, "setResizable") == 0) {
+  } else if (g_strcmp0(method, "setResizable") == 0) {
     response = set_resizable(self, args);
-  } else if (strcmp(method, "isClosable") == 0) {
+  } else if (g_strcmp0(method, "isClosable") == 0) {
     response = is_closable(self);
-  } else if (strcmp(method, "setClosable") == 0) {
+  } else if (g_strcmp0(method, "setClosable") == 0) {
     response = set_closable(self, args);
-  } else if (strcmp(method, "isAlwaysOnTop") == 0) {
+  } else if (g_strcmp0(method, "isAlwaysOnTop") == 0) {
     response = is_always_on_top(self);
-  } else if (strcmp(method, "setAlwaysOnTop") == 0) {
+  } else if (g_strcmp0(method, "setAlwaysOnTop") == 0) {
     response = set_always_on_top(self, args);
-  } else if (strcmp(method, "isAlwaysOnBottom") == 0) {
+  } else if (g_strcmp0(method, "isAlwaysOnBottom") == 0) {
     response = is_always_on_bottom(self);
-  } else if (strcmp(method, "setAlwaysOnBottom") == 0) {
+  } else if (g_strcmp0(method, "setAlwaysOnBottom") == 0) {
     response = set_always_on_bottom(self, args);
-  } else if (strcmp(method, "getTitle") == 0) {
+  } else if (g_strcmp0(method, "getTitle") == 0) {
     response = get_title(self);
-  } else if (strcmp(method, "setTitle") == 0) {
+  } else if (g_strcmp0(method, "setTitle") == 0) {
     response = set_title(self, args);
-  } else if (strcmp(method, "setTitleBarStyle") == 0) {
+  } else if (g_strcmp0(method, "setTitleBarStyle") == 0) {
     response = set_title_bar_style(self, args);
-  } else if (strcmp(method, "getTitleBarHeight") == 0) {
+  } else if (g_strcmp0(method, "getTitleBarHeight") == 0) {
     response = get_title_bar_height(self, args);
-  } else if (strcmp(method, "isSkipTaskbar") == 0) {
+  } else if (g_strcmp0(method, "isSkipTaskbar") == 0) {
     response = is_skip_taskbar(self);
-  } else if (strcmp(method, "setSkipTaskbar") == 0) {
+  } else if (g_strcmp0(method, "setSkipTaskbar") == 0) {
     response = set_skip_taskbar(self, args);
-  } else if (strcmp(method, "setIcon") == 0) {
+  } else if (g_strcmp0(method, "setIcon") == 0) {
     response = set_icon(self, args);
-  } else if (strcmp(method, "getOpacity") == 0) {
+  } else if (g_strcmp0(method, "getOpacity") == 0) {
     response = get_opacity(self);
-  } else if (strcmp(method, "setOpacity") == 0) {
+  } else if (g_strcmp0(method, "setOpacity") == 0) {
     response = set_opacity(self, args);
-  } else if (strcmp(method, "popUpWindowMenu") == 0) {
+  } else if (g_strcmp0(method, "popUpWindowMenu") == 0) {
     response = pop_up_window_menu(self);
-  } else if (strcmp(method, "startDragging") == 0) {
+  } else if (g_strcmp0(method, "startDragging") == 0) {
     response = start_dragging(self);
-  } else if (strcmp(method, "startResizing") == 0) {
+  } else if (g_strcmp0(method, "startResizing") == 0) {
     response = start_resizing(self, args);
-  } else if (strcmp(method, "grabKeyboard") == 0) {
+  } else if (g_strcmp0(method, "grabKeyboard") == 0) {
     response = grab_keyboard(self);
-  } else if (strcmp(method, "ungrabKeyboard") == 0) {
+  } else if (g_strcmp0(method, "ungrabKeyboard") == 0) {
     response = ungrab_keyboard(self);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
