@@ -691,6 +691,34 @@ static FlMethodResponse* ungrab_keyboard(WindowManagerPlugin* self) {
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* set_brightness(WindowManagerPlugin* self,
+                                        FlValue* args) {
+  const gchar* brightness =
+      fl_value_get_string(fl_value_lookup_string(args, "brightness"));
+
+  gboolean dark = g_strcmp0(brightness, "dark") == 0;
+
+  GtkSettings* settings = gtk_settings_get_default();
+  g_object_set(settings, "gtk-application-prefer-dark-theme", dark, nullptr);
+
+  if (!dark) {
+    // `gtk-application-prefer-dark-theme=false` is not enough to switch to the
+    // light mode if the current theme is a dark variant such as "Yaru-dark" or
+    // "Adwaita-dark". try switching to the light variant without a "-dark"
+    // suffix.
+    g_autofree gchar* theme_name = nullptr;
+    g_object_get(settings, "gtk-theme-name", &theme_name, nullptr);
+    if (g_str_has_suffix(theme_name, "-dark")) {
+      g_autofree gchar* light_theme_name =
+          g_strndup(theme_name, strlen(theme_name) - 5);
+      g_object_set(settings, "gtk-theme-name", light_theme_name, nullptr);
+    }
+  }
+
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
 // Called when a method call is received from Flutter.
 static void window_manager_plugin_handle_method_call(
     WindowManagerPlugin* self,
@@ -800,6 +828,8 @@ static void window_manager_plugin_handle_method_call(
     response = grab_keyboard(self);
   } else if (strcmp(method, "ungrabKeyboard") == 0) {
     response = ungrab_keyboard(self);
+  } else if (strcmp(method, "setBrightness") == 0) {
+    response = set_brightness(self, args);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
