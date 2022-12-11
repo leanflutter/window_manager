@@ -18,6 +18,7 @@ struct _WindowManagerPlugin {
   FlPluginRegistrar* registrar;
   FlMethodChannel* channel;
   GdkGeometry window_geometry;
+  GdkWindowHints window_hints;
   GtkWidget* _event_box;
   bool _is_prevent_close;
   bool _is_frameless;
@@ -191,8 +192,16 @@ static FlMethodResponse* set_aspect_ratio(WindowManagerPlugin* self,
   self->window_geometry.min_aspect = aspect_ratio;
   self->window_geometry.max_aspect = aspect_ratio;
 
+  if (aspect_ratio >= 0) {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints | GDK_HINT_ASPECT);
+  } else {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints & ~GDK_HINT_ASPECT);
+  }
+
   gdk_window_set_geometry_hints(get_gdk_window(self), &self->window_geometry,
-                                static_cast<GdkWindowHints>(GDK_HINT_ASPECT));
+                                self->window_hints);
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
@@ -280,11 +289,15 @@ static FlMethodResponse* set_minimum_size(WindowManagerPlugin* self,
   if (width >= 0 && height >= 0) {
     self->window_geometry.min_width = static_cast<gint>(width);
     self->window_geometry.min_height = static_cast<gint>(height);
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints | GDK_HINT_MIN_SIZE);
+  } else {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints & ~GDK_HINT_MIN_SIZE);
   }
 
-  gdk_window_set_geometry_hints(
-      get_gdk_window(self), &self->window_geometry,
-      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
+  gdk_window_set_geometry_hints(get_gdk_window(self), &self->window_geometry,
+                                self->window_hints);
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -299,14 +312,21 @@ static FlMethodResponse* set_maximum_size(WindowManagerPlugin* self,
   self->window_geometry.max_width = static_cast<gint>(width);
   self->window_geometry.max_height = static_cast<gint>(height);
 
+  if (width >= 0 && height >= 0) {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints | GDK_HINT_MAX_SIZE);
+  } else {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints & ~GDK_HINT_MAX_SIZE);
+  }
+
   if (self->window_geometry.max_width < 0)
     self->window_geometry.max_width = G_MAXINT;
   if (self->window_geometry.max_height < 0)
     self->window_geometry.max_height = G_MAXINT;
 
-  gdk_window_set_geometry_hints(
-      get_gdk_window(self), &self->window_geometry,
-      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
+  gdk_window_set_geometry_hints(get_gdk_window(self), &self->window_geometry,
+                                self->window_hints);
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
