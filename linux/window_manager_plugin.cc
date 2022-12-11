@@ -11,8 +11,6 @@
   (G_TYPE_CHECK_INSTANCE_CAST((obj), window_manager_plugin_get_type(), \
                               WindowManagerPlugin))
 
-WindowManagerPlugin* plugin_instance;
-
 struct _WindowManagerPlugin {
   GObject parent_instance;
   FlPluginRegistrar* registrar;
@@ -858,84 +856,92 @@ static void method_call_cb(FlMethodChannel* channel,
   window_manager_plugin_handle_method_call(plugin, method_call);
 }
 
-void _emit_event(const char* event_name) {
+void _emit_event(WindowManagerPlugin* plugin, const char* event_name) {
   g_autoptr(FlValue) result_data = fl_value_new_map();
   fl_value_set_string_take(result_data, "eventName",
                            fl_value_new_string(event_name));
-  fl_method_channel_invoke_method(plugin_instance->channel, "onEvent",
-                                  result_data, nullptr, nullptr, nullptr);
+  fl_method_channel_invoke_method(plugin->channel, "onEvent", result_data,
+                                  nullptr, nullptr, nullptr);
 }
 
 gboolean on_window_close(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("close");
-  return plugin_instance->_is_prevent_close;
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "close");
+  return plugin->_is_prevent_close;
 }
 
 gboolean on_window_focus(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("focus");
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "focus");
   return false;
 }
 
 gboolean on_window_blur(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("blur");
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "blur");
   return false;
 }
 
 gboolean on_window_show(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("show");
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "show");
   return false;
 }
 
 gboolean on_window_hide(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("hide");
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "hide");
   return false;
 }
 
-gboolean on_window_resize(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("resize");
+gboolean on_window_resize(GtkWidget* widget, gpointer data) {
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "resize");
   return false;
 }
 
 gboolean on_window_move(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("move");
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "move");
   return false;
 }
 
 gboolean on_window_state_change(GtkWidget* widget,
                                 GdkEventWindowState* event,
                                 gpointer data) {
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
   if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) {
-    if (!plugin_instance->_is_maximized) {
-      plugin_instance->_is_maximized = true;
-      _emit_event("maximize");
+    if (!plugin->_is_maximized) {
+      plugin->_is_maximized = true;
+      _emit_event(plugin, "maximize");
     }
   }
   if (event->new_window_state & GDK_WINDOW_STATE_ICONIFIED) {
-    if (!plugin_instance->_is_minimized) {
-      plugin_instance->_is_minimized = true;
-      _emit_event("minimize");
+    if (!plugin->_is_minimized) {
+      plugin->_is_minimized = true;
+      _emit_event(plugin, "minimize");
     }
   }
   if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) {
-    if (!plugin_instance->_is_fullscreen) {
-      plugin_instance->_is_fullscreen = true;
-      _emit_event("enter-full-screen");
+    if (!plugin->_is_fullscreen) {
+      plugin->_is_fullscreen = true;
+      _emit_event(plugin, "enter-full-screen");
     }
   }
-  if (plugin_instance->_is_maximized &&
+  if (plugin->_is_maximized &&
       !(event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED)) {
-    plugin_instance->_is_maximized = false;
-    _emit_event("unmaximize");
+    plugin->_is_maximized = false;
+    _emit_event(plugin, "unmaximize");
   }
-  if (plugin_instance->_is_minimized &&
+  if (plugin->_is_minimized &&
       !(event->new_window_state & GDK_WINDOW_STATE_ICONIFIED)) {
-    plugin_instance->_is_minimized = false;
-    _emit_event("restore");
+    plugin->_is_minimized = false;
+    _emit_event(plugin, "restore");
   }
-  if (plugin_instance->_is_fullscreen &&
+  if (plugin->_is_fullscreen &&
       !(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
-    plugin_instance->_is_fullscreen = false;
-    _emit_event("leave-full-screen");
+    plugin->_is_fullscreen = false;
+    _emit_event(plugin, "leave-full-screen");
   }
   return false;
 }
@@ -976,15 +982,14 @@ gboolean on_mouse_press(GSignalInvocationHint* ihint,
                         guint n_param_values,
                         const GValue* param_values,
                         gpointer data) {
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
   GdkEventButton* event_button =
       (GdkEventButton*)(g_value_get_boxed(param_values + 1));
 
-  // plugin_instance->_event_button = event_button;
+  // plugin->_event_button = event_button;
 
-  memset(&plugin_instance->_event_button, 0,
-         sizeof(plugin_instance->_event_button));
-  memcpy(&plugin_instance->_event_button, event_button,
-         sizeof(plugin_instance->_event_button));
+  memset(&plugin->_event_button, 0, sizeof(plugin->_event_button));
+  memcpy(&plugin->_event_button, event_button, sizeof(plugin->_event_button));
   return TRUE;
 }
 
@@ -1000,21 +1005,21 @@ void window_manager_plugin_register_with_registrar(
   plugin->window_geometry.max_width = G_MAXINT;
   plugin->window_geometry.max_height = G_MAXINT;
   g_signal_connect(get_window(plugin), "delete_event",
-                   G_CALLBACK(on_window_close), NULL);
+                   G_CALLBACK(on_window_close), plugin);
   g_signal_connect(get_window(plugin), "focus-in-event",
-                   G_CALLBACK(on_window_focus), NULL);
+                   G_CALLBACK(on_window_focus), plugin);
   g_signal_connect(get_window(plugin), "focus-out-event",
-                   G_CALLBACK(on_window_blur), NULL);
+                   G_CALLBACK(on_window_blur), plugin);
   g_signal_connect(get_window(plugin), "show", G_CALLBACK(on_window_show),
-                   NULL);
+                   plugin);
   g_signal_connect(get_window(plugin), "hide", G_CALLBACK(on_window_hide),
-                   NULL);
+                   plugin);
   g_signal_connect(get_window(plugin), "check-resize",
-                   G_CALLBACK(on_window_resize), NULL);
+                   G_CALLBACK(on_window_resize), plugin);
   g_signal_connect(get_window(plugin), "configure-event",
-                   G_CALLBACK(on_window_move), NULL);
+                   G_CALLBACK(on_window_move), plugin);
   g_signal_connect(get_window(plugin), "window-state-event",
-                   G_CALLBACK(on_window_state_change), NULL);
+                   G_CALLBACK(on_window_state_change), plugin);
   g_signal_connect(get_window(plugin), "event-after",
                    G_CALLBACK(on_event_after), plugin);
   find_event_box(plugin, GTK_WIDGET(fl_plugin_registrar_get_view(registrar)));
@@ -1029,8 +1034,6 @@ void window_manager_plugin_register_with_registrar(
                             "window_manager", FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(
       plugin->channel, method_call_cb, g_object_ref(plugin), g_object_unref);
-
-  plugin_instance = plugin;
 
   g_object_unref(plugin);
 }
