@@ -454,7 +454,8 @@ static FlMethodResponse* set_icon(WindowManagerPlugin* self, FlValue* args) {
 }
 
 static FlMethodResponse* get_opacity(WindowManagerPlugin* self) {
-  g_autoptr(FlValue) result = fl_value_new_float(1);
+  gdouble opacity = gtk_widget_get_opacity(GTK_WIDGET(get_window(self)));
+  g_autoptr(FlValue) result = fl_value_new_float(opacity);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
