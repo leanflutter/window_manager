@@ -13,29 +13,25 @@
 
 WindowManagerPlugin* plugin_instance;
 
-static double bg_color_r = 0.0;
-static double bg_color_g = 0.0;
-static double bg_color_b = 0.0;
-static double bg_color_a = 0.0;
-
 struct _WindowManagerPlugin {
   GObject parent_instance;
   FlPluginRegistrar* registrar;
   FlMethodChannel* channel;
   GdkGeometry window_geometry;
-  GtkWidget* _event_box = nullptr;
-  bool _is_prevent_close = false;
-  bool _is_frameless = false;
-  bool _is_maximized = false;
-  bool _is_minimized = false;
-  bool _is_fullscreen = false;
-  bool _is_always_on_top = false;
-  bool _is_always_on_bottom = false;
-  bool _is_dragging = false;
-  bool _is_resizing = false;
-  gchar* title_bar_style_ = strdup("normal");
-  GdkEventButton _event_button = GdkEventButton{};
+  GtkWidget* _event_box;
+  bool _is_prevent_close;
+  bool _is_frameless;
+  bool _is_maximized;
+  bool _is_minimized;
+  bool _is_fullscreen;
+  bool _is_always_on_top;
+  bool _is_always_on_bottom;
+  bool _is_dragging;
+  bool _is_resizing;
+  gchar* title_bar_style_;
+  GdkEventButton _event_button;
   GdkDevice* grab_pointer;
+  GtkCssProvider* css_provider;
 };
 
 G_DEFINE_TYPE(WindowManagerPlugin, window_manager_plugin, g_object_get_type())
@@ -55,23 +51,7 @@ GdkWindow* get_gdk_window(WindowManagerPlugin* self) {
 
 static FlMethodResponse* set_as_frameless(WindowManagerPlugin* self,
                                           FlValue* args) {
-  self->_is_frameless = true;
-  bg_color_r = 0;
-  bg_color_g = 0;
-  bg_color_b = 0;
-  bg_color_a = 0;
-
   gtk_window_set_decorated(get_window(self), false);
-
-  gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
-
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
-
-  // gtk_window_resize(get_window(self), static_cast<gint>(width),
-  // static_cast<gint>(height+1));
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -219,28 +199,39 @@ static FlMethodResponse* set_aspect_ratio(WindowManagerPlugin* self,
 
 static FlMethodResponse* set_background_color(WindowManagerPlugin* self,
                                               FlValue* args) {
-  bg_color_r = ((double)fl_value_get_int(
-                    fl_value_lookup_string(args, "backgroundColorR")) /
-                255.0);
-  bg_color_g = ((double)fl_value_get_int(
+  GdkRGBA rgba;
+  rgba.red = ((double)fl_value_get_int(
+                  fl_value_lookup_string(args, "backgroundColorR")) /
+              255.0);
+  rgba.green = ((double)fl_value_get_int(
                     fl_value_lookup_string(args, "backgroundColorG")) /
                 255.0);
-  bg_color_b = ((double)fl_value_get_int(
-                    fl_value_lookup_string(args, "backgroundColorB")) /
-                255.0);
-  bg_color_a = ((double)fl_value_get_int(
+  rgba.blue = ((double)fl_value_get_int(
+                   fl_value_lookup_string(args, "backgroundColorB")) /
+               255.0);
+  rgba.alpha = ((double)fl_value_get_int(
                     fl_value_lookup_string(args, "backgroundColorA")) /
                 255.0);
 
-  gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
+  g_autofree gchar* color = gdk_rgba_to_string(&rgba);
+  g_autofree gchar* css =
+      g_strdup_printf("window { background-color: %s; }", color);
 
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
+  if (self->css_provider == nullptr) {
+    self->css_provider = gtk_css_provider_new();
+    gtk_style_context_add_provider(
+        gtk_widget_get_style_context(GTK_WIDGET(get_window(self))),
+        GTK_STYLE_PROVIDER(self->css_provider),
+        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  }
 
-  // gtk_window_resize(get_window(self), static_cast<gint>(width),
-  // static_cast<gint>(height+1));
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
+  g_autoptr(GError) error = nullptr;
+  gtk_css_provider_load_from_data(self->css_provider, css, -1, &error);
+
+  if (error != nullptr) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        "setBackgroundColor", error->message, nullptr));
+  }
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -401,15 +392,59 @@ static FlMethodResponse* set_title(WindowManagerPlugin* self, FlValue* args) {
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+// Returns true if the widget is GtkHeaderBar or HdyHeaderBar from libhandy.
+static gboolean is_header_bar(GtkWidget* widget) {
+  return widget != nullptr &&
+         (GTK_IS_HEADER_BAR(widget) ||
+          g_str_has_suffix(G_OBJECT_TYPE_NAME(widget), "HeaderBar"));
+}
+
+// Recursively searches for a Gtk/HdyHeaderBar in the widget tree.
+static GtkWidget* find_header_bar(GtkWidget* widget) {
+  if (is_header_bar(widget)) {
+    return widget;
+  }
+
+  if (GTK_IS_CONTAINER(widget)) {
+    g_autoptr(GList) children =
+        gtk_container_get_children(GTK_CONTAINER(widget));
+    for (GList* l = children; l != nullptr; l = l->next) {
+      GtkWidget* header_bar = find_header_bar(GTK_WIDGET(l->data));
+      if (header_bar != nullptr) {
+        return header_bar;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+// Returns the window's header bar which is typically a GtkHeaderBar used as
+// GtkWindow::titlebar, or a HdyHeaderBar as HdyWindow granchild.
+static GtkWidget* get_header_bar(GtkWindow* window) {
+  GtkWidget* titlebar = gtk_window_get_titlebar(window);
+  if (is_header_bar(titlebar)) {
+    return titlebar;
+  }
+  return find_header_bar(GTK_WIDGET(window));
+}
+
 static FlMethodResponse* set_title_bar_style(WindowManagerPlugin* self,
                                              FlValue* args) {
   const gchar* title_bar_style =
       fl_value_get_string(fl_value_lookup_string(args, "titleBarStyle"));
 
-  gtk_window_set_decorated(get_window(self),
-                           g_strcmp0(title_bar_style, "hidden") != 0);
+  gboolean normal = g_strcmp0(title_bar_style, "hidden") != 0;
 
-  self->title_bar_style_ = strdup(title_bar_style);
+  GtkWidget* header_bar = get_header_bar(get_window(self));
+  if (header_bar != nullptr) {
+    gtk_widget_set_visible(header_bar, normal);
+  } else {
+    gtk_window_set_decorated(get_window(self), normal);
+  }
+
+  g_free(self->title_bar_style_);
+  self->title_bar_style_ = g_strdup(title_bar_style);
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -454,7 +489,8 @@ static FlMethodResponse* set_icon(WindowManagerPlugin* self, FlValue* args) {
 }
 
 static FlMethodResponse* get_opacity(WindowManagerPlugin* self) {
-  g_autoptr(FlValue) result = fl_value_new_float(1);
+  gdouble opacity = gtk_widget_get_opacity(GTK_WIDGET(get_window(self)));
+  g_autoptr(FlValue) result = fl_value_new_float(opacity);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
@@ -656,6 +692,34 @@ static FlMethodResponse* ungrab_keyboard(WindowManagerPlugin* self) {
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* set_brightness(WindowManagerPlugin* self,
+                                        FlValue* args) {
+  const gchar* brightness =
+      fl_value_get_string(fl_value_lookup_string(args, "brightness"));
+
+  gboolean dark = g_strcmp0(brightness, "dark") == 0;
+
+  GtkSettings* settings = gtk_settings_get_default();
+  g_object_set(settings, "gtk-application-prefer-dark-theme", dark, nullptr);
+
+  if (!dark) {
+    // `gtk-application-prefer-dark-theme=false` is not enough to switch to the
+    // light mode if the current theme is a dark variant such as "Yaru-dark" or
+    // "Adwaita-dark". try switching to the light variant without a "-dark"
+    // suffix.
+    g_autofree gchar* theme_name = nullptr;
+    g_object_get(settings, "gtk-theme-name", &theme_name, nullptr);
+    if (g_str_has_suffix(theme_name, "-dark")) {
+      g_autofree gchar* light_theme_name =
+          g_strndup(theme_name, strlen(theme_name) - 5);
+      g_object_set(settings, "gtk-theme-name", light_theme_name, nullptr);
+    }
+  }
+
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
 // Called when a method call is received from Flutter.
 static void window_manager_plugin_handle_method_call(
     WindowManagerPlugin* self,
@@ -765,6 +829,8 @@ static void window_manager_plugin_handle_method_call(
     response = grab_keyboard(self);
   } else if (g_strcmp0(method, "ungrabKeyboard") == 0) {
     response = ungrab_keyboard(self);
+  } else if (strcmp(method, "setBrightness") == 0) {
+    response = set_brightness(self, args);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
@@ -773,6 +839,9 @@ static void window_manager_plugin_handle_method_call(
 }
 
 static void window_manager_plugin_dispose(GObject* object) {
+  WindowManagerPlugin* self = WINDOW_MANAGER_PLUGIN(object);
+  g_clear_object(&self->css_provider);
+  g_free(self->title_bar_style_);
   G_OBJECT_CLASS(window_manager_plugin_parent_class)->dispose(object);
 }
 
@@ -871,15 +940,6 @@ gboolean on_window_state_change(GtkWidget* widget,
   return false;
 }
 
-gboolean on_window_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
-  if (plugin_instance->_is_frameless) {
-    cairo_set_source_rgba(cr, bg_color_r, bg_color_g, bg_color_b, bg_color_a);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(cr);
-  }
-  return false;
-}
-
 void emit_button_release(WindowManagerPlugin* self) {
   auto newEvent = (GdkEventButton*)gdk_event_new(GDK_BUTTON_RELEASE);
   newEvent->x = self->_event_button.x;
@@ -955,8 +1015,6 @@ void window_manager_plugin_register_with_registrar(
                    G_CALLBACK(on_window_move), NULL);
   g_signal_connect(get_window(plugin), "window-state-event",
                    G_CALLBACK(on_window_state_change), NULL);
-  g_signal_connect(get_window(plugin), "draw", G_CALLBACK(on_window_draw),
-                   NULL);
   g_signal_connect(get_window(plugin), "event-after",
                    G_CALLBACK(on_event_after), plugin);
   find_event_box(plugin, GTK_WIDGET(fl_plugin_registrar_get_view(registrar)));
