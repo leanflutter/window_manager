@@ -13,11 +13,6 @@
 
 WindowManagerPlugin* plugin_instance;
 
-static double bg_color_r = 0.0;
-static double bg_color_g = 0.0;
-static double bg_color_b = 0.0;
-static double bg_color_a = 0.0;
-
 struct _WindowManagerPlugin {
   GObject parent_instance;
   FlPluginRegistrar* registrar;
@@ -25,7 +20,6 @@ struct _WindowManagerPlugin {
   GdkGeometry window_geometry;
   GtkWidget* _event_box = nullptr;
   bool _is_prevent_close = false;
-  bool _is_frameless = false;
   bool _is_maximized = false;
   bool _is_minimized = false;
   bool _is_fullscreen = false;
@@ -36,6 +30,7 @@ struct _WindowManagerPlugin {
   gchar* title_bar_style_ = strdup("normal");
   GdkEventButton _event_button = GdkEventButton{};
   GdkDevice* grab_pointer;
+  GtkCssProvider* css_provider;
 };
 
 G_DEFINE_TYPE(WindowManagerPlugin, window_manager_plugin, g_object_get_type())
@@ -55,23 +50,7 @@ GdkWindow* get_gdk_window(WindowManagerPlugin* self) {
 
 static FlMethodResponse* set_as_frameless(WindowManagerPlugin* self,
                                           FlValue* args) {
-  self->_is_frameless = true;
-  bg_color_r = 0;
-  bg_color_g = 0;
-  bg_color_b = 0;
-  bg_color_a = 0;
-
   gtk_window_set_decorated(get_window(self), false);
-
-  gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
-
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
-
-  // gtk_window_resize(get_window(self), static_cast<gint>(width),
-  // static_cast<gint>(height+1));
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -219,28 +198,39 @@ static FlMethodResponse* set_aspect_ratio(WindowManagerPlugin* self,
 
 static FlMethodResponse* set_background_color(WindowManagerPlugin* self,
                                               FlValue* args) {
-  bg_color_r = ((double)fl_value_get_int(
-                    fl_value_lookup_string(args, "backgroundColorR")) /
-                255.0);
-  bg_color_g = ((double)fl_value_get_int(
+  GdkRGBA rgba;
+  rgba.red = ((double)fl_value_get_int(
+                  fl_value_lookup_string(args, "backgroundColorR")) /
+              255.0);
+  rgba.green = ((double)fl_value_get_int(
                     fl_value_lookup_string(args, "backgroundColorG")) /
                 255.0);
-  bg_color_b = ((double)fl_value_get_int(
-                    fl_value_lookup_string(args, "backgroundColorB")) /
-                255.0);
-  bg_color_a = ((double)fl_value_get_int(
+  rgba.blue = ((double)fl_value_get_int(
+                   fl_value_lookup_string(args, "backgroundColorB")) /
+               255.0);
+  rgba.alpha = ((double)fl_value_get_int(
                     fl_value_lookup_string(args, "backgroundColorA")) /
                 255.0);
 
-  gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
+  g_autofree gchar* color = gdk_rgba_to_string(&rgba);
+  g_autofree gchar* css =
+      g_strdup_printf("window { background-color: %s; }", color);
 
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
+  if (self->css_provider == nullptr) {
+    self->css_provider = gtk_css_provider_new();
+    gtk_style_context_add_provider(
+        gtk_widget_get_style_context(GTK_WIDGET(get_window(self))),
+        GTK_STYLE_PROVIDER(self->css_provider),
+        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  }
 
-  // gtk_window_resize(get_window(self), static_cast<gint>(width),
-  // static_cast<gint>(height+1));
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
+  g_autoptr(GError) error = nullptr;
+  gtk_css_provider_load_from_data(self->css_provider, css, -1, &error);
+
+  if (error != nullptr) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        "setBackgroundColor", error->message, nullptr));
+  }
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -819,6 +809,7 @@ static void window_manager_plugin_handle_method_call(
 
 static void window_manager_plugin_dispose(GObject* object) {
   WindowManagerPlugin* self = WINDOW_MANAGER_PLUGIN(object);
+  g_clear_object(&self->css_provider);
   g_free(self->title_bar_style_);
   G_OBJECT_CLASS(window_manager_plugin_parent_class)->dispose(object);
 }
@@ -918,15 +909,6 @@ gboolean on_window_state_change(GtkWidget* widget,
   return false;
 }
 
-gboolean on_window_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
-  if (plugin_instance->_is_frameless) {
-    cairo_set_source_rgba(cr, bg_color_r, bg_color_g, bg_color_b, bg_color_a);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(cr);
-  }
-  return false;
-}
-
 void emit_button_release(WindowManagerPlugin* self) {
   auto newEvent = (GdkEventButton*)gdk_event_new(GDK_BUTTON_RELEASE);
   newEvent->x = self->_event_button.x;
@@ -1002,8 +984,6 @@ void window_manager_plugin_register_with_registrar(
                    G_CALLBACK(on_window_move), NULL);
   g_signal_connect(get_window(plugin), "window-state-event",
                    G_CALLBACK(on_window_state_change), NULL);
-  g_signal_connect(get_window(plugin), "draw", G_CALLBACK(on_window_draw),
-                   NULL);
   g_signal_connect(get_window(plugin), "event-after",
                    G_CALLBACK(on_event_after), plugin);
   find_event_box(plugin, GTK_WIDGET(fl_plugin_registrar_get_view(registrar)));
