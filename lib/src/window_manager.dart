@@ -435,7 +435,7 @@ class WindowManager {
     final Map<String, dynamic> arguments = {
       'isMaximizable': isMaximizable,
     };
-    _channel.invokeListMethod('setMaximizable', arguments);
+    _channel.invokeMethod('setMaximizable', arguments);
   }
 
   /// Sets whether the window can be manually closed by user.
