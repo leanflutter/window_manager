@@ -392,7 +392,8 @@ static FlMethodResponse* set_always_on_bottom(WindowManagerPlugin* self,
 
 static FlMethodResponse* get_title(WindowManagerPlugin* self) {
   const gchar* title = gtk_window_get_title(get_window(self));
-  g_autoptr(FlValue) result = fl_value_new_string(title);
+  g_autoptr(FlValue) result =
+      fl_value_new_string(title != nullptr ? title : "");
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
