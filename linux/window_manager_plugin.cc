@@ -2,10 +2,6 @@
 
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
-#include <sys/utsname.h>
-
-#include <cairo/cairo.h>
-#include <cstring>
 
 #define WINDOW_MANAGER_PLUGIN(obj)                                     \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), window_manager_plugin_get_type(), \
@@ -847,7 +843,7 @@ static void window_manager_plugin_handle_method_call(
     response = grab_keyboard(self);
   } else if (g_strcmp0(method, "ungrabKeyboard") == 0) {
     response = ungrab_keyboard(self);
-  } else if (strcmp(method, "setBrightness") == 0) {
+  } else if (g_strcmp0(method, "setBrightness") == 0) {
     response = set_brightness(self, args);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
