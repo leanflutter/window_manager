@@ -431,11 +431,11 @@ class WindowManager {
   }
 
   /// Sets whether the window can be manually maximized by the user.
-  setMaximizable(bool isMaximizable) {
+  Future<void> setMaximizable(bool isMaximizable) async {
     final Map<String, dynamic> arguments = {
       'isMaximizable': isMaximizable,
     };
-    _channel.invokeListMethod('setMaximizable', arguments);
+    await _channel.invokeMethod('setMaximizable', arguments);
   }
 
   /// Sets whether the window can be manually closed by user.
