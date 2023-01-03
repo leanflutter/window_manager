@@ -575,8 +575,6 @@ class WindowManager {
   }
 
   /// Sets the brightness of the window.
-  ///
-  /// @platforms macos,windows
   Future<void> setBrightness(Brightness brightness) async {
     final Map<String, dynamic> arguments = {
       'brightness': describeEnum(brightness),
@@ -651,11 +649,13 @@ class WindowManager {
   }
 
   /// Grabs the keyboard.
+  /// @platforms linux
   Future<bool> grabKeyboard() async {
     return await _channel.invokeMethod('grabKeyboard');
   }
 
   /// Ungrabs the keyboard.
+  /// @platforms linux
   Future<bool> ungrabKeyboard() async {
     return await _channel.invokeMethod('ungrabKeyboard');
   }

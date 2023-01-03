@@ -1,3 +1,16 @@
+## 0.2.9
+
+* [windows] Fix set maximizable throwing an error (#267)
+* [linux] clean up unused includes (#260)
+* [linux] fix window geometry hints (#257)
+* [linux] pass the plugin instance around as user data (#256)
+* [linux] fix `getOpacity()` (#255)
+* [Linux] use g_strcmp0() (#254)
+* [Linux] remove misleading C++-style default values (#253)
+* [Linux] implement `setBrightness()` (#252)
+* [Linux] fix frameless window & background color (#250)
+* [Linux] make `setTitleBarStyle()` GTK/HDY/CSD/SSD compatible (#249)
+
 ## 0.2.8
 
 * Bump screen_retriever from 0.1.2 to 0.1.4
