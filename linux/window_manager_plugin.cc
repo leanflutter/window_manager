@@ -898,13 +898,13 @@ gboolean on_window_blur(GtkWidget* widget, GdkEvent* event, gpointer data) {
   return false;
 }
 
-gboolean on_window_show(GtkWidget* widget, GdkEvent* event, gpointer data) {
+gboolean on_window_show(GtkWidget* widget, gpointer data) {
   WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
   _emit_event(plugin, "show");
   return false;
 }
 
-gboolean on_window_hide(GtkWidget* widget, GdkEvent* event, gpointer data) {
+gboolean on_window_hide(GtkWidget* widget, gpointer data) {
   WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
   _emit_event(plugin, "hide");
   return false;
