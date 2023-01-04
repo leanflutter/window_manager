@@ -375,11 +375,11 @@ class WindowManager {
   }
 
   /// Sets whether the window can be manually resized by the user.
-  setResizable(bool isResizable) {
+  Future<void> setResizable(bool isResizable) async {
     final Map<String, dynamic> arguments = {
       'isResizable': isResizable,
     };
-    _channel.invokeMethod('setResizable', arguments);
+    await _channel.invokeMethod('setResizable', arguments);
   }
 
   /// Returns `bool` - Whether the window can be moved by user.
@@ -392,11 +392,11 @@ class WindowManager {
   /// Sets whether the window can be moved by user.
   ///
   /// @platforms macos
-  setMovable(bool isMovable) {
+  Future<void> setMovable(bool isMovable) async {
     final Map<String, dynamic> arguments = {
       'isMovable': isMovable,
     };
-    _channel.invokeMethod('setMovable', arguments);
+    await _channel.invokeMethod('setMovable', arguments);
   }
 
   /// Returns `bool` - Whether the window can be manually minimized by the user.
@@ -409,11 +409,11 @@ class WindowManager {
   /// Sets whether the window can be manually minimized by user.
   ///
   /// @platforms macos,windows
-  setMinimizable(bool isMinimizable) {
+  Future<void> setMinimizable(bool isMinimizable) async {
     final Map<String, dynamic> arguments = {
       'isMinimizable': isMinimizable,
     };
-    _channel.invokeMethod('setMinimizable', arguments);
+    await _channel.invokeMethod('setMinimizable', arguments);
   }
 
   /// Returns `bool` - Whether the window can be manually closed by user.
