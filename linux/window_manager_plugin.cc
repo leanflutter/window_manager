@@ -16,9 +16,6 @@ struct _WindowManagerPlugin {
   GtkWidget* _event_box;
   bool _is_prevent_close;
   bool _is_frameless;
-  bool _is_maximized;
-  bool _is_minimized;
-  bool _is_fullscreen;
   bool _is_always_on_top;
   bool _is_always_on_bottom;
   bool _is_dragging;
@@ -139,7 +136,9 @@ static FlMethodResponse* unmaximize(WindowManagerPlugin* self) {
 }
 
 static FlMethodResponse* is_minimized(WindowManagerPlugin* self) {
-  g_autoptr(FlValue) result = fl_value_new_bool(self->_is_minimized);
+  GdkWindowState state = gdk_window_get_state(get_gdk_window(self));
+  g_autoptr(FlValue) result =
+      fl_value_new_bool(state & GDK_WINDOW_STATE_ICONIFIED);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
@@ -157,10 +156,9 @@ static FlMethodResponse* restore(WindowManagerPlugin* self) {
 }
 
 static FlMethodResponse* is_full_screen(WindowManagerPlugin* self) {
-  bool is_full_screen = (bool)(gdk_window_get_state(get_gdk_window(self)) &
-                               GDK_WINDOW_STATE_FULLSCREEN);
-
-  g_autoptr(FlValue) result = fl_value_new_bool(is_full_screen);
+  GdkWindowState state = gdk_window_get_state(get_gdk_window(self));
+  g_autoptr(FlValue) result =
+      fl_value_new_bool(state & GDK_WINDOW_STATE_FULLSCREEN);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
@@ -974,38 +972,26 @@ gboolean on_window_state_change(GtkWidget* widget,
                                 GdkEventWindowState* event,
                                 gpointer data) {
   WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
-  if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) {
-    if (!plugin->_is_maximized) {
-      plugin->_is_maximized = true;
+  if (event->changed_mask & GDK_WINDOW_STATE_MAXIMIZED) {
+    if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) {
       _emit_event(plugin, "maximize");
+    } else {
+      _emit_event(plugin, "unmaximize");
     }
   }
-  if (event->new_window_state & GDK_WINDOW_STATE_ICONIFIED) {
-    if (!plugin->_is_minimized) {
-      plugin->_is_minimized = true;
+  if (event->changed_mask & GDK_WINDOW_STATE_ICONIFIED) {
+    if (event->new_window_state & GDK_WINDOW_STATE_ICONIFIED) {
       _emit_event(plugin, "minimize");
+    } else {
+      _emit_event(plugin, "restore");
     }
   }
-  if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) {
-    if (!plugin->_is_fullscreen) {
-      plugin->_is_fullscreen = true;
+  if (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) {
+    if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) {
       _emit_event(plugin, "enter-full-screen");
+    } else {
+      _emit_event(plugin, "leave-full-screen");
     }
-  }
-  if (plugin->_is_maximized &&
-      !(event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED)) {
-    plugin->_is_maximized = false;
-    _emit_event(plugin, "unmaximize");
-  }
-  if (plugin->_is_minimized &&
-      !(event->new_window_state & GDK_WINDOW_STATE_ICONIFIED)) {
-    plugin->_is_minimized = false;
-    _emit_event(plugin, "restore");
-  }
-  if (plugin->_is_fullscreen &&
-      !(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
-    plugin->_is_fullscreen = false;
-    _emit_event(plugin, "leave-full-screen");
   }
   return false;
 }
