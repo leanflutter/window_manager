@@ -289,6 +289,12 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     if (window_manager->IsPreventClose()) {
       return -1;
     }
+  } else if (message == WM_SHOWWINDOW) {
+    if (wParam == TRUE) {
+      _EmitEvent("show");
+    } else {
+      _EmitEvent("hide");
+    }
   }
   return result;
 }
