@@ -659,6 +659,11 @@ class WindowManager {
   Future<bool> ungrabKeyboard() async {
     return await _channel.invokeMethod('ungrabKeyboard');
   }
+
+  @visibleForTesting
+  Future<void> processEvents() async {
+    await _channel.invokeMethod('processEvents');
+  }
 }
 
 final windowManager = WindowManager.instance;

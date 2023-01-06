@@ -772,6 +772,13 @@ static FlMethodResponse* set_brightness(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* process_events(WindowManagerPlugin* self) {
+  while (gtk_events_pending()) {
+    gtk_main_iteration_do(false);
+  }
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
 // Called when a method call is received from Flutter.
 static void window_manager_plugin_handle_method_call(
     WindowManagerPlugin* self,
@@ -891,6 +898,8 @@ static void window_manager_plugin_handle_method_call(
     response = ungrab_keyboard(self);
   } else if (g_strcmp0(method, "setBrightness") == 0) {
     response = set_brightness(self, args);
+  } else if (g_strcmp0(method, "processEvents") == 0) {
+    response = process_events(self);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
