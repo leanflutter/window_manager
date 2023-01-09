@@ -1,3 +1,13 @@
+## 0.3.0
+
+* Add integration test (#275)
+* [windows] add show and hide events (#274)
+* [linux] clean up state tracking (#273)
+* Add missing future return values (#272)
+* [linux] implement minimizable & maximizable (#270)
+* [linux] fix getTitle() crash when null (#269)
+* [linux] fix on_window_show and on_window_hide signatures (#268)
+
 ## 0.2.9
 
 * [windows] Fix set maximizable throwing an error (#267)
