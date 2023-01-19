@@ -89,7 +89,7 @@
       - [getTitleBarHeight](#gettitlebarheight)
       - [isSkipTaskbar](#isskiptaskbar)
       - [setSkipTaskbar](#setskiptaskbar)
-      - [setProgressBar  `macos`](#setprogressbar--macos)
+      - [setProgressBar  `macos`  `windows`](#setprogressbar--macos--windows)
       - [setIcon  `windows`](#seticon--windows)
       - [hasShadow  `macos`  `windows`](#hasshadow--macos--windows)
       - [setHasShadow  `macos`  `windows`](#sethasshadow--macos--windows)
@@ -716,7 +716,7 @@ Returns `bool` - Whether skipping taskbar is enabled.
 
 Makes the window not show in the taskbar / dock.
 
-##### setProgressBar  `macos`
+##### setProgressBar  `macos`  `windows`
 
 Sets progress value in progress bar. Valid range is [0, 1.0].
 
