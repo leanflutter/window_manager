@@ -821,16 +821,6 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               },
             ),
             PreferenceListItem(
-              title: Text('createSubWindow'),
-              onTap: () async {
-                SubWindow subWindow = await SubWindow.create(
-                  size: Size(800, 600),
-                  center: true,
-                  title: 'title',
-                );
-              },
-            ),
-            PreferenceListItem(
               title: Text('grabKeyboard'),
               onTap: () async {
                 await windowManager.grabKeyboard();

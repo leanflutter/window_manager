@@ -231,12 +231,6 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.startDragging()
             result(true)
             break
-        case "isSubWindow":
-            result(windowManager.isSubWindow())
-            break
-        case "createSubWindow":
-            windowManager.createSubWindow(args);
-            result(true)
         default:
             result(FlutterMethodNotImplemented)
         }

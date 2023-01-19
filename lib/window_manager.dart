@@ -5,7 +5,6 @@ export 'src/widgets/virtual_window_frame.dart';
 export 'src/widgets/window_caption_button.dart';
 export 'src/widgets/window_caption.dart';
 export 'src/resize_edge.dart';
-export 'src/sub_window.dart';
 export 'src/title_bar_style.dart';
 export 'src/window_listener.dart';
 export 'src/window_manager.dart';

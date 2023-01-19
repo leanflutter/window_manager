@@ -627,27 +627,6 @@ class WindowManager {
     );
   }
 
-  Future<bool> isSubWindow() async {
-    return await _channel.invokeMethod('isSubWindow');
-  }
-
-  Future<void> createSubWindow({
-    Size? size,
-    Offset? position,
-    bool center = true,
-    required String title,
-  }) async {
-    final Map<String, dynamic> arguments = {
-      'width': size?.width,
-      'height': size?.height,
-      'x': position?.dx,
-      'y': position?.dy,
-      'center': center,
-      'title': title,
-    }..removeWhere((key, value) => value == null);
-    await _channel.invokeMethod('createSubWindow', arguments);
-  }
-
   /// Grabs the keyboard.
   /// @platforms linux
   Future<bool> grabKeyboard() async {
