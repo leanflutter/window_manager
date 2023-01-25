@@ -440,6 +440,18 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
       nullptr, nullptr, GetModuleHandle(nullptr), this);
 ```
 
+使用 flutter 3.7 创建的Windows项目
+更改 `windows/runner/flutter_window.cpp` 如下:
+
+```diff
+bool FlutterWindow::OnCreate() {
+  ...
+  flutter_controller_->engine()->SetNextFrameCallback([&]() {
+-   this->Show();
++   "" //删除 this->Show()
+  });
+```
+
 确保在 `onWindowFocus` 事件中调用一次 `setState`。
 
 ```dart
