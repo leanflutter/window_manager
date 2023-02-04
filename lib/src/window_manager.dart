@@ -67,7 +67,7 @@ class WindowManager {
         kWindowEventEnterFullScreen: listener.onWindowEnterFullScreen,
         kWindowEventLeaveFullScreen: listener.onWindowLeaveFullScreen,
       };
-      funcMap[eventName]!();
+      funcMap[eventName]?.call();
     }
   }
 
