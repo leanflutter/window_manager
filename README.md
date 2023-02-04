@@ -440,6 +440,17 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
       nullptr, nullptr, GetModuleHandle(nullptr), this);
 ```
 
+Since flutter 3.7 new windows project
+Change the file `windows/runner/flutter_window.cpp` as follows:
+```diff
+bool FlutterWindow::OnCreate() {
+  ...
+  flutter_controller_->engine()->SetNextFrameCallback([&]() {
+-   this->Show();
++   "" //delete this->Show()
+  });
+```
+
 Make sure to call `setState` once on the `onWindowFocus` event.
 
 ```dart
