@@ -47,12 +47,13 @@ class DragToResizeArea extends StatelessWidget {
     double? width,
     double? height,
   }) {
-    if (enableResizeEdges != null && !enableResizeEdges!.contains(resizeEdge))
+    if (enableResizeEdges != null && !enableResizeEdges!.contains(resizeEdge)) {
       return Container();
+    }
     return Container(
       width: width,
       height: height,
-      color: this.resizeEdgeColor,
+      color: resizeEdgeColor,
       child: MouseRegion(
         cursor: cursor,
         child: GestureDetector(

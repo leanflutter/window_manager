@@ -38,13 +38,12 @@ class WindowManager {
 
   final MethodChannel _channel = const MethodChannel('window_manager');
 
-  ObserverList<WindowListener>? _listeners = ObserverList<WindowListener>();
+  final ObserverList<WindowListener> _listeners =
+      ObserverList<WindowListener>();
 
   Future<void> _methodCallHandler(MethodCall call) async {
-    if (_listeners == null) return;
-
     for (final WindowListener listener in listeners) {
-      if (!_listeners!.contains(listener)) {
+      if (!_listeners.contains(listener)) {
         return;
       }
 
@@ -73,20 +72,20 @@ class WindowManager {
 
   List<WindowListener> get listeners {
     final List<WindowListener> localListeners =
-        List<WindowListener>.from(_listeners!);
+        List<WindowListener>.from(_listeners);
     return localListeners;
   }
 
   bool get hasListeners {
-    return _listeners!.isNotEmpty;
+    return _listeners.isNotEmpty;
   }
 
   void addListener(WindowListener listener) {
-    _listeners!.add(listener);
+    _listeners.add(listener);
   }
 
   void removeListener(WindowListener listener) {
-    _listeners!.remove(listener);
+    _listeners.remove(listener);
   }
 
   Future<void> ensureInitialized() async {
@@ -104,30 +103,32 @@ class WindowManager {
   ]) async {
     await _channel.invokeMethod('waitUntilReadyToShow');
 
-    bool _isFullScreen = await isFullScreen();
-    bool _isMaximized = await isMaximized();
-    bool _isMinimized = await isMinimized();
-
-    if (_isFullScreen) await setFullScreen(false);
-    if (_isMaximized) await unmaximize();
-    if (_isMinimized) await restore();
+    if (await isFullScreen()) await setFullScreen(false);
+    if (await isMaximized()) await unmaximize();
+    if (await isMinimized()) await restore();
 
     if (options?.size != null) await setSize(options!.size!);
     if (options?.center == true) await setAlignment(Alignment.center);
-    if (options?.minimumSize != null)
+    if (options?.minimumSize != null) {
       await setMinimumSize(options!.minimumSize!);
-    if (options?.maximumSize != null)
+    }
+    if (options?.maximumSize != null) {
       await setMaximumSize(options!.maximumSize!);
-    if (options?.alwaysOnTop != null)
+    }
+    if (options?.alwaysOnTop != null) {
       await setAlwaysOnTop(options!.alwaysOnTop!);
+    }
     if (options?.fullScreen != null) await setFullScreen(options!.fullScreen!);
-    if (options?.backgroundColor != null)
+    if (options?.backgroundColor != null) {
       await setBackgroundColor(options!.backgroundColor!);
-    if (options?.skipTaskbar != null)
+    }
+    if (options?.skipTaskbar != null) {
       await setSkipTaskbar(options!.skipTaskbar!);
+    }
     if (options?.title != null) await setTitle(options!.title!);
-    if (options?.titleBarStyle != null)
+    if (options?.titleBarStyle != null) {
       await setTitleBarStyle(options!.titleBarStyle!);
+    }
 
     if (callback != null) {
       callback();
@@ -181,7 +182,7 @@ class WindowManager {
   Future<void> show({bool inactive = false}) async {
     bool isMinimized = await this.isMinimized();
     if (isMinimized) {
-      await this.restore();
+      await restore();
     }
     final Map<String, dynamic> arguments = {
       'inactive': inactive,
@@ -271,7 +272,7 @@ class WindowManager {
   }) async {
     Size windowSize = await getSize();
     Offset position = await calcWindowPosition(windowSize, alignment);
-    await this.setPosition(position, animate: animate);
+    await setPosition(position, animate: animate);
   }
 
   /// Moves window to the center of the screen.
@@ -280,7 +281,7 @@ class WindowManager {
   }) async {
     Size windowSize = await getSize();
     Offset position = await calcWindowPosition(windowSize, Alignment.center);
-    await this.setPosition(position, animate: animate);
+    await setPosition(position, animate: animate);
   }
 
   /// Returns `Rect` - The bounds of the window as Object.

@@ -58,19 +58,19 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
       decoration: BoxDecoration(
         color: widget.backgroundColor ??
             (widget.brightness == Brightness.dark
-                ? Color(0xff1C1C1C)
+                ? const Color(0xff1C1C1C)
                 : Colors.transparent),
       ),
       child: Row(
         children: [
           Expanded(
             child: DragToMoveArea(
-              child: Container(
+              child: SizedBox(
                 height: double.infinity,
                 child: Row(
                   children: [
                     Container(
-                      padding: EdgeInsets.only(left: 16),
+                      padding: const EdgeInsets.only(left: 16),
                       child: DefaultTextStyle(
                         style: TextStyle(
                           color: widget.brightness == Brightness.light

@@ -8,7 +8,7 @@ class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 }
 
 class _ConfigChangeNotifier implements Listenable {
-  LinkedList<_ListenerEntry> _listeners = LinkedList<_ListenerEntry>();
+  final LinkedList<_ListenerEntry> _listeners = LinkedList<_ListenerEntry>();
 
   @protected
   bool get hasListeners {

@@ -80,15 +80,14 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
   Widget build(BuildContext context) {
     if (_kIsLinux) {
       return DragToResizeArea(
-        child: _buildVirtualWindowFrame(context),
         resizeEdgeMargin: (_isMaximized || _isFullScreen)
             ? EdgeInsets.zero
             : EdgeInsets.all(kVirtualWindowFrameMargin * 0.6),
         enableResizeEdges: (_isMaximized || _isFullScreen) ? [] : null,
+        child: _buildVirtualWindowFrame(context),
       );
     } else if (_kIsWindows) {
       return DragToResizeArea(
-        child: widget.child,
         enableResizeEdges: (_isMaximized || _isFullScreen)
             ? []
             : [
@@ -96,6 +95,7 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
                 ResizeEdge.top,
                 ResizeEdge.topRight,
               ],
+        child: widget.child,
       );
     }
 
@@ -130,12 +130,14 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
     });
   }
 
+  @override
   void onWindowEnterFullScreen() {
     setState(() {
       _isFullScreen = true;
     });
   }
 
+  @override
   void onWindowLeaveFullScreen() {
     setState(() {
       _isFullScreen = false;

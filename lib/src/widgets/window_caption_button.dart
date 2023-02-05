@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 
 class WindowCaptionButtonIcon extends StatelessWidget {
@@ -67,7 +69,7 @@ class WindowCaptionButton extends StatefulWidget {
     this.brightness,
     this.icon,
     this.onPressed,
-  })  : this.iconName = 'images/ic_chrome_minimize.png',
+  })  : iconName = 'images/ic_chrome_minimize.png',
         super(key: key);
 
   WindowCaptionButton.maximize({
@@ -75,7 +77,7 @@ class WindowCaptionButton extends StatefulWidget {
     this.brightness,
     this.icon,
     this.onPressed,
-  })  : this.iconName = 'images/ic_chrome_maximize.png',
+  })  : iconName = 'images/ic_chrome_maximize.png',
         super(key: key);
 
   WindowCaptionButton.unmaximize({
@@ -83,7 +85,7 @@ class WindowCaptionButton extends StatefulWidget {
     this.brightness,
     this.icon,
     this.onPressed,
-  })  : this.iconName = 'images/ic_chrome_unmaximize.png',
+  })  : iconName = 'images/ic_chrome_unmaximize.png',
         super(key: key);
 
   WindowCaptionButton.close({
@@ -91,11 +93,11 @@ class WindowCaptionButton extends StatefulWidget {
     this.brightness,
     this.icon,
     this.onPressed,
-  })  : this.iconName = 'images/ic_chrome_close.png',
+  })  : iconName = 'images/ic_chrome_close.png',
         _lightButtonBgColorScheme = _ButtonBgColorScheme(
           normal: Colors.transparent,
-          hovered: Color(0xffC42B1C),
-          pressed: Color(0xffC42B1C).withOpacity(0.9),
+          hovered: const Color(0xffC42B1C),
+          pressed: const Color(0xffC42B1C).withOpacity(0.9),
         ),
         _lightButtonIconColorScheme = _ButtonIconColorScheme(
           normal: Colors.black.withOpacity(0.8956),
@@ -105,8 +107,8 @@ class WindowCaptionButton extends StatefulWidget {
         ),
         _darkButtonBgColorScheme = _ButtonBgColorScheme(
           normal: Colors.transparent,
-          hovered: Color(0xffC42B1C),
-          pressed: Color(0xffC42B1C).withOpacity(0.9),
+          hovered: const Color(0xffC42B1C),
+          pressed: const Color(0xffC42B1C).withOpacity(0.9),
         ),
         _darkButtonIconColorScheme = _ButtonIconColorScheme(
           normal: Colors.white,
