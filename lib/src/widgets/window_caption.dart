@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'drag_to_move_area.dart';
-import 'window_caption_button.dart';
-import '../window_listener.dart';
-import '../window_manager.dart';
+import 'package:window_manager/src/widgets/drag_to_move_area.dart';
+import 'package:window_manager/src/widgets/window_caption_button.dart';
+import 'package:window_manager/src/window_listener.dart';
+import 'package:window_manager/src/window_manager.dart';
 
 const double kWindowCaptionHeight = 32;
 
@@ -24,16 +24,16 @@ const double kWindowCaptionHeight = 32;
 /// ```
 /// {@end-tool}
 class WindowCaption extends StatefulWidget {
-  final Widget? title;
-  final Color? backgroundColor;
-  final Brightness? brightness;
-
   const WindowCaption({
     Key? key,
     this.title,
     this.backgroundColor,
     this.brightness,
   }) : super(key: key);
+
+  final Widget? title;
+  final Color? backgroundColor;
+  final Brightness? brightness;
 
   @override
   State<WindowCaption> createState() => _WindowCaptionState();

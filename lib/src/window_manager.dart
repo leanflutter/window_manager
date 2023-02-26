@@ -6,12 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
-
-import 'utils/calc_window_position.dart';
-import 'resize_edge.dart';
-import 'title_bar_style.dart';
-import 'window_listener.dart';
-import 'window_options.dart';
+import 'package:window_manager/src/resize_edge.dart';
+import 'package:window_manager/src/title_bar_style.dart';
+import 'package:window_manager/src/utils/calc_window_position.dart';
+import 'package:window_manager/src/window_listener.dart';
+import 'package:window_manager/src/window_options.dart';
 
 const kWindowEventClose = 'close';
 const kWindowEventFocus = 'focus';
@@ -147,7 +146,7 @@ class WindowManager {
 
   /// Check if is intercepting the native close signal.
   Future<bool> isPreventClose() async {
-    return await _channel.invokeMethod("isPreventClose");
+    return await _channel.invokeMethod('isPreventClose');
   }
 
   /// Set if intercept the native close signal. May useful when combine with the onclose event listener.
@@ -611,17 +610,17 @@ class WindowManager {
     return _channel.invokeMethod<bool>(
       'startResizing',
       {
-        "resizeEdge": describeEnum(resizeEdge),
-        "top": resizeEdge == ResizeEdge.top ||
+        'resizeEdge': describeEnum(resizeEdge),
+        'top': resizeEdge == ResizeEdge.top ||
             resizeEdge == ResizeEdge.topLeft ||
             resizeEdge == ResizeEdge.topRight,
-        "bottom": resizeEdge == ResizeEdge.bottom ||
+        'bottom': resizeEdge == ResizeEdge.bottom ||
             resizeEdge == ResizeEdge.bottomLeft ||
             resizeEdge == ResizeEdge.bottomRight,
-        "right": resizeEdge == ResizeEdge.right ||
+        'right': resizeEdge == ResizeEdge.right ||
             resizeEdge == ResizeEdge.topRight ||
             resizeEdge == ResizeEdge.bottomRight,
-        "left": resizeEdge == ResizeEdge.left ||
+        'left': resizeEdge == ResizeEdge.left ||
             resizeEdge == ResizeEdge.topLeft ||
             resizeEdge == ResizeEdge.bottomLeft,
       },

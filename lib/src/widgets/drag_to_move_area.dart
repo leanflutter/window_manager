@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../window_manager.dart';
+import 'package:window_manager/src/window_manager.dart';
 
 /// A widget for drag to move window.
 ///
@@ -21,12 +20,12 @@ import '../window_manager.dart';
 /// ```
 /// {@end-tool}
 class DragToMoveArea extends StatelessWidget {
-  final Widget child;
-
   const DragToMoveArea({
     Key? key,
     required this.child,
   }) : super(key: key);
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {

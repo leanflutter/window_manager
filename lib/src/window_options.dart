@@ -1,20 +1,9 @@
 import 'dart:ui';
 
-import 'title_bar_style.dart';
+import 'package:window_manager/src/title_bar_style.dart';
 
 /// WindowOptions
 class WindowOptions {
-  final Size? size;
-  final bool? center;
-  final Size? minimumSize;
-  final Size? maximumSize;
-  final bool? alwaysOnTop;
-  final bool? fullScreen;
-  final Color? backgroundColor;
-  final bool? skipTaskbar;
-  final String? title;
-  final TitleBarStyle? titleBarStyle;
-
   const WindowOptions({
     this.size,
     this.center,
@@ -27,4 +16,15 @@ class WindowOptions {
     this.title,
     this.titleBarStyle,
   });
+
+  final Size? size;
+  final bool? center;
+  final Size? minimumSize;
+  final Size? maximumSize;
+  final bool? alwaysOnTop;
+  final bool? fullScreen;
+  final Color? backgroundColor;
+  final bool? skipTaskbar;
+  final String? title;
+  final TitleBarStyle? titleBarStyle;
 }

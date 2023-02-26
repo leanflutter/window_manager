@@ -5,10 +5,10 @@ packages:
     dependency: transitive
     description:
       name: args
-      sha256: "139d809800a412ebb26a3892da228b2d0ba36f0ef5d9a82166e5e52ec8d61611"
+      sha256: "4cab82a83ffef80b262ddedf47a0a8e56ee6fbf7fe21e6e768b02792034dd440"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.2"
+    version: "2.4.0"
   async:
     dependency: transitive
     description:
@@ -215,10 +215,10 @@ packages:
     dependency: "direct main"
     description:
       name: screen_retriever
-      sha256: "9c3839c4eb80807cd8210afa3c84a177ba00aef9f9b7b74ad92d3a0ab1d7e7ed"
+      sha256: "4931f226ca158123ccd765325e9fbf360bfed0af9b460a10f960f9bb13d58323"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.5"
+    version: "0.1.6"
   sky_engine:
     dependency: transitive
     description: flutter

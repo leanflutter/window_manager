@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import './drag_to_resize_area.dart';
-import '../resize_edge.dart';
-import '../window_listener.dart';
-import '../window_manager.dart';
+import 'package:window_manager/src/resize_edge.dart';
+import 'package:window_manager/src/widgets/drag_to_resize_area.dart';
+import 'package:window_manager/src/window_listener.dart';
+import 'package:window_manager/src/window_manager.dart';
 
 final _kIsLinux = !kIsWeb && Platform.isLinux;
 final _kIsWindows = !kIsWeb && Platform.isWindows;
@@ -14,13 +13,13 @@ final _kIsWindows = !kIsWeb && Platform.isWindows;
 double get kVirtualWindowFrameMargin => (_kIsLinux) ? 20.0 : 0;
 
 class VirtualWindowFrame extends StatefulWidget {
-  /// The [child] contained by the VirtualWindowFrame.
-  final Widget child;
-
   const VirtualWindowFrame({
     Key? key,
     required this.child,
   }) : super(key: key);
+
+  /// The [child] contained by the VirtualWindowFrame.
+  final Widget child;
 
   @override
   State<StatefulWidget> createState() => _VirtualWindowFrameState();
