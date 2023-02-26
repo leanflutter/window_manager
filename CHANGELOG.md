@@ -1,3 +1,10 @@
+## 0.3.1
+
+* [linux] avoid removing shadows if no title is set (#297)
+* [macos] Implement isMaximizable and setMaximizable (#290)
+* Don't crash if an event doesn't have a dedicated handler (#286)
+* Remove all subWindow related implementations
+
 ## 0.3.0
 
 * Add integration test (#275)
