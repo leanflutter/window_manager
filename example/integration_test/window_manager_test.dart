@@ -50,7 +50,7 @@ Future<void> main() async {
 
   testWidgets('isMaximizable', (tester) async {
     expect(await windowManager.isMaximizable(), isTrue);
-  }, skip: Platform.isMacOS);
+  });
 
   testWidgets('isMaximized', (tester) async {
     expect(await windowManager.isMaximized(), isFalse);

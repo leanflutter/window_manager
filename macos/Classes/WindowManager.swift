@@ -51,7 +51,8 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     private var _isPreventClose: Bool = false
     private var _isMaximized: Bool = false
-    
+    private var _isMaximizable: Bool = true
+
     override public init() {
         super.init()
     }
@@ -87,6 +88,14 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     public func setPreventClose(_ args: [String: Any]) {
         _isPreventClose = args["isPreventClose"] as! Bool
+    }
+
+    public func isMaximizable() -> Bool {
+        return _isMaximizable;
+    }
+
+    public func setIsMaximizable(_ args: [String: Any]) {
+        _isMaximizable = args["isMaximizable"] as! Bool
     }
     
     public func focus() {
@@ -458,6 +467,15 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
         return true;
     }
+
+    public func windowShouldZoom(_ window: NSWindow, toFrame newFrame: NSRect) -> Bool {
+        _emitEvent("maximize")
+        if (isMaximizable()) {
+            return true
+        }
+        return false;
+    }
+
     
     public func windowDidResize(_ notification: Notification) {
         _emitEvent("resize")
