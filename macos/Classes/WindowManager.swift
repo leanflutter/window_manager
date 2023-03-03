@@ -370,6 +370,11 @@ public class WindowManager: NSObject, NSWindowDelegate {
         let isSkipTaskbar: Bool = args["isSkipTaskbar"] as! Bool
         NSApplication.shared.setActivationPolicy(isSkipTaskbar ? .accessory : .regular)
     }
+
+    public func setBadgeLabel(_ args: [String: Any]) {
+        let label: String = args["label"] as! String
+        NSApplication.shared.dockTile.badgeLabel = label
+    }
     
     public func setProgressBar(_ args: [String: Any]) {
         let progress: CGFloat = CGFloat(truncating: args["progress"] as! NSNumber)

@@ -544,6 +544,19 @@ class WindowManager {
     await _channel.invokeMethod('setIcon', arguments);
   }
 
+  /// Set/unset label on taskbar(dock) app icon
+  ///
+  /// Note that it's required to request access at your AppDelegate.swift like this:
+  /// UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) <...>
+  ///                                                                           ^---
+  /// @platforms macos
+  Future<void> setBadgeLabel([String? label]) async {
+    final Map<String, dynamic> arguments = {
+      'label': label ?? '',
+    };
+    await _channel.invokeMethod('setBadgeLabel', arguments);
+  }
+
   /// Returns `bool` - Whether the window has a shadow. On Windows, always returns true unless window is frameless.
   ///
   /// @platforms macos,windows
