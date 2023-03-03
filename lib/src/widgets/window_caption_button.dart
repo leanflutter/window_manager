@@ -1,16 +1,18 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 
 class WindowCaptionButtonIcon extends StatelessWidget {
-  final String name;
-  final Color? color;
-  final String package;
-
   const WindowCaptionButtonIcon({
     Key? key,
     required this.name,
     this.color,
     this.package = 'window_manager',
   }) : super(key: key);
+
+  final String name;
+  final Color? color;
+  final String package;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,67 @@ class WindowCaptionButtonIcon extends StatelessWidget {
 
 // ignore: must_be_immutable
 class WindowCaptionButton extends StatefulWidget {
+  WindowCaptionButton({
+    Key? key,
+    this.brightness,
+    this.icon,
+    this.iconName,
+    required this.onPressed,
+  }) : super(key: key);
+  WindowCaptionButton.close({
+    Key? key,
+    this.brightness,
+    this.icon,
+    this.onPressed,
+  })  : iconName = 'images/ic_chrome_close.png',
+        _lightButtonBgColorScheme = _ButtonBgColorScheme(
+          normal: Colors.transparent,
+          hovered: const Color(0xffC42B1C),
+          pressed: const Color(0xffC42B1C).withOpacity(0.9),
+        ),
+        _lightButtonIconColorScheme = _ButtonIconColorScheme(
+          normal: Colors.black.withOpacity(0.8956),
+          hovered: Colors.white,
+          pressed: Colors.white.withOpacity(0.7),
+          disabled: Colors.black.withOpacity(0.3614),
+        ),
+        _darkButtonBgColorScheme = _ButtonBgColorScheme(
+          normal: Colors.transparent,
+          hovered: const Color(0xffC42B1C),
+          pressed: const Color(0xffC42B1C).withOpacity(0.9),
+        ),
+        _darkButtonIconColorScheme = _ButtonIconColorScheme(
+          normal: Colors.white,
+          hovered: Colors.white,
+          pressed: Colors.white.withOpacity(0.786),
+          disabled: Colors.black.withOpacity(0.3628),
+        ),
+        super(key: key);
+
+  WindowCaptionButton.unmaximize({
+    Key? key,
+    this.brightness,
+    this.icon,
+    this.onPressed,
+  })  : iconName = 'images/ic_chrome_unmaximize.png',
+        super(key: key);
+
+  WindowCaptionButton.maximize({
+    Key? key,
+    this.brightness,
+    this.icon,
+    this.onPressed,
+  })  : iconName = 'images/ic_chrome_maximize.png',
+        super(key: key);
+
+  WindowCaptionButton.minimize({
+    Key? key,
+    this.brightness,
+    this.icon,
+    this.onPressed,
+  })  : iconName = 'images/ic_chrome_minimize.png',
+        super(key: key);
+
   final Brightness? brightness;
   final Widget? icon;
   final String? iconName;
@@ -53,68 +116,6 @@ class WindowCaptionButton extends StatefulWidget {
     pressed: Colors.white.withOpacity(0.786),
     disabled: Colors.black.withOpacity(0.3628),
   );
-
-  WindowCaptionButton({
-    Key? key,
-    this.brightness,
-    this.icon,
-    this.iconName,
-    required this.onPressed,
-  }) : super(key: key);
-
-  WindowCaptionButton.minimize({
-    Key? key,
-    this.brightness,
-    this.icon,
-    this.onPressed,
-  })  : this.iconName = 'images/ic_chrome_minimize.png',
-        super(key: key);
-
-  WindowCaptionButton.maximize({
-    Key? key,
-    this.brightness,
-    this.icon,
-    this.onPressed,
-  })  : this.iconName = 'images/ic_chrome_maximize.png',
-        super(key: key);
-
-  WindowCaptionButton.unmaximize({
-    Key? key,
-    this.brightness,
-    this.icon,
-    this.onPressed,
-  })  : this.iconName = 'images/ic_chrome_unmaximize.png',
-        super(key: key);
-
-  WindowCaptionButton.close({
-    Key? key,
-    this.brightness,
-    this.icon,
-    this.onPressed,
-  })  : this.iconName = 'images/ic_chrome_close.png',
-        _lightButtonBgColorScheme = _ButtonBgColorScheme(
-          normal: Colors.transparent,
-          hovered: Color(0xffC42B1C),
-          pressed: Color(0xffC42B1C).withOpacity(0.9),
-        ),
-        _lightButtonIconColorScheme = _ButtonIconColorScheme(
-          normal: Colors.black.withOpacity(0.8956),
-          hovered: Colors.white,
-          pressed: Colors.white.withOpacity(0.7),
-          disabled: Colors.black.withOpacity(0.3614),
-        ),
-        _darkButtonBgColorScheme = _ButtonBgColorScheme(
-          normal: Colors.transparent,
-          hovered: Color(0xffC42B1C),
-          pressed: Color(0xffC42B1C).withOpacity(0.9),
-        ),
-        _darkButtonIconColorScheme = _ButtonIconColorScheme(
-          normal: Colors.white,
-          hovered: Colors.white,
-          pressed: Colors.white.withOpacity(0.786),
-          disabled: Colors.black.withOpacity(0.3628),
-        ),
-        super(key: key);
 
   _ButtonBgColorScheme get buttonBgColorScheme => brightness != Brightness.dark
       ? _lightButtonBgColorScheme
@@ -182,27 +183,25 @@ class _WindowCaptionButtonState extends State<WindowCaptionButton> {
 }
 
 class _ButtonBgColorScheme {
-  final Color normal;
-  final Color hovered;
-  final Color pressed;
-
   _ButtonBgColorScheme({
     required this.normal,
     required this.hovered,
     required this.pressed,
   });
-}
-
-class _ButtonIconColorScheme {
   final Color normal;
   final Color hovered;
   final Color pressed;
-  final Color disabled;
+}
 
+class _ButtonIconColorScheme {
   _ButtonIconColorScheme({
     required this.normal,
     required this.hovered,
     required this.pressed,
     required this.disabled,
   });
+  final Color normal;
+  final Color hovered;
+  final Color pressed;
+  final Color disabled;
 }

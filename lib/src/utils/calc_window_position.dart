@@ -20,10 +20,10 @@ Future<Offset> calcWindowPosition(
     visibleStartX = primaryDisplay.visiblePosition!.dx;
     visibleStartY = primaryDisplay.visiblePosition!.dy;
   }
-  Offset position = Offset(0, 0);
+  Offset position = const Offset(0, 0);
 
   if (alignment == Alignment.topLeft) {
-    position = Offset(0, 0);
+    position = const Offset(0, 0);
   } else if (alignment == Alignment.topCenter) {
     position = Offset(
       visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),

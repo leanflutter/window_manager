@@ -107,6 +107,13 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         case "isMinimized":
             result(windowManager.isMinimized())
             break
+        case "isMaximizable":
+            result(windowManager.isMaximizable())
+            break
+        case "setMaximizable":
+            windowManager.setIsMaximizable(args)
+            result(true)
+            break
         case "minimize":
             windowManager.minimize()
             result(true)
@@ -231,12 +238,6 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.startDragging()
             result(true)
             break
-        case "isSubWindow":
-            result(windowManager.isSubWindow())
-            break
-        case "createSubWindow":
-            windowManager.createSubWindow(args);
-            result(true)
         default:
             result(FlutterMethodNotImplemented)
         }

@@ -2,36 +2,28 @@
 
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
-#include <sys/utsname.h>
-
-#include <cairo/cairo.h>
-#include <cstring>
 
 #define WINDOW_MANAGER_PLUGIN(obj)                                     \
   (G_TYPE_CHECK_INSTANCE_CAST((obj), window_manager_plugin_get_type(), \
                               WindowManagerPlugin))
-
-WindowManagerPlugin* plugin_instance;
-
-static double bg_color_r = 0.0;
-static double bg_color_g = 0.0;
-static double bg_color_b = 0.0;
-static double bg_color_a = 0.0;
 
 struct _WindowManagerPlugin {
   GObject parent_instance;
   FlPluginRegistrar* registrar;
   FlMethodChannel* channel;
   GdkGeometry window_geometry;
-  bool _is_prevent_close = false;
-  bool _is_frameless = false;
-  bool _is_maximized = false;
-  bool _is_minimized = false;
-  bool _is_fullscreen = false;
-  bool _is_always_on_top = false;
-  bool _is_always_on_bottom = false;
-  gchar* title_bar_style_ = strdup("normal");
-  GdkEventButton _event_button = GdkEventButton{};
+  GdkWindowHints window_hints;
+  GtkWidget* _event_box;
+  bool _is_prevent_close;
+  bool _is_frameless;
+  bool _is_always_on_top;
+  bool _is_always_on_bottom;
+  bool _is_dragging;
+  bool _is_resizing;
+  gchar* title_bar_style_;
+  GdkEventButton _event_button;
+  GdkDevice* grab_pointer;
+  GtkCssProvider* css_provider;
 };
 
 G_DEFINE_TYPE(WindowManagerPlugin, window_manager_plugin, g_object_get_type())
@@ -51,23 +43,7 @@ GdkWindow* get_gdk_window(WindowManagerPlugin* self) {
 
 static FlMethodResponse* set_as_frameless(WindowManagerPlugin* self,
                                           FlValue* args) {
-  self->_is_frameless = true;
-  bg_color_r = 0;
-  bg_color_g = 0;
-  bg_color_b = 0;
-  bg_color_a = 0;
-
   gtk_window_set_decorated(get_window(self), false);
-
-  gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
-
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
-
-  // gtk_window_resize(get_window(self), static_cast<gint>(width),
-  // static_cast<gint>(height+1));
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -123,7 +99,14 @@ static FlMethodResponse* show(WindowManagerPlugin* self) {
 }
 
 static FlMethodResponse* hide(WindowManagerPlugin* self) {
+  gint x, y, width, height;
+  // store the bound of window before hide
+  gtk_window_get_position(get_window(self), &x, &y);
+  gtk_window_get_size(get_window(self), &width, &height);
   gtk_widget_hide(GTK_WIDGET(get_window(self)));
+  // restore the bound of window after hide
+  gtk_window_move(get_window(self), x, y);
+  gtk_window_resize(get_window(self), width, height);
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
@@ -153,7 +136,9 @@ static FlMethodResponse* unmaximize(WindowManagerPlugin* self) {
 }
 
 static FlMethodResponse* is_minimized(WindowManagerPlugin* self) {
-  g_autoptr(FlValue) result = fl_value_new_bool(self->_is_minimized);
+  GdkWindowState state = gdk_window_get_state(get_gdk_window(self));
+  g_autoptr(FlValue) result =
+      fl_value_new_bool(state & GDK_WINDOW_STATE_ICONIFIED);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
@@ -171,10 +156,9 @@ static FlMethodResponse* restore(WindowManagerPlugin* self) {
 }
 
 static FlMethodResponse* is_full_screen(WindowManagerPlugin* self) {
-  bool is_full_screen = (bool)(gdk_window_get_state(get_gdk_window(self)) &
-                               GDK_WINDOW_STATE_FULLSCREEN);
-
-  g_autoptr(FlValue) result = fl_value_new_bool(is_full_screen);
+  GdkWindowState state = gdk_window_get_state(get_gdk_window(self));
+  g_autoptr(FlValue) result =
+      fl_value_new_bool(state & GDK_WINDOW_STATE_FULLSCREEN);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
@@ -200,36 +184,55 @@ static FlMethodResponse* set_aspect_ratio(WindowManagerPlugin* self,
   self->window_geometry.min_aspect = aspect_ratio;
   self->window_geometry.max_aspect = aspect_ratio;
 
+  if (aspect_ratio >= 0) {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints | GDK_HINT_ASPECT);
+  } else {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints & ~GDK_HINT_ASPECT);
+  }
+
   gdk_window_set_geometry_hints(get_gdk_window(self), &self->window_geometry,
-                                static_cast<GdkWindowHints>(GDK_HINT_ASPECT));
+                                self->window_hints);
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
 static FlMethodResponse* set_background_color(WindowManagerPlugin* self,
                                               FlValue* args) {
-  bg_color_r = ((double)fl_value_get_int(
-                    fl_value_lookup_string(args, "backgroundColorR")) /
-                255.0);
-  bg_color_g = ((double)fl_value_get_int(
+  GdkRGBA rgba;
+  rgba.red = ((double)fl_value_get_int(
+                  fl_value_lookup_string(args, "backgroundColorR")) /
+              255.0);
+  rgba.green = ((double)fl_value_get_int(
                     fl_value_lookup_string(args, "backgroundColorG")) /
                 255.0);
-  bg_color_b = ((double)fl_value_get_int(
-                    fl_value_lookup_string(args, "backgroundColorB")) /
-                255.0);
-  bg_color_a = ((double)fl_value_get_int(
+  rgba.blue = ((double)fl_value_get_int(
+                   fl_value_lookup_string(args, "backgroundColorB")) /
+               255.0);
+  rgba.alpha = ((double)fl_value_get_int(
                     fl_value_lookup_string(args, "backgroundColorA")) /
                 255.0);
 
-  gtk_widget_set_app_paintable(GTK_WIDGET(get_window(self)), TRUE);
+  g_autofree gchar* color = gdk_rgba_to_string(&rgba);
+  g_autofree gchar* css =
+      g_strdup_printf("window { background-color: %s; }", color);
 
-  gint width, height;
-  gtk_window_get_size(get_window(self), &width, &height);
+  if (self->css_provider == nullptr) {
+    self->css_provider = gtk_css_provider_new();
+    gtk_style_context_add_provider(
+        gtk_widget_get_style_context(GTK_WIDGET(get_window(self))),
+        GTK_STYLE_PROVIDER(self->css_provider),
+        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  }
 
-  // gtk_window_resize(get_window(self), static_cast<gint>(width),
-  // static_cast<gint>(height+1));
-  gtk_window_resize(get_window(self), static_cast<gint>(width),
-                    static_cast<gint>(height));
+  g_autoptr(GError) error = nullptr;
+  gtk_css_provider_load_from_data(self->css_provider, css, -1, &error);
+
+  if (error != nullptr) {
+    return FL_METHOD_RESPONSE(fl_method_error_response_new(
+        "setBackgroundColor", error->message, nullptr));
+  }
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -278,11 +281,15 @@ static FlMethodResponse* set_minimum_size(WindowManagerPlugin* self,
   if (width >= 0 && height >= 0) {
     self->window_geometry.min_width = static_cast<gint>(width);
     self->window_geometry.min_height = static_cast<gint>(height);
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints | GDK_HINT_MIN_SIZE);
+  } else {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints & ~GDK_HINT_MIN_SIZE);
   }
 
-  gdk_window_set_geometry_hints(
-      get_gdk_window(self), &self->window_geometry,
-      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
+  gdk_window_set_geometry_hints(get_gdk_window(self), &self->window_geometry,
+                                self->window_hints);
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -297,14 +304,21 @@ static FlMethodResponse* set_maximum_size(WindowManagerPlugin* self,
   self->window_geometry.max_width = static_cast<gint>(width);
   self->window_geometry.max_height = static_cast<gint>(height);
 
+  if (width >= 0 && height >= 0) {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints | GDK_HINT_MAX_SIZE);
+  } else {
+    self->window_hints =
+        static_cast<GdkWindowHints>(self->window_hints & ~GDK_HINT_MAX_SIZE);
+  }
+
   if (self->window_geometry.max_width < 0)
     self->window_geometry.max_width = G_MAXINT;
   if (self->window_geometry.max_height < 0)
     self->window_geometry.max_height = G_MAXINT;
 
-  gdk_window_set_geometry_hints(
-      get_gdk_window(self), &self->window_geometry,
-      static_cast<GdkWindowHints>(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE));
+  gdk_window_set_geometry_hints(get_gdk_window(self), &self->window_geometry,
+                                self->window_hints);
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -323,6 +337,45 @@ static FlMethodResponse* set_resizable(WindowManagerPlugin* self,
   gtk_window_set_resizable(get_window(self), is_resizable);
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* is_minimizable(WindowManagerPlugin* self) {
+  GdkWindowState state = gdk_window_get_state(get_gdk_window(self));
+  GdkWindowTypeHint type_hint = gtk_window_get_type_hint(get_window(self));
+  g_autoptr(FlValue) result =
+      fl_value_new_bool(!(state & GDK_WINDOW_STATE_ICONIFIED) &&
+                        type_hint == GDK_WINDOW_TYPE_HINT_NORMAL);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* set_minimizable(WindowManagerPlugin* self,
+                                         FlValue* args) {
+  gboolean minimizable =
+      fl_value_get_bool(fl_value_lookup_string(args, "isMinimizable"));
+  GdkWindowTypeHint type_hint =
+      minimizable ? GDK_WINDOW_TYPE_HINT_NORMAL : GDK_WINDOW_TYPE_HINT_DIALOG;
+  gtk_window_set_type_hint(get_window(self), type_hint);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+}
+
+static FlMethodResponse* is_maximizable(WindowManagerPlugin* self) {
+  gboolean resizable = gtk_window_get_resizable(get_window(self));
+  GdkWindowState state = gdk_window_get_state(get_gdk_window(self));
+  GdkWindowTypeHint type_hint = gtk_window_get_type_hint(get_window(self));
+  g_autoptr(FlValue) result =
+      fl_value_new_bool(resizable && !(state & GDK_WINDOW_STATE_MAXIMIZED) &&
+                        type_hint == GDK_WINDOW_TYPE_HINT_NORMAL);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* set_maximizable(WindowManagerPlugin* self,
+                                         FlValue* args) {
+  gboolean maximizable =
+      fl_value_get_bool(fl_value_lookup_string(args, "isMaximizable"));
+  GdkWindowTypeHint type_hint =
+      maximizable ? GDK_WINDOW_TYPE_HINT_NORMAL : GDK_WINDOW_TYPE_HINT_DIALOG;
+  gtk_window_set_type_hint(get_window(self), type_hint);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
 
 static FlMethodResponse* is_closable(WindowManagerPlugin* self) {
@@ -376,7 +429,8 @@ static FlMethodResponse* set_always_on_bottom(WindowManagerPlugin* self,
 
 static FlMethodResponse* get_title(WindowManagerPlugin* self) {
   const gchar* title = gtk_window_get_title(get_window(self));
-  g_autoptr(FlValue) result = fl_value_new_string(title);
+  g_autoptr(FlValue) result =
+      fl_value_new_string(title != nullptr ? title : "");
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
@@ -390,15 +444,62 @@ static FlMethodResponse* set_title(WindowManagerPlugin* self, FlValue* args) {
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+// Returns true if the widget is GtkHeaderBar or HdyHeaderBar from libhandy.
+static gboolean is_header_bar(GtkWidget* widget) {
+  return widget != nullptr &&
+         (GTK_IS_HEADER_BAR(widget) ||
+          g_str_has_suffix(G_OBJECT_TYPE_NAME(widget), "HeaderBar"));
+}
+
+// Recursively searches for a Gtk/HdyHeaderBar in the widget tree.
+static GtkWidget* find_header_bar(GtkWidget* widget) {
+  if (is_header_bar(widget)) {
+    return widget;
+  }
+
+  if (GTK_IS_CONTAINER(widget)) {
+    g_autoptr(GList) children =
+        gtk_container_get_children(GTK_CONTAINER(widget));
+    for (GList* l = children; l != nullptr; l = l->next) {
+      GtkWidget* header_bar = find_header_bar(GTK_WIDGET(l->data));
+      if (header_bar != nullptr) {
+        return header_bar;
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+// Returns the window's header bar which is typically a GtkHeaderBar used as
+// GtkWindow::titlebar, or a HdyHeaderBar as HdyWindow granchild.
+static GtkWidget* get_header_bar(GtkWindow* window) {
+  GtkWidget* titlebar = gtk_window_get_titlebar(window);
+  if (is_header_bar(titlebar)) {
+    return titlebar;
+  }
+  return find_header_bar(GTK_WIDGET(window));
+}
+
 static FlMethodResponse* set_title_bar_style(WindowManagerPlugin* self,
                                              FlValue* args) {
   const gchar* title_bar_style =
       fl_value_get_string(fl_value_lookup_string(args, "titleBarStyle"));
 
-  gtk_window_set_decorated(get_window(self),
-                           strcmp(title_bar_style, "hidden") != 0);
+  gboolean normal = g_strcmp0(title_bar_style, "hidden") != 0;
 
-  self->title_bar_style_ = strdup(title_bar_style);
+  GtkWidget* header_bar = get_header_bar(get_window(self));
+  if (header_bar != nullptr) {
+    gtk_widget_set_visible(header_bar, normal);
+  } else {
+    const gchar* title = gtk_window_get_title(get_window(self));
+    if (title != nullptr) {
+      gtk_window_set_decorated(get_window(self), normal);
+    }
+  }
+
+  g_free(self->title_bar_style_);
+  self->title_bar_style_ = g_strdup(title_bar_style);
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -410,7 +511,7 @@ static FlMethodResponse* get_title_bar_height(WindowManagerPlugin* self,
 
   int title_bar_height = 0;
 
-  if (strcmp(self->title_bar_style_, "hidden") != 0) {
+  if (g_strcmp0(self->title_bar_style_, "hidden") != 0) {
     title_bar_height = gtk_widget_get_allocated_height(widget);
   }
 
@@ -433,17 +534,18 @@ static FlMethodResponse* set_skip_taskbar(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
-static FlMethodResponse* set_icon(WindowManagerPlugin* self,
-                                          FlValue* args) {
+static FlMethodResponse* set_icon(WindowManagerPlugin* self, FlValue* args) {
   const gchar* file_name =
       fl_value_get_string(fl_value_lookup_string(args, "iconPath"));
-  const gboolean gtk_result = gtk_window_set_icon_from_file(get_window(self), file_name, NULL);
+  const gboolean gtk_result =
+      gtk_window_set_icon_from_file(get_window(self), file_name, NULL);
   g_autoptr(FlValue) result = fl_value_new_bool(gtk_result);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
 static FlMethodResponse* get_opacity(WindowManagerPlugin* self) {
-  g_autoptr(FlValue) result = fl_value_new_float(1);
+  gdouble opacity = gtk_widget_get_opacity(GTK_WIDGET(get_window(self)));
+  g_autoptr(FlValue) result = fl_value_new_float(opacity);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
@@ -491,9 +593,31 @@ static FlMethodResponse* start_dragging(WindowManagerPlugin* self) {
   guint32 timestamp = (guint32)g_get_monotonic_time();
 
   gtk_window_begin_move_drag(window, 1, root_x, root_y, timestamp);
+  self->_is_dragging = true;
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static void gtk_container_children_callback(GtkWidget* widget,
+                                            gpointer client_data) {
+  GList** children;
+  children = (GList**)client_data;
+  *children = g_list_prepend(*children, widget);
+}
+
+static void find_event_box(WindowManagerPlugin* plugin, GtkWidget* widget) {
+  GList* children = NULL;
+  GtkWidget* current_child;
+  gtk_container_forall(GTK_CONTAINER(widget), gtk_container_children_callback,
+                       &children);
+  while (children) {
+    current_child = (GtkWidget*)children->data;
+    if (GTK_IS_EVENT_BOX(current_child)) {
+      plugin->_event_box = current_child;
+    }
+    children = children->next;
+  }
 }
 
 static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
@@ -513,27 +637,139 @@ static FlMethodResponse* start_resizing(WindowManagerPlugin* self,
 
   GdkWindowEdge gdk_window_edge = GDK_WINDOW_EDGE_NORTH_WEST;
 
-  if (strcmp(resize_edge, "topLeft") == 0) {
+  if (g_strcmp0(resize_edge, "topLeft") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_NORTH_WEST;
-  } else if (strcmp(resize_edge, "top") == 0) {
+  } else if (g_strcmp0(resize_edge, "top") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_NORTH;
-  } else if (strcmp(resize_edge, "topRight") == 0) {
+  } else if (g_strcmp0(resize_edge, "topRight") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_NORTH_EAST;
-  } else if (strcmp(resize_edge, "left") == 0) {
+  } else if (g_strcmp0(resize_edge, "left") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_WEST;
-  } else if (strcmp(resize_edge, "right") == 0) {
+  } else if (g_strcmp0(resize_edge, "right") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_EAST;
-  } else if (strcmp(resize_edge, "bottomLeft")) {
+  } else if (g_strcmp0(resize_edge, "bottomLeft") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_SOUTH_WEST;
-  } else if (strcmp(resize_edge, "bottom")) {
+  } else if (g_strcmp0(resize_edge, "bottom") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_SOUTH;
-  } else if (strcmp(resize_edge, "bottomRight")) {
+  } else if (g_strcmp0(resize_edge, "bottomRight") == 0) {
     gdk_window_edge = GDK_WINDOW_EDGE_SOUTH_EAST;
   }
 
   gtk_window_begin_resize_drag(window, gdk_window_edge,
                                self->_event_button.button, root_x, root_y,
                                timestamp);
+  self->_is_resizing = true;
+
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static const gchar* gdk_grab_status_code(GdkGrabStatus status) {
+  switch (status) {
+    case GDK_GRAB_SUCCESS:
+      return "GDK_GRAB_SUCCESS";
+    case GDK_GRAB_ALREADY_GRABBED:
+      return "GDK_GRAB_ALREADY_GRABBED";
+    case GDK_GRAB_INVALID_TIME:
+      return "GDK_GRAB_INVALID_TIME";
+    case GDK_GRAB_NOT_VIEWABLE:
+      return "GDK_GRAB_NOT_VIEWABLE";
+    case GDK_GRAB_FROZEN:
+      return "GDK_GRAB_FROZEN";
+    case GDK_GRAB_FAILED:
+      return "GDK_GRAB_FAILED";
+    default:
+      return "GDK_GRAB_???";
+  }
+}
+
+static const gchar* gdk_grab_status_message(GdkGrabStatus status) {
+  switch (status) {
+    case GDK_GRAB_SUCCESS:
+      return "The resource was successfully grabbed.";
+    case GDK_GRAB_ALREADY_GRABBED:
+      return "The resource is actively grabbed by another client.";
+    case GDK_GRAB_INVALID_TIME:
+      return "The resource was grabbed more recently than the specified time.";
+    case GDK_GRAB_NOT_VIEWABLE:
+      return "The grab window or the confine_to window are not viewable.";
+    case GDK_GRAB_FROZEN:
+      return "The resource is frozen by an active grab of another client.";
+    case GDK_GRAB_FAILED:
+      return "The grab failed for some other reason.";
+    default:
+      return "The grab status is unknown.";
+  }
+}
+
+static GdkGrabStatus gdk_grab_keyboard(WindowManagerPlugin* self) {
+  g_return_val_if_fail(self->grab_pointer == nullptr, GDK_GRAB_FAILED);
+
+  auto window = get_window(self);
+  auto screen = gtk_window_get_screen(window);
+  auto display = gdk_screen_get_display(screen);
+  auto seat = gdk_display_get_default_seat(display);
+  auto gdk_window = get_gdk_window(self);
+
+  GdkGrabStatus status = gdk_seat_grab(
+      seat, gdk_window, GDK_SEAT_CAPABILITY_KEYBOARD, false /* owner_events */,
+      nullptr /* cursor */, nullptr /* event */, nullptr /*prepare_func */,
+      nullptr /* prepare_func_data */);
+
+  self->grab_pointer = gdk_seat_get_keyboard(seat);
+  if (!self->grab_pointer) {
+    self->grab_pointer = gdk_seat_get_pointer(seat);
+  }
+
+  return status;
+}
+
+static FlMethodResponse* grab_keyboard(WindowManagerPlugin* self) {
+  GdkGrabStatus status = gdk_grab_keyboard(self);
+
+  if (status != GDK_GRAB_SUCCESS) {
+    return FL_METHOD_RESPONSE(
+        fl_method_error_response_new(gdk_grab_status_code(status),
+                                     gdk_grab_status_message(status), nullptr));
+  }
+
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* ungrab_keyboard(WindowManagerPlugin* self) {
+  if (self->grab_pointer != nullptr) {
+    gdk_seat_ungrab(gdk_device_get_seat(self->grab_pointer));
+    self->grab_pointer = nullptr;
+  }
+
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
+static FlMethodResponse* set_brightness(WindowManagerPlugin* self,
+                                        FlValue* args) {
+  const gchar* brightness =
+      fl_value_get_string(fl_value_lookup_string(args, "brightness"));
+
+  gboolean dark = g_strcmp0(brightness, "dark") == 0;
+
+  GtkSettings* settings = gtk_settings_get_default();
+  g_object_set(settings, "gtk-application-prefer-dark-theme", dark, nullptr);
+
+  if (!dark) {
+    // `gtk-application-prefer-dark-theme=false` is not enough to switch to the
+    // light mode if the current theme is a dark variant such as "Yaru-dark" or
+    // "Adwaita-dark". try switching to the light variant without a "-dark"
+    // suffix.
+    g_autofree gchar* theme_name = nullptr;
+    g_object_get(settings, "gtk-theme-name", &theme_name, nullptr);
+    if (g_str_has_suffix(theme_name, "-dark")) {
+      g_autofree gchar* light_theme_name =
+          g_strndup(theme_name, strlen(theme_name) - 5);
+      g_object_set(settings, "gtk-theme-name", light_theme_name, nullptr);
+    }
+  }
 
   g_autoptr(FlValue) result = fl_value_new_bool(true);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
@@ -548,102 +784,116 @@ static void window_manager_plugin_handle_method_call(
   const gchar* method = fl_method_call_get_name(method_call);
   FlValue* args = fl_method_call_get_args(method_call);
 
-  if (strcmp(method, "ensureInitialized") == 0) {
+  if (g_strcmp0(method, "ensureInitialized") == 0) {
     g_autoptr(FlValue) result = fl_value_new_bool(true);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
-  } else if (strcmp(method, "waitUntilReadyToShow") == 0) {
+  } else if (g_strcmp0(method, "waitUntilReadyToShow") == 0) {
     g_autoptr(FlValue) result = fl_value_new_bool(true);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
-  } else if (strcmp(method, "setAsFrameless") == 0) {
+  } else if (g_strcmp0(method, "setAsFrameless") == 0) {
     response = set_as_frameless(self, args);
-  } else if (strcmp(method, "destroy") == 0) {
+  } else if (g_strcmp0(method, "destroy") == 0) {
     response = destroy(self);
-  } else if (strcmp(method, "close") == 0) {
+  } else if (g_strcmp0(method, "close") == 0) {
     response = close(self);
-  } else if (strcmp(method, "setPreventClose") == 0) {
+  } else if (g_strcmp0(method, "setPreventClose") == 0) {
     response = set_prevent_close(self, args);
-  } else if (strcmp(method, "isPreventClose") == 0) {
+  } else if (g_strcmp0(method, "isPreventClose") == 0) {
     response = is_prevent_close(self);
-  } else if (strcmp(method, "focus") == 0) {
+  } else if (g_strcmp0(method, "focus") == 0) {
     response = focus(self);
-  } else if (strcmp(method, "blur") == 0) {
+  } else if (g_strcmp0(method, "blur") == 0) {
     response = blur(self);
-  } else if (strcmp(method, "isFocused") == 0) {
+  } else if (g_strcmp0(method, "isFocused") == 0) {
     response = is_focused(self);
-  } else if (strcmp(method, "show") == 0) {
+  } else if (g_strcmp0(method, "show") == 0) {
     response = show(self);
-  } else if (strcmp(method, "hide") == 0) {
+  } else if (g_strcmp0(method, "hide") == 0) {
     response = hide(self);
-  } else if (strcmp(method, "isVisible") == 0) {
+  } else if (g_strcmp0(method, "isVisible") == 0) {
     response = is_visible(self);
-  } else if (strcmp(method, "isMaximized") == 0) {
+  } else if (g_strcmp0(method, "isMaximized") == 0) {
     response = is_maximized(self);
-  } else if (strcmp(method, "maximize") == 0) {
+  } else if (g_strcmp0(method, "maximize") == 0) {
     response = maximize(self);
-  } else if (strcmp(method, "unmaximize") == 0) {
+  } else if (g_strcmp0(method, "unmaximize") == 0) {
     response = unmaximize(self);
-  } else if (strcmp(method, "isMinimized") == 0) {
+  } else if (g_strcmp0(method, "isMinimized") == 0) {
     response = is_minimized(self);
-  } else if (strcmp(method, "minimize") == 0) {
+  } else if (g_strcmp0(method, "minimize") == 0) {
     response = minimize(self);
-  } else if (strcmp(method, "restore") == 0) {
+  } else if (g_strcmp0(method, "restore") == 0) {
     response = restore(self);
-  } else if (strcmp(method, "isFullScreen") == 0) {
+  } else if (g_strcmp0(method, "isFullScreen") == 0) {
     response = is_full_screen(self);
-  } else if (strcmp(method, "setFullScreen") == 0) {
+  } else if (g_strcmp0(method, "setFullScreen") == 0) {
     response = set_full_screen(self, args);
-  } else if (strcmp(method, "setAspectRatio") == 0) {
+  } else if (g_strcmp0(method, "setAspectRatio") == 0) {
     response = set_aspect_ratio(self, args);
-  } else if (strcmp(method, "setBackgroundColor") == 0) {
+  } else if (g_strcmp0(method, "setBackgroundColor") == 0) {
     response = set_background_color(self, args);
-  } else if (strcmp(method, "getBounds") == 0) {
+  } else if (g_strcmp0(method, "getBounds") == 0) {
     response = get_bounds(self);
-  } else if (strcmp(method, "setBounds") == 0) {
+  } else if (g_strcmp0(method, "setBounds") == 0) {
     response = set_bounds(self, args);
-  } else if (strcmp(method, "setMinimumSize") == 0) {
+  } else if (g_strcmp0(method, "setMinimumSize") == 0) {
     response = set_minimum_size(self, args);
-  } else if (strcmp(method, "setMaximumSize") == 0) {
+  } else if (g_strcmp0(method, "setMaximumSize") == 0) {
     response = set_maximum_size(self, args);
-  } else if (strcmp(method, "isResizable") == 0) {
+  } else if (g_strcmp0(method, "isResizable") == 0) {
     response = is_resizable(self);
-  } else if (strcmp(method, "setResizable") == 0) {
+  } else if (g_strcmp0(method, "setResizable") == 0) {
     response = set_resizable(self, args);
-  } else if (strcmp(method, "isClosable") == 0) {
+  } else if (g_strcmp0(method, "isMinimizable") == 0) {
+    response = is_minimizable(self);
+  } else if (g_strcmp0(method, "setMinimizable") == 0) {
+    response = set_minimizable(self, args);
+  } else if (g_strcmp0(method, "isMaximizable") == 0) {
+    response = is_maximizable(self);
+  } else if (g_strcmp0(method, "setMaximizable") == 0) {
+    response = set_maximizable(self, args);
+  } else if (g_strcmp0(method, "isClosable") == 0) {
     response = is_closable(self);
-  } else if (strcmp(method, "setClosable") == 0) {
+  } else if (g_strcmp0(method, "setClosable") == 0) {
     response = set_closable(self, args);
-  } else if (strcmp(method, "isAlwaysOnTop") == 0) {
+  } else if (g_strcmp0(method, "isAlwaysOnTop") == 0) {
     response = is_always_on_top(self);
-  } else if (strcmp(method, "setAlwaysOnTop") == 0) {
+  } else if (g_strcmp0(method, "setAlwaysOnTop") == 0) {
     response = set_always_on_top(self, args);
-  } else if (strcmp(method, "isAlwaysOnBottom") == 0) {
+  } else if (g_strcmp0(method, "isAlwaysOnBottom") == 0) {
     response = is_always_on_bottom(self);
-  } else if (strcmp(method, "setAlwaysOnBottom") == 0) {
+  } else if (g_strcmp0(method, "setAlwaysOnBottom") == 0) {
     response = set_always_on_bottom(self, args);
-  } else if (strcmp(method, "getTitle") == 0) {
+  } else if (g_strcmp0(method, "getTitle") == 0) {
     response = get_title(self);
-  } else if (strcmp(method, "setTitle") == 0) {
+  } else if (g_strcmp0(method, "setTitle") == 0) {
     response = set_title(self, args);
-  } else if (strcmp(method, "setTitleBarStyle") == 0) {
+  } else if (g_strcmp0(method, "setTitleBarStyle") == 0) {
     response = set_title_bar_style(self, args);
-  } else if (strcmp(method, "getTitleBarHeight") == 0) {
+  } else if (g_strcmp0(method, "getTitleBarHeight") == 0) {
     response = get_title_bar_height(self, args);
-  } else if (strcmp(method, "isSkipTaskbar") == 0) {
+  } else if (g_strcmp0(method, "isSkipTaskbar") == 0) {
     response = is_skip_taskbar(self);
-  } else if (strcmp(method, "setSkipTaskbar") == 0) {
+  } else if (g_strcmp0(method, "setSkipTaskbar") == 0) {
     response = set_skip_taskbar(self, args);
-  } else if (strcmp(method, "setIcon") == 0) {
+  } else if (g_strcmp0(method, "setIcon") == 0) {
     response = set_icon(self, args);
-  } else if (strcmp(method, "getOpacity") == 0) {
+  } else if (g_strcmp0(method, "getOpacity") == 0) {
     response = get_opacity(self);
-  } else if (strcmp(method, "setOpacity") == 0) {
+  } else if (g_strcmp0(method, "setOpacity") == 0) {
     response = set_opacity(self, args);
-  } else if (strcmp(method, "popUpWindowMenu") == 0) {
+  } else if (g_strcmp0(method, "popUpWindowMenu") == 0) {
     response = pop_up_window_menu(self);
-  } else if (strcmp(method, "startDragging") == 0) {
+  } else if (g_strcmp0(method, "startDragging") == 0) {
     response = start_dragging(self);
-  } else if (strcmp(method, "startResizing") == 0) {
+  } else if (g_strcmp0(method, "startResizing") == 0) {
     response = start_resizing(self, args);
+  } else if (g_strcmp0(method, "grabKeyboard") == 0) {
+    response = grab_keyboard(self);
+  } else if (g_strcmp0(method, "ungrabKeyboard") == 0) {
+    response = ungrab_keyboard(self);
+  } else if (g_strcmp0(method, "setBrightness") == 0) {
+    response = set_brightness(self, args);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
@@ -652,6 +902,9 @@ static void window_manager_plugin_handle_method_call(
 }
 
 static void window_manager_plugin_dispose(GObject* object) {
+  WindowManagerPlugin* self = WINDOW_MANAGER_PLUGIN(object);
+  g_clear_object(&self->css_provider);
+  g_free(self->title_bar_style_);
   G_OBJECT_CLASS(window_manager_plugin_parent_class)->dispose(object);
 }
 
@@ -668,110 +921,128 @@ static void method_call_cb(FlMethodChannel* channel,
   window_manager_plugin_handle_method_call(plugin, method_call);
 }
 
-void _emit_event(const char* event_name) {
+void _emit_event(WindowManagerPlugin* plugin, const char* event_name) {
   g_autoptr(FlValue) result_data = fl_value_new_map();
   fl_value_set_string_take(result_data, "eventName",
                            fl_value_new_string(event_name));
-  fl_method_channel_invoke_method(plugin_instance->channel, "onEvent",
-                                  result_data, nullptr, nullptr, nullptr);
+  fl_method_channel_invoke_method(plugin->channel, "onEvent", result_data,
+                                  nullptr, nullptr, nullptr);
 }
 
 gboolean on_window_close(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("close");
-  return plugin_instance->_is_prevent_close;
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "close");
+  return plugin->_is_prevent_close;
 }
 
 gboolean on_window_focus(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("focus");
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "focus");
   return false;
 }
 
 gboolean on_window_blur(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("blur");
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "blur");
   return false;
 }
 
-gboolean on_window_show(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("show");
+gboolean on_window_show(GtkWidget* widget, gpointer data) {
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "show");
   return false;
 }
 
-gboolean on_window_hide(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("hide");
+gboolean on_window_hide(GtkWidget* widget, gpointer data) {
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "hide");
   return false;
 }
 
-gboolean on_window_resize(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("resize");
+gboolean on_window_resize(GtkWidget* widget, gpointer data) {
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "resize");
   return false;
 }
 
 gboolean on_window_move(GtkWidget* widget, GdkEvent* event, gpointer data) {
-  _emit_event("move");
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  _emit_event(plugin, "move");
   return false;
 }
 
 gboolean on_window_state_change(GtkWidget* widget,
                                 GdkEventWindowState* event,
                                 gpointer data) {
-  if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) {
-    if (!plugin_instance->_is_maximized) {
-      plugin_instance->_is_maximized = true;
-      _emit_event("maximize");
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
+  if (event->changed_mask & GDK_WINDOW_STATE_MAXIMIZED) {
+    if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) {
+      _emit_event(plugin, "maximize");
+    } else {
+      _emit_event(plugin, "unmaximize");
     }
   }
-  if (event->new_window_state & GDK_WINDOW_STATE_ICONIFIED) {
-    if (!plugin_instance->_is_minimized) {
-      plugin_instance->_is_minimized = true;
-      _emit_event("minimize");
+  if (event->changed_mask & GDK_WINDOW_STATE_ICONIFIED) {
+    if (event->new_window_state & GDK_WINDOW_STATE_ICONIFIED) {
+      _emit_event(plugin, "minimize");
+    } else {
+      _emit_event(plugin, "restore");
     }
   }
-  if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) {
-    if (!plugin_instance->_is_fullscreen) {
-      plugin_instance->_is_fullscreen = true;
-      _emit_event("enter-full-screen");
+  if (event->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) {
+    if (event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN) {
+      _emit_event(plugin, "enter-full-screen");
+    } else {
+      _emit_event(plugin, "leave-full-screen");
     }
-  }
-  if (plugin_instance->_is_maximized &&
-      !(event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED)) {
-    plugin_instance->_is_maximized = false;
-    _emit_event("unmaximize");
-  }
-  if (plugin_instance->_is_minimized &&
-      !(event->new_window_state & GDK_WINDOW_STATE_ICONIFIED)) {
-    plugin_instance->_is_minimized = false;
-    _emit_event("restore");
-  }
-  if (plugin_instance->_is_fullscreen &&
-      !(event->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
-    plugin_instance->_is_fullscreen = false;
-    _emit_event("leave-full-screen");
   }
   return false;
 }
 
-gboolean on_window_draw(GtkWidget* widget, cairo_t* cr, gpointer data) {
-  if (plugin_instance->_is_frameless) {
-    cairo_set_source_rgba(cr, bg_color_r, bg_color_g, bg_color_b, bg_color_a);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(cr);
+void emit_button_release(WindowManagerPlugin* self) {
+  auto newEvent = (GdkEventButton*)gdk_event_new(GDK_BUTTON_RELEASE);
+  newEvent->x = self->_event_button.x;
+  newEvent->y = self->_event_button.y;
+  newEvent->button = self->_event_button.button;
+  newEvent->type = GDK_BUTTON_RELEASE;
+  newEvent->time = g_get_monotonic_time();
+  gboolean result;
+  g_signal_emit_by_name(self->_event_box, "button-release-event", newEvent,
+                        &result);
+  gdk_event_free((GdkEvent*)newEvent);
+}
+
+gboolean on_event_after(GtkWidget* text_view,
+                        GdkEvent* event,
+                        WindowManagerPlugin* self) {
+  if (event->type == GDK_ENTER_NOTIFY) {
+    if (nullptr == self->_event_box) {
+      return FALSE;
+    }
+    if (self->_is_dragging) {
+      self->_is_dragging = false;
+      emit_button_release(self);
+    }
+    if (self->_is_resizing) {
+      self->_is_resizing = false;
+      emit_button_release(self);
+    }
   }
-  return false;
+  return FALSE;
 }
 
 gboolean on_mouse_press(GSignalInvocationHint* ihint,
                         guint n_param_values,
                         const GValue* param_values,
                         gpointer data) {
+  WindowManagerPlugin* plugin = WINDOW_MANAGER_PLUGIN(data);
   GdkEventButton* event_button =
       (GdkEventButton*)(g_value_get_boxed(param_values + 1));
 
-  // plugin_instance->_event_button = event_button;
+  // plugin->_event_button = event_button;
 
-  memset(&plugin_instance->_event_button, 0,
-         sizeof(plugin_instance->_event_button));
-  memcpy(&plugin_instance->_event_button, event_button,
-         sizeof(plugin_instance->_event_button));
+  memset(&plugin->_event_button, 0, sizeof(plugin->_event_button));
+  memcpy(&plugin->_event_button, event_button, sizeof(plugin->_event_button));
   return TRUE;
 }
 
@@ -787,23 +1058,24 @@ void window_manager_plugin_register_with_registrar(
   plugin->window_geometry.max_width = G_MAXINT;
   plugin->window_geometry.max_height = G_MAXINT;
   g_signal_connect(get_window(plugin), "delete_event",
-                   G_CALLBACK(on_window_close), NULL);
+                   G_CALLBACK(on_window_close), plugin);
   g_signal_connect(get_window(plugin), "focus-in-event",
-                   G_CALLBACK(on_window_focus), NULL);
+                   G_CALLBACK(on_window_focus), plugin);
   g_signal_connect(get_window(plugin), "focus-out-event",
-                   G_CALLBACK(on_window_blur), NULL);
+                   G_CALLBACK(on_window_blur), plugin);
   g_signal_connect(get_window(plugin), "show", G_CALLBACK(on_window_show),
-                   NULL);
+                   plugin);
   g_signal_connect(get_window(plugin), "hide", G_CALLBACK(on_window_hide),
-                   NULL);
+                   plugin);
   g_signal_connect(get_window(plugin), "check-resize",
-                   G_CALLBACK(on_window_resize), NULL);
+                   G_CALLBACK(on_window_resize), plugin);
   g_signal_connect(get_window(plugin), "configure-event",
-                   G_CALLBACK(on_window_move), NULL);
+                   G_CALLBACK(on_window_move), plugin);
   g_signal_connect(get_window(plugin), "window-state-event",
-                   G_CALLBACK(on_window_state_change), NULL);
-  g_signal_connect(get_window(plugin), "draw", G_CALLBACK(on_window_draw),
-                   NULL);
+                   G_CALLBACK(on_window_state_change), plugin);
+  g_signal_connect(get_window(plugin), "event-after",
+                   G_CALLBACK(on_event_after), plugin);
+  find_event_box(plugin, GTK_WIDGET(fl_plugin_registrar_get_view(registrar)));
 
   g_signal_add_emission_hook(
       g_signal_lookup("button-press-event", GTK_TYPE_WIDGET), 0, on_mouse_press,
@@ -815,8 +1087,6 @@ void window_manager_plugin_register_with_registrar(
                             "window_manager", FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(
       plugin->channel, method_call_cb, g_object_ref(plugin), g_object_unref);
-
-  plugin_instance = plugin;
 
   g_object_unref(plugin);
 }

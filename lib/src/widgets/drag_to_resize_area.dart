@@ -1,9 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-
-import '../resize_edge.dart';
-import '../window_manager.dart';
+import 'package:window_manager/src/resize_edge.dart';
+import 'package:window_manager/src/window_manager.dart';
 
 /// A widget for drag to resize window.
 ///
@@ -26,12 +25,6 @@ import '../window_manager.dart';
 /// ```
 /// {@end-tool}
 class DragToResizeArea extends StatelessWidget {
-  final Widget child;
-  final double resizeEdgeSize;
-  final Color resizeEdgeColor;
-  final EdgeInsets resizeEdgeMargin;
-  final List<ResizeEdge>? enableResizeEdges;
-
   const DragToResizeArea({
     Key? key,
     required this.child,
@@ -41,18 +34,25 @@ class DragToResizeArea extends StatelessWidget {
     this.enableResizeEdges,
   }) : super(key: key);
 
+  final Widget child;
+  final double resizeEdgeSize;
+  final Color resizeEdgeColor;
+  final EdgeInsets resizeEdgeMargin;
+  final List<ResizeEdge>? enableResizeEdges;
+
   Widget _buildDragToResizeEdge(
     ResizeEdge resizeEdge, {
     MouseCursor cursor = SystemMouseCursors.basic,
     double? width,
     double? height,
   }) {
-    if (enableResizeEdges != null && !enableResizeEdges!.contains(resizeEdge))
+    if (enableResizeEdges != null && !enableResizeEdges!.contains(resizeEdge)) {
       return Container();
+    }
     return Container(
       width: width,
       height: height,
-      color: this.resizeEdgeColor,
+      color: resizeEdgeColor,
       child: MouseRegion(
         cursor: cursor,
         child: GestureDetector(
