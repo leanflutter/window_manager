@@ -459,6 +459,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
     }
     
     // NSWindowDelegate
+
+    public func window(_ window: NSWindow, willUseFullScreenPresentationOptions proposedOptions: NSApplication.PresentationOptions = []) -> NSApplication.PresentationOptions {
+        return [.autoHideToolbar, .autoHideMenuBar, .fullScreen]
+    }
     
     public func windowShouldClose(_ sender: NSWindow) -> Bool {
         _emitEvent("close")
