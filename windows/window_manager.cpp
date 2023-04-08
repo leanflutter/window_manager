@@ -52,6 +52,7 @@ class WindowManager {
   double aspect_ratio_ = 0;
   POINT minimum_size_ = {0, 0};
   POINT maximum_size_ = {-1, -1};
+  double pixel_ratio_ = 1;
   bool is_resizable_ = true;
   bool is_skip_taskbar_ = true;
   std::string title_bar_style_ = "normal";
@@ -534,9 +535,10 @@ void WindowManager::SetMinimumSize(const flutter::EncodableMap& args) {
   double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
   if (width >= 0 && height >= 0) {
+    pixel_ratio_ = devicePixelRatio;
     POINT point = {};
-    point.x = static_cast<LONG>(width * devicePixelRatio);
-    point.y = static_cast<LONG>(height * devicePixelRatio);
+    point.x = static_cast<LONG>(width);
+    point.y = static_cast<LONG>(height);
     minimum_size_ = point;
   }
 }
@@ -548,9 +550,10 @@ void WindowManager::SetMaximumSize(const flutter::EncodableMap& args) {
   double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
   if (width >= 0 && height >= 0) {
+    pixel_ratio_ = devicePixelRatio;
     POINT point = {};
-    point.x = static_cast<LONG>(width * devicePixelRatio);
-    point.y = static_cast<LONG>(height * devicePixelRatio);
+    point.x = static_cast<LONG>(width);
+    point.y = static_cast<LONG>(height);
     maximum_size_ = point;
   }
 }
