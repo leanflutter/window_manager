@@ -46,6 +46,7 @@ class WindowManager {
   int last_state = STATE_NORMAL;
 
   bool has_shadow_ = false;
+  bool is_always_on_bottom_ = false;
   bool is_frameless_ = false;
   bool is_prevent_close_ = false;
   double aspect_ratio_ = 0;
@@ -99,6 +100,8 @@ class WindowManager {
   void WindowManager::SetClosable(const flutter::EncodableMap& args);
   bool WindowManager::IsAlwaysOnTop();
   void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap& args);
+  bool WindowManager::IsAlwaysOnBottom();
+  void WindowManager::SetAlwaysOnBottom(const flutter::EncodableMap& args);
   std::string WindowManager::GetTitle();
   void WindowManager::SetTitle(const flutter::EncodableMap& args);
   void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args);
@@ -626,6 +629,25 @@ void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap& args) {
       std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnTop")));
   SetWindowPos(GetMainWindow(), isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST,
                0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+}
+
+bool WindowManager::IsAlwaysOnBottom() {
+    return is_always_on_bottom_;
+}
+
+void WindowManager::SetAlwaysOnBottom(const flutter::EncodableMap& args) {
+  is_always_on_bottom_ =
+      std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnBottom")));
+
+  SetWindowPos(
+    GetMainWindow(),
+    is_always_on_bottom_ ? HWND_BOTTOM : HWND_NOTOPMOST,
+    0,
+    0,
+    0,
+    0,
+    SWP_NOMOVE | SWP_NOSIZE
+  );
 }
 
 std::string WindowManager::GetTitle() {

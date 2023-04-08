@@ -648,9 +648,9 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 BotToast.showText(text: 'isAlwaysOnBottom: $isAlwaysOnBottom');
               },
               value: _isAlwaysOnBottom,
-              onChanged: (newValue) {
+              onChanged: (newValue) async {
                 _isAlwaysOnBottom = newValue;
-                windowManager.setAlwaysOnBottom(_isAlwaysOnBottom);
+                await windowManager.setAlwaysOnBottom(_isAlwaysOnBottom);
                 setState(() {});
               },
             ),

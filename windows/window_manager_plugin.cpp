@@ -295,7 +295,15 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     } else {
       _EmitEvent("hide");
     }
+  } else if (message == WM_WINDOWPOSCHANGED) {
+    if (window_manager->IsAlwaysOnBottom()) {
+        const flutter::EncodableMap& args = {
+		  {flutter::EncodableValue("isAlwaysOnBottom"),
+            		   flutter::EncodableValue(true)}};
+	    window_manager->SetAlwaysOnBottom(args);
+	  }
   }
+  
   return result;
 }
 
@@ -444,6 +452,14 @@ void WindowManagerPlugin::HandleMethodCall(
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->SetAlwaysOnTop(args);
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("isAlwaysOnBottom") == 0) {
+    bool value = window_manager->IsAlwaysOnBottom();
+    result->Success(flutter::EncodableValue(value));
+  } else if (method_name.compare("setAlwaysOnBottom") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->SetAlwaysOnBottom(args);
+    result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("getTitle") == 0) {
     std::string value = window_manager->GetTitle();
     result->Success(flutter::EncodableValue(value));
@@ -520,7 +536,7 @@ void WindowManagerPlugin::HandleMethodCall(
   } else {
     result->NotImplemented();
   }
-}
+ }
 
 }  // namespace
 
