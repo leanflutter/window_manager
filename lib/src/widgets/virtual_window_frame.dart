@@ -10,8 +10,6 @@ import 'package:window_manager/src/window_manager.dart';
 final _kIsLinux = !kIsWeb && Platform.isLinux;
 final _kIsWindows = !kIsWeb && Platform.isWindows;
 
-double get kVirtualWindowFrameMargin => (_kIsLinux) ? 20.0 : 0;
-
 class VirtualWindowFrame extends StatefulWidget {
   const VirtualWindowFrame({
     Key? key,
@@ -45,9 +43,6 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
 
   Widget _buildVirtualWindowFrame(BuildContext context) {
     return Container(
-      margin: (_isMaximized || _isFullScreen)
-          ? EdgeInsets.zero
-          : EdgeInsets.all(kVirtualWindowFrameMargin),
       decoration: BoxDecoration(
         color: Colors.transparent,
         border: Border.all(
@@ -79,9 +74,6 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
   Widget build(BuildContext context) {
     if (_kIsLinux) {
       return DragToResizeArea(
-        resizeEdgeMargin: (_isMaximized || _isFullScreen)
-            ? EdgeInsets.zero
-            : EdgeInsets.all(kVirtualWindowFrameMargin * 0.6),
         enableResizeEdges: (_isMaximized || _isFullScreen) ? [] : null,
         child: _buildVirtualWindowFrame(context),
       );
