@@ -15,6 +15,7 @@ class WindowOptions {
     this.skipTaskbar,
     this.title,
     this.titleBarStyle,
+    this.windowButtonVisibility,
   });
 
   final Size? size;
@@ -27,4 +28,5 @@ class WindowOptions {
   final bool? skipTaskbar;
   final String? title;
   final TitleBarStyle? titleBarStyle;
+  final bool? windowButtonVisibility;
 }

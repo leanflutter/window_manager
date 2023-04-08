@@ -126,7 +126,10 @@ class WindowManager {
     }
     if (options?.title != null) await setTitle(options!.title!);
     if (options?.titleBarStyle != null) {
-      await setTitleBarStyle(options!.titleBarStyle!);
+      await setTitleBarStyle(
+        options!.titleBarStyle!,
+        windowButtonVisibility: options.windowButtonVisibility ?? true,
+      );
     }
 
     if (callback != null) {
