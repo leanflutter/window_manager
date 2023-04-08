@@ -136,7 +136,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.3.1
+  window_manager: ^0.3.2
 ```
 
 Or
@@ -699,7 +699,7 @@ Sets whether the window should show always on top of other windows.
 
 Returns `bool` - Whether the window is always below other windows.
 
-##### setAlwaysOnBottom  `linux`
+##### setAlwaysOnBottom  `linux`  `windows`
 
 Sets whether the window should show always below other windows.
 
@@ -736,6 +736,14 @@ Sets progress value in progress bar. Valid range is [0, 1.0].
 ##### setIcon  `windows`
 
 Sets window/taskbar icon.
+
+
+##### setBadgeLabel  `macos`
+
+Set/unset label on taskbar(dock) app icon
+
+Note that it's required to request access at your AppDelegate.swift like this:
+UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge])
 
 
 ##### hasShadow  `macos`  `windows`

@@ -1,3 +1,12 @@
+## 0.3.2
+
+* [macos] Feature to set labeled badge on taskbar aka dock (#305)
+* [linux] remove the margins of the window frame (#318)
+* Add AlwaysOnBottom support for Windows (#306)
+* [Windows] make setMinimum/MaximumSize() dpi change awareable (#231)
+* remove frameless on set title bar style on macos (#240)
+* chore: Add windowButtonVisibility to WindowOptions
+
 ## 0.3.1
 
 * [linux] avoid removing shadows if no title is set (#297)
