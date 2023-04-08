@@ -754,6 +754,26 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               ),
               onTap: () => _handleSetIcon(_kIconTypeDefault),
             ),
+            PreferenceListItem(
+              title: const Text('setBadgeLabel'),
+              accessoryView: Row(
+                children: [
+                  CupertinoButton(
+                    child: const Text('null'),
+                    onPressed: () async {
+                      await windowManager.setBadgeLabel();
+                    },
+                  ),
+                  CupertinoButton(
+                    child: const Text('99+'),
+                    onPressed: () async {
+                      await windowManager.setBadgeLabel('99+');
+                    },
+                  ),
+                ],
+              ),
+              onTap: () => _handleSetIcon(_kIconTypeDefault),
+            ),
             PreferenceListSwitchItem(
               title: const Text('hasShadow / setHasShadow'),
               onTap: () async {
