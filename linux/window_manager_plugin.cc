@@ -50,7 +50,7 @@ static FlMethodResponse* set_as_frameless(WindowManagerPlugin* self,
 }
 
 static FlMethodResponse* destroy(WindowManagerPlugin* self) {
-  gtk_window_destroy(get_window(self));
+  gtk_widget_destroy(get_window(self));
   return FL_METHOD_RESPONSE(
       fl_method_success_response_new(fl_value_new_bool(true)));
 }
