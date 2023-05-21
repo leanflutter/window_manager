@@ -542,6 +542,18 @@ public class WindowManager: NSObject, NSWindowDelegate {
         _emitEvent("moved")
     }
     
+    public func windowDidBecomeKey(_ notification: Notification) {
+        if (mainWindow is NSPanel) {
+            _emitEvent("focus");
+        }
+    }
+    
+    public func windowDidResignKey(_ notification: Notification) {
+        if (mainWindow is NSPanel) {
+            _emitEvent("blur");
+        }
+    }
+    
     public func windowDidBecomeMain(_ notification: Notification) {
         _emitEvent("focus");
     }
