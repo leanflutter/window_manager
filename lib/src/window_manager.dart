@@ -87,6 +87,12 @@ class WindowManager {
     _listeners.remove(listener);
   }
 
+  double getDevicePixelRatio() {
+    // Subsequent version, remove this deprecated member.
+    // ignore: deprecated_member_use
+    return window.devicePixelRatio;
+  }
+
   Future<void> ensureInitialized() async {
     await _channel.invokeMethod('ensureInitialized');
   }
@@ -289,7 +295,7 @@ class WindowManager {
   /// Returns `Rect` - The bounds of the window as Object.
   Future<Rect> getBounds() async {
     final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
+      'devicePixelRatio': getDevicePixelRatio(),
     };
     final Map<dynamic, dynamic> resultData = await _channel.invokeMethod(
       'getBounds',
@@ -312,7 +318,7 @@ class WindowManager {
     bool animate = false,
   }) async {
     final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
+      'devicePixelRatio': getDevicePixelRatio(),
       'x': bounds?.topLeft.dx ?? position?.dx,
       'y': bounds?.topLeft.dy ?? position?.dy,
       'width': bounds?.size.width ?? size?.width,
@@ -355,7 +361,7 @@ class WindowManager {
   /// Sets the minimum size of window to `width` and `height`.
   Future<void> setMinimumSize(Size size) async {
     final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
+      'devicePixelRatio': getDevicePixelRatio(),
       'width': size.width,
       'height': size.height,
     };
@@ -365,7 +371,7 @@ class WindowManager {
   /// Sets the maximum size of window to `width` and `height`.
   Future<void> setMaximumSize(Size size) async {
     final Map<String, dynamic> arguments = {
-      'devicePixelRatio': window.devicePixelRatio,
+      'devicePixelRatio': getDevicePixelRatio(),
       'width': size.width,
       'height': size.height,
     };
@@ -545,6 +551,37 @@ class WindowManager {
     };
 
     await _channel.invokeMethod('setIcon', arguments);
+  }
+
+  /// Returns `bool` - Whether the window is visible on all workspaces.
+  ///
+  /// @platforms macos
+  Future<bool> isVisibleOnAllWorkspaces() async {
+    return await _channel.invokeMethod('isVisibleOnAllWorkspaces');
+  }
+
+  /// Sets whether the window should be visible on all workspaces.
+  ///
+  /// Note: If you need to support dragging a window on top of a fullscreen
+  /// window on another screen, you need to modify MainFlutterWindow
+  /// to inherit from NSPanel
+  ///
+  /// ```swift
+  /// class MainFlutterWindow: NSPanel {
+  ///     // ...
+  /// }
+  /// ```
+  ///
+  /// @platforms macos
+  Future<void> setVisibleOnAllWorkspaces(
+    bool visible, {
+    bool? visibleOnFullScreen,
+  }) async {
+    final Map<String, dynamic> arguments = {
+      'visible': visible,
+      'visibleOnFullScreen': visibleOnFullScreen ?? false,
+    };
+    await _channel.invokeMethod('setVisibleOnAllWorkspaces', arguments);
   }
 
   /// Set/unset label on taskbar(dock) app icon

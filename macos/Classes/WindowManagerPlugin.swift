@@ -216,6 +216,13 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setProgressBar(args)
             result(true)
             break
+        case "isVisibleOnAllWorkspaces":
+            result(windowManager.isVisibleOnAllWorkspaces())
+            break
+        case "setVisibleOnAllWorkspaces":
+            windowManager.setVisibleOnAllWorkspaces(args)
+            result(true)
+            break
         case "hasShadow":
             result(windowManager.hasShadow())
             break

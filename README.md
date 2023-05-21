@@ -443,6 +443,7 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
 
 Since flutter 3.7 new windows project
 Change the file `windows/runner/flutter_window.cpp` as follows:
+
 ```diff
 bool FlutterWindow::OnCreate() {
   ...
@@ -736,6 +737,26 @@ Sets progress value in progress bar. Valid range is [0, 1.0].
 ##### setIcon  `windows`
 
 Sets window/taskbar icon.
+
+
+##### isVisibleOnAllWorkspaces  `macos`
+
+Returns `bool` - Whether the window is visible on all workspaces.
+
+
+##### setVisibleOnAllWorkspaces  `macos`
+
+Sets whether the window should be visible on all workspaces.
+
+Note: If you need to support dragging a window on top of a fullscreen
+window on another screen, you need to modify MainFlutterWindow
+to inherit from NSPanel
+
+```swift
+class MainFlutterWindow: NSPanel {
+// ...
+}
+```
 
 
 ##### setBadgeLabel  `macos`
