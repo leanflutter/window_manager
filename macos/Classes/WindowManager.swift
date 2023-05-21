@@ -273,16 +273,16 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     public func setMinimumSize(_ args: [String: Any]) {
         let minSize: NSSize = NSSize(
-            width: CGFloat(args["width"] as! Float),
-            height: CGFloat(args["height"] as! Float)
+            width: CGFloat((args["width"] as! NSNumber).floatValue),
+            height: CGFloat((args["height"] as! NSNumber).floatValue)
         )
         mainWindow.minSize = minSize
     }
     
     public func setMaximumSize(_ args: [String: Any]) {
         let maxSize: NSSize = NSSize(
-            width: CGFloat(args["width"] as! Float),
-            height: CGFloat(args["height"] as! Float)
+            width: CGFloat((args["width"] as! NSNumber).floatValue),
+            height: CGFloat((args["height"] as! NSNumber).floatValue)
         )
         mainWindow.maxSize = maxSize
     }
