@@ -56,6 +56,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   double _opacity = 1;
   bool _isIgnoreMouseEvents = false;
   String _iconType = _kIconTypeOriginal;
+  bool _isVisibleOnAllWorkspaces = false;
 
   @override
   void initState() {
@@ -753,6 +754,27 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 ],
               ),
               onTap: () => _handleSetIcon(_kIconTypeDefault),
+            ),
+            PreferenceListSwitchItem(
+              title: const Text(
+                'isVisibleOnAllWorkspaces / setVisibleOnAllWorkspaces',
+              ),
+              onTap: () async {
+                bool isVisibleOnAllWorkspaces =
+                    await windowManager.isVisibleOnAllWorkspaces();
+                BotToast.showText(
+                  text: 'isVisibleOnAllWorkspaces: $isVisibleOnAllWorkspaces',
+                );
+              },
+              value: _isVisibleOnAllWorkspaces,
+              onChanged: (newValue) {
+                _isVisibleOnAllWorkspaces = newValue;
+                windowManager.setVisibleOnAllWorkspaces(
+                  _isVisibleOnAllWorkspaces,
+                  visibleOnFullScreen: _isVisibleOnAllWorkspaces,
+                );
+                setState(() {});
+              },
             ),
             PreferenceListItem(
               title: const Text('setBadgeLabel'),

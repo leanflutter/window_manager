@@ -547,6 +547,37 @@ class WindowManager {
     await _channel.invokeMethod('setIcon', arguments);
   }
 
+  /// Returns `bool` - Whether the window is visible on all workspaces.
+  ///
+  /// @platforms macos
+  Future<bool> isVisibleOnAllWorkspaces() async {
+    return await _channel.invokeMethod('isVisibleOnAllWorkspaces');
+  }
+
+  /// Sets whether the window should be visible on all workspaces.
+  ///
+  /// Note: If you need to support dragging a window on top of a fullscreen
+  /// window on another screen, you need to modify MainFlutterWindow
+  /// to inherit from NSPanel
+  ///
+  /// ```swift
+  /// class MainFlutterWindow: NSPanel {
+  ///     // ...
+  /// }
+  /// ```
+  ///
+  /// @platforms macos
+  Future<void> setVisibleOnAllWorkspaces(
+    bool visible, {
+    bool? visibleOnFullScreen,
+  }) async {
+    final Map<String, dynamic> arguments = {
+      'visible': visible,
+      'visibleOnFullScreen': visibleOnFullScreen ?? false,
+    };
+    await _channel.invokeMethod('setVisibleOnAllWorkspaces', arguments);
+  }
+
   /// Set/unset label on taskbar(dock) app icon
   ///
   /// Note that it's required to request access at your AppDelegate.swift like this:

@@ -2,7 +2,7 @@ import Cocoa
 import FlutterMacOS
 import window_manager
 
-class MainFlutterWindow: NSWindow {
+class MainFlutterWindow: NSPanel {
     override func awakeFromNib() {
         let flutterViewController = FlutterViewController.init()
         let windowFrame = self.frame
@@ -15,7 +15,7 @@ class MainFlutterWindow: NSWindow {
         
         super.awakeFromNib()
     }
-
+    
     override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
         super.order(place, relativeTo: otherWin)
         hiddenWindowAtLaunch()
