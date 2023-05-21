@@ -136,7 +136,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.3.2
+  window_manager: ^0.3.3
 ```
 
 或

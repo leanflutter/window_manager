@@ -1,3 +1,8 @@
+## 0.3.3
+
+* [macos] feat: setTitleBarStyle() restores window frame on Linux (#323)
+* [macos] Implement `isVisibleOnAllWorkspaces` & `setVisibleOnAllWorkspaces` methods
+
 ## 0.3.2
 
 * [macos] Feature to set labeled badge on taskbar aka dock (#305)
