@@ -1,3 +1,7 @@
+### 0.3.4
+
+* [macos] Fix blur and focus events when the MainFlutterWindow extends from NSPanel
+
 ## 0.3.3
 
 * [macos] feat: setTitleBarStyle() restores window frame on Linux (#323)
