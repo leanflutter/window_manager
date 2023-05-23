@@ -6,7 +6,7 @@ description: Demonstrates how to use the window_manager plugin.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.18.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -22,7 +22,7 @@ dependencies:
 
   bot_toast: ^4.0.1
   preference_list: ^0.0.1
-  tray_manager: ^0.1.7
+  tray_manager: ^0.2.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

@@ -19,6 +19,22 @@ extension NSWindow {
             configured = true
         }
     }
+    
+    public func setStyleMask(_ on: Bool, _ flag: StyleMask) {
+        if (on) {
+            styleMask.insert(flag)
+        } else {
+            styleMask.remove(flag)
+        }
+    }
+    
+    public func setCollectionBehavior(_ on: Bool, _ flag: CollectionBehavior) {
+        if (on) {
+            collectionBehavior.insert(flag)
+        } else {
+            collectionBehavior.remove(flag)
+        }
+    }
 }
 
 extension NSRect {
@@ -52,7 +68,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
     private var _isPreventClose: Bool = false
     private var _isMaximized: Bool = false
     private var _isMaximizable: Bool = true
-
+    
     override public init() {
         super.init()
     }
@@ -89,11 +105,11 @@ public class WindowManager: NSObject, NSWindowDelegate {
     public func setPreventClose(_ args: [String: Any]) {
         _isPreventClose = args["isPreventClose"] as! Bool
     }
-
+    
     public func isMaximizable() -> Bool {
         return _isMaximizable;
     }
-
+    
     public func setIsMaximizable(_ args: [String: Any]) {
         _isMaximizable = args["isMaximizable"] as! Bool
     }
@@ -257,16 +273,16 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     public func setMinimumSize(_ args: [String: Any]) {
         let minSize: NSSize = NSSize(
-            width: CGFloat(args["width"] as! Float),
-            height: CGFloat(args["height"] as! Float)
+            width: CGFloat((args["width"] as! NSNumber).floatValue),
+            height: CGFloat((args["height"] as! NSNumber).floatValue)
         )
         mainWindow.minSize = minSize
     }
     
     public func setMaximumSize(_ args: [String: Any]) {
         let maxSize: NSSize = NSSize(
-            width: CGFloat(args["width"] as! Float),
-            height: CGFloat(args["height"] as! Float)
+            width: CGFloat((args["width"] as! NSNumber).floatValue),
+            height: CGFloat((args["height"] as! NSNumber).floatValue)
         )
         mainWindow.maxSize = maxSize
     }
@@ -326,6 +342,9 @@ public class WindowManager: NSObject, NSWindowDelegate {
     public func setAlwaysOnTop(_ args: [String: Any]) {
         let isAlwaysOnTop: Bool = args["isAlwaysOnTop"] as! Bool
         mainWindow.level = isAlwaysOnTop ? .floating : .normal
+        if (mainWindow is NSPanel) {
+            mainWindow.setStyleMask(isAlwaysOnTop, .nonactivatingPanel)
+        }
     }
     
     public func getTitle() -> String {
@@ -351,6 +370,12 @@ public class WindowManager: NSObject, NSWindowDelegate {
             mainWindow.styleMask.remove(.fullSizeContentView)
         }
         
+        mainWindow.isOpaque = false
+        mainWindow.hasShadow = true
+        
+        let titleBarView: NSView = (mainWindow.standardWindowButton(.closeButton)?.superview)!.superview!
+        titleBarView.isHidden = false
+        
         mainWindow.standardWindowButton(.closeButton)?.isHidden = !windowButtonVisibility
         mainWindow.standardWindowButton(.miniaturizeButton)?.isHidden = !windowButtonVisibility
         mainWindow.standardWindowButton(.zoomButton)?.isHidden = !windowButtonVisibility
@@ -369,6 +394,11 @@ public class WindowManager: NSObject, NSWindowDelegate {
     public func setSkipTaskbar(_ args: [String: Any]) {
         let isSkipTaskbar: Bool = args["isSkipTaskbar"] as! Bool
         NSApplication.shared.setActivationPolicy(isSkipTaskbar ? .accessory : .regular)
+    }
+    
+    public func setBadgeLabel(_ args: [String: Any]) {
+        let label: String = args["label"] as! String
+        NSApplication.shared.dockTile.badgeLabel = label
     }
     
     public func setProgressBar(_ args: [String: Any]) {
@@ -406,6 +436,18 @@ public class WindowManager: NSObject, NSWindowDelegate {
             progressIndicator.doubleValue = Double(progress)
         }
         dockTile.display()
+    }
+    
+    public func isVisibleOnAllWorkspaces() -> Bool {
+        return mainWindow.collectionBehavior.contains(.canJoinAllSpaces)
+    }
+    
+    public func setVisibleOnAllWorkspaces(_ args: [String: Any]) {
+        let visible: Bool = args["visible"] as! Bool
+        let visibleOnFullScreen: Bool = args["visibleOnFullScreen"] as! Bool
+        
+        mainWindow.setCollectionBehavior(visible, .canJoinAllSpaces)
+        mainWindow.setCollectionBehavior(visibleOnFullScreen, .fullScreenAuxiliary)
     }
     
     public func hasShadow() -> Bool {
@@ -467,7 +509,7 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
         return true;
     }
-
+    
     public func windowShouldZoom(_ window: NSWindow, toFrame newFrame: NSRect) -> Bool {
         _emitEvent("maximize")
         if (isMaximizable()) {
@@ -475,7 +517,6 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
         return false;
     }
-
     
     public func windowDidResize(_ notification: Notification) {
         _emitEvent("resize")
@@ -499,6 +540,18 @@ public class WindowManager: NSObject, NSWindowDelegate {
     
     public func windowDidMove(_ notification: Notification) {
         _emitEvent("moved")
+    }
+    
+    public func windowDidBecomeKey(_ notification: Notification) {
+        if (mainWindow is NSPanel) {
+            _emitEvent("focus");
+        }
+    }
+    
+    public func windowDidResignKey(_ notification: Notification) {
+        if (mainWindow is NSPanel) {
+            _emitEvent("blur");
+        }
     }
     
     public func windowDidBecomeMain(_ notification: Notification) {

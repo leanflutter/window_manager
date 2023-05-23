@@ -56,6 +56,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   double _opacity = 1;
   bool _isIgnoreMouseEvents = false;
   String _iconType = _kIconTypeOriginal;
+  bool _isVisibleOnAllWorkspaces = false;
 
   @override
   void initState() {
@@ -648,9 +649,9 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 BotToast.showText(text: 'isAlwaysOnBottom: $isAlwaysOnBottom');
               },
               value: _isAlwaysOnBottom,
-              onChanged: (newValue) {
+              onChanged: (newValue) async {
                 _isAlwaysOnBottom = newValue;
-                windowManager.setAlwaysOnBottom(_isAlwaysOnBottom);
+                await windowManager.setAlwaysOnBottom(_isAlwaysOnBottom);
                 setState(() {});
               },
             ),
@@ -749,6 +750,47 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                   CupertinoButton(
                     child: const Text('Original'),
                     onPressed: () => _handleSetIcon(_kIconTypeOriginal),
+                  ),
+                ],
+              ),
+              onTap: () => _handleSetIcon(_kIconTypeDefault),
+            ),
+            PreferenceListSwitchItem(
+              title: const Text(
+                'isVisibleOnAllWorkspaces / setVisibleOnAllWorkspaces',
+              ),
+              onTap: () async {
+                bool isVisibleOnAllWorkspaces =
+                    await windowManager.isVisibleOnAllWorkspaces();
+                BotToast.showText(
+                  text: 'isVisibleOnAllWorkspaces: $isVisibleOnAllWorkspaces',
+                );
+              },
+              value: _isVisibleOnAllWorkspaces,
+              onChanged: (newValue) {
+                _isVisibleOnAllWorkspaces = newValue;
+                windowManager.setVisibleOnAllWorkspaces(
+                  _isVisibleOnAllWorkspaces,
+                  visibleOnFullScreen: _isVisibleOnAllWorkspaces,
+                );
+                setState(() {});
+              },
+            ),
+            PreferenceListItem(
+              title: const Text('setBadgeLabel'),
+              accessoryView: Row(
+                children: [
+                  CupertinoButton(
+                    child: const Text('null'),
+                    onPressed: () async {
+                      await windowManager.setBadgeLabel();
+                    },
+                  ),
+                  CupertinoButton(
+                    child: const Text('99+'),
+                    onPressed: () async {
+                      await windowManager.setBadgeLabel('99+');
+                    },
                   ),
                 ],
               ),

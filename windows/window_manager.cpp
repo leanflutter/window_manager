@@ -46,11 +46,13 @@ class WindowManager {
   int last_state = STATE_NORMAL;
 
   bool has_shadow_ = false;
+  bool is_always_on_bottom_ = false;
   bool is_frameless_ = false;
   bool is_prevent_close_ = false;
   double aspect_ratio_ = 0;
   POINT minimum_size_ = {0, 0};
   POINT maximum_size_ = {-1, -1};
+  double pixel_ratio_ = 1;
   bool is_resizable_ = true;
   bool is_skip_taskbar_ = true;
   std::string title_bar_style_ = "normal";
@@ -99,6 +101,8 @@ class WindowManager {
   void WindowManager::SetClosable(const flutter::EncodableMap& args);
   bool WindowManager::IsAlwaysOnTop();
   void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap& args);
+  bool WindowManager::IsAlwaysOnBottom();
+  void WindowManager::SetAlwaysOnBottom(const flutter::EncodableMap& args);
   std::string WindowManager::GetTitle();
   void WindowManager::SetTitle(const flutter::EncodableMap& args);
   void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args);
@@ -531,9 +535,10 @@ void WindowManager::SetMinimumSize(const flutter::EncodableMap& args) {
   double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
   if (width >= 0 && height >= 0) {
+    pixel_ratio_ = devicePixelRatio;
     POINT point = {};
-    point.x = static_cast<LONG>(width * devicePixelRatio);
-    point.y = static_cast<LONG>(height * devicePixelRatio);
+    point.x = static_cast<LONG>(width);
+    point.y = static_cast<LONG>(height);
     minimum_size_ = point;
   }
 }
@@ -545,9 +550,10 @@ void WindowManager::SetMaximumSize(const flutter::EncodableMap& args) {
   double height = std::get<double>(args.at(flutter::EncodableValue("height")));
 
   if (width >= 0 && height >= 0) {
+    pixel_ratio_ = devicePixelRatio;
     POINT point = {};
-    point.x = static_cast<LONG>(width * devicePixelRatio);
-    point.y = static_cast<LONG>(height * devicePixelRatio);
+    point.x = static_cast<LONG>(width);
+    point.y = static_cast<LONG>(height);
     maximum_size_ = point;
   }
 }
@@ -626,6 +632,25 @@ void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap& args) {
       std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnTop")));
   SetWindowPos(GetMainWindow(), isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST,
                0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+}
+
+bool WindowManager::IsAlwaysOnBottom() {
+    return is_always_on_bottom_;
+}
+
+void WindowManager::SetAlwaysOnBottom(const flutter::EncodableMap& args) {
+  is_always_on_bottom_ =
+      std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnBottom")));
+
+  SetWindowPos(
+    GetMainWindow(),
+    is_always_on_bottom_ ? HWND_BOTTOM : HWND_NOTOPMOST,
+    0,
+    0,
+    0,
+    0,
+    SWP_NOMOVE | SWP_NOSIZE
+  );
 }
 
 std::string WindowManager::GetTitle() {

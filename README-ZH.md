@@ -77,13 +77,13 @@
       - [isMinimizable  `macos`  `windows`](#isminimizable--macos--windows)
       - [setMinimizable  `macos`  `windows`](#setminimizable--macos--windows)
       - [isClosable  `windows`](#isclosable--windows)
-      - [isMaximizable  `windows`](#ismaximizable--windows)
+      - [isMaximizable `macos` `windows`](#ismaximizable--macos--windows)
       - [setMaximizable](#setmaximizable)
       - [setClosable  `macos`  `windows`](#setclosable--macos--windows)
       - [isAlwaysOnTop](#isalwaysontop)
       - [setAlwaysOnTop](#setalwaysontop)
       - [isAlwaysOnBottom](#isalwaysonbottom)
-      - [setAlwaysOnBottom  `linux`](#setalwaysonbottom--linux)
+      - [setAlwaysOnBottom  `linux` `windows`](#setalwaysonbottom--linux--windows)
       - [getTitle](#gettitle)
       - [setTitle](#settitle)
       - [setTitleBarStyle](#settitlebarstyle)
@@ -136,7 +136,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.3.1
+  window_manager: ^0.3.4
 ```
 
 或
@@ -193,8 +193,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WindowListener {
   @override
   void initState() {
-    windowManager.addListener(this);
     super.initState();
+    windowManager.addListener(this);
   }
 
   @override
@@ -305,9 +305,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WindowListener {
   @override
   void initState() {
+    super.initState();
     windowManager.addListener(this);
     _init();
-    super.initState();
   }
 
   @override
@@ -441,7 +441,7 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
       nullptr, nullptr, GetModuleHandle(nullptr), this);
 ```
 
-使用 flutter 3.7 创建的Windows项目
+使用 flutter 3.7 创建的 Windows 项目
 更改 `windows/runner/flutter_window.cpp` 如下:
 
 ```diff
@@ -700,7 +700,7 @@ Sets whether the window should show always on top of other windows.
 
 Returns `bool` - Whether the window is always below other windows.
 
-##### setAlwaysOnBottom  `linux`
+##### setAlwaysOnBottom  `linux`  `windows`
 
 Sets whether the window should show always below other windows.
 
@@ -737,6 +737,34 @@ Sets progress value in progress bar. Valid range is [0, 1.0].
 ##### setIcon  `windows`
 
 Sets window/taskbar icon.
+
+
+##### isVisibleOnAllWorkspaces  `macos`
+
+Returns `bool` - Whether the window is visible on all workspaces.
+
+
+##### setVisibleOnAllWorkspaces  `macos`
+
+Sets whether the window should be visible on all workspaces.
+
+Note: If you need to support dragging a window on top of a fullscreen
+window on another screen, you need to modify MainFlutterWindow
+to inherit from NSPanel
+
+```swift
+class MainFlutterWindow: NSPanel {
+// ...
+}
+```
+
+
+##### setBadgeLabel  `macos`
+
+Set/unset label on taskbar(dock) app icon
+
+Note that it's required to request access at your AppDelegate.swift like this:
+UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge])
 
 
 ##### hasShadow  `macos`  `windows`

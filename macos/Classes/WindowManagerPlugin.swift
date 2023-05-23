@@ -208,8 +208,19 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.setSkipTaskbar(args)
             result(true)
             break
+        case "setBadgeLabel":
+            windowManager.setBadgeLabel(args)
+            result(true)
+            break
         case "setProgressBar":
             windowManager.setProgressBar(args)
+            result(true)
+            break
+        case "isVisibleOnAllWorkspaces":
+            result(windowManager.isVisibleOnAllWorkspaces())
+            break
+        case "setVisibleOnAllWorkspaces":
+            windowManager.setVisibleOnAllWorkspaces(args)
             result(true)
             break
         case "hasShadow":
