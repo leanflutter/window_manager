@@ -520,6 +520,11 @@ class WindowManager {
     return await _channel.invokeMethod('isSkipTaskbar');
   }
 
+  /// Returns `bool` - Whether taskbar is visible (in case of autohiding).
+  Future<bool> isTaskbarVisible() async {
+    return await _channel.invokeMethod('isTaskbarVisible');
+  }
+
   /// Makes the window not show in the taskbar / dock.
   Future<void> setSkipTaskbar(bool isSkipTaskbar) async {
     final Map<String, dynamic> arguments = {

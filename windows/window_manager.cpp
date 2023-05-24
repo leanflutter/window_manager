@@ -108,6 +108,7 @@ class WindowManager {
   void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args);
   int WindowManager::GetTitleBarHeight();
   bool WindowManager::IsSkipTaskbar();
+  bool WindowManager::IsTaskbarVisible();
   void WindowManager::SetSkipTaskbar(const flutter::EncodableMap& args);
   void WindowManager::SetProgressBar(const flutter::EncodableMap& args);
   void WindowManager::SetIcon(const flutter::EncodableMap& args);
@@ -703,6 +704,26 @@ int WindowManager::GetTitleBarHeight() {
 
 bool WindowManager::IsSkipTaskbar() {
   return is_skip_taskbar_;
+}
+
+bool WindowManager::IsTaskbarVisible() {
+  HWND hTaskbarWnd;
+  hTaskbarWnd = ::FindWindowW(L"Shell_TrayWnd", NULL);
+  HMONITOR hMonitor = MonitorFromWindow(hTaskbarWnd , MONITOR_DEFAULTTONEAREST);
+  MONITORINFO info = { sizeof(MONITORINFO) };
+
+  if (GetMonitorInfo(hMonitor, &info)) {
+    RECT rect;
+    GetWindowRect(hTaskbarWnd , &rect);
+    if ((rect.top >= info.rcMonitor.bottom - 4) ||
+        (rect.right <= 2) ||
+        (rect.bottom <= 4) ||
+        (rect.left >= info.rcMonitor.right - 2))
+    return false;
+
+    return true;
+  }
+  return true;
 }
 
 void WindowManager::SetSkipTaskbar(const flutter::EncodableMap& args) {
