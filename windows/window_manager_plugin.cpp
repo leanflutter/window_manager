@@ -116,8 +116,6 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     // This must always be first or else the one of other two ifs will execute
     //  when window is in full screen and we don't want that
     if (wParam && window_manager->IsFullScreen()) {
-      NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-      sz->rgrc[0].bottom -= 3;
       return 0;
     }
 
@@ -132,9 +130,6 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
         sz->rgrc[0].right -= 8;
         sz->rgrc[0].bottom -= 9;
       }
-      // This cuts the app at the bottom by one pixel but that's necessary to
-      // prevent jitter when resizing the app
-      sz->rgrc[0].bottom += 1;
       return 0;
     }
 
