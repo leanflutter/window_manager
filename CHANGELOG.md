@@ -1,3 +1,10 @@
+### 0.3.5
+
+* [macos] fixes setMinimumSize and setMaximumSize (#341)
+* [windows] Remove app cut at the bottom and force refresh when back from fullscreen (#359), Fixes #311, #266, #228, #355, #237
+* [linux] fix: on-close event handler not be triggered on flutter >= 3.10 (#343)
+* [linux] feat: Dock Window to Screen like Taskbar (#347)
+
 ### 0.3.4
 
 * [macos] Fix blur and focus events when the MainFlutterWindow extends from NSPanel

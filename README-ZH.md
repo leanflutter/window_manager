@@ -145,7 +145,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.3.4
+  window_manager: ^0.3.5
 ```
 
 或
