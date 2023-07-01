@@ -255,19 +255,19 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               accessoryView: Row(
                 children: [
                   CupertinoButton(
-                    child: const Text('LEFT'),
+                    child: const Text('dock left'),
                     onPressed: () async {
-                      windowManager.dock(side: DockSide.LEFT, width: 500);
+                      windowManager.dock(side: DockSide.left, width: 500);
                     },
                   ),
                   CupertinoButton(
-                    child: const Text('RIGHT'),
+                    child: const Text('dock right'),
                     onPressed: () async {
-                      windowManager.dock(side: DockSide.RIGHT, width: 500);
+                      windowManager.dock(side: DockSide.right, width: 500);
                     },
                   ),
                   CupertinoButton(
-                    child: const Text('UNDOCK'),
+                    child: const Text('undock'),
                     onPressed: () async {
                       windowManager.undock();
                     },

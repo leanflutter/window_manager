@@ -29,7 +29,7 @@ const kWindowEventLeaveFullScreen = 'leave-full-screen';
 const kWindowEventDocked = 'docked';
 const kWindowEventUndocked = 'undocked';
 
-enum DockSide { LEFT, RIGHT }
+enum DockSide { left, right }
 
 // WindowManager
 class WindowManager {
@@ -277,16 +277,16 @@ class WindowManager {
   Future<DockSide?> isDocked() async {
     int? docked = await _channel.invokeMethod('isDocked');
     if (docked == 0) return null;
-    if (docked == 1) return DockSide.LEFT;
-    if (docked == 2) return DockSide.RIGHT;
+    if (docked == 1) return DockSide.left;
+    if (docked == 2) return DockSide.right;
     return null;
   }
 
   /// Docks the window. only works on Windows
   Future<void> dock({required DockSide side, required int width}) async {
     final Map<String, dynamic> arguments = {
-      'left': side == DockSide.LEFT,
-      'right': side == DockSide.RIGHT,
+      'left': side == DockSide.left,
+      'right': side == DockSide.right,
       'width': width,
     };
     await _channel.invokeMethod('dock', arguments);
