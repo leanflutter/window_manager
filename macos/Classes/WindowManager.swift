@@ -172,6 +172,22 @@ public class WindowManager: NSObject, NSWindowDelegate {
     public func restore() {
         mainWindow.deminiaturize(nil)
     }
+
+    public func isDockable() -> Bool {
+        return false
+    }
+
+    public func isDocked() -> Int {
+        return 0;
+    }
+    
+    public func dock(_ args: [String: Any]) {
+        if (isDockable()) {}
+    }
+    
+    public func undock() {
+        if (isDockable()) {}
+    }
     
     public func isFullScreen() -> Bool {
         return mainWindow.styleMask.contains(.fullScreen)

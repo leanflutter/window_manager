@@ -381,6 +381,20 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("restore") == 0) {
     window_manager->Restore();
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("isDockable") == 0) {
+    bool value = window_manager->IsDockable();
+    result->Success(flutter::EncodableValue(value));
+  } else if (method_name.compare("isDocked") == 0) {
+    int value = window_manager->IsDocked();
+    result->Success(flutter::EncodableValue(value));
+  } else if (method_name.compare("dock") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->Dock(args);
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("undock") == 0) {
+    bool value = window_manager->Undock();
+    result->Success(flutter::EncodableValue(value));
   } else if (method_name.compare("isFullScreen") == 0) {
     bool value = window_manager->IsFullScreen();
     result->Success(flutter::EncodableValue(value));
