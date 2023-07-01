@@ -252,6 +252,13 @@ class WindowManager {
       'isFullScreen': isFullScreen,
     };
     await _channel.invokeMethod('setFullScreen', arguments);
+    // (Windows) Force refresh the app so it 's back to the correct size
+    // (see GitHub issue #311)
+    if (!isFullScreen && Platform.isWindows) {
+      final size = await getSize();
+      setSize(size + const Offset(1, 1));
+      setSize(size);
+    }
   }
 
   /// This will make a window maintain an aspect ratio.
