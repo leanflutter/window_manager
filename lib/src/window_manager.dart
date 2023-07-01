@@ -269,11 +269,15 @@ class WindowManager {
   }
 
   /// Returns `bool` - Whether the window is dockable or not.
+  ///
+  /// @platforms windows
   Future<bool> isDockable() async {
     return await _channel.invokeMethod('isDockable');
   }
 
   /// Returns `bool` - Whether the window is docked.
+  ///
+  /// @platforms windows
   Future<DockSide?> isDocked() async {
     int? docked = await _channel.invokeMethod('isDocked');
     if (docked == 0) return null;
@@ -283,6 +287,8 @@ class WindowManager {
   }
 
   /// Docks the window. only works on Windows
+  ///
+  /// @platforms windows
   Future<void> dock({required DockSide side, required int width}) async {
     final Map<String, dynamic> arguments = {
       'left': side == DockSide.left,
@@ -293,6 +299,8 @@ class WindowManager {
   }
 
   /// Undocks the window. only works on Windows
+  ///
+  /// @platforms windows
   Future<bool> undock() async {
     return await _channel.invokeMethod('undock');
   }
@@ -477,7 +485,7 @@ class WindowManager {
 
   /// Returns `bool` - Whether the window can be manually maximized by the user.
   ///
-  /// @platforms windows
+  /// @platforms macos,windows
   Future<bool> isMaximizable() async {
     return await _channel.invokeMethod('isMaximizable');
   }

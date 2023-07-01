@@ -43,9 +43,13 @@ abstract class WindowListener {
   void onWindowLeaveFullScreen() {}
 
   /// Emitted when the window entered a docked state.
+  ///
+  /// @platforms windows
   void onWindowDocked() {}
 
   /// Emitted when the window leaves a docked state.
+  ///
+  /// @platforms windows
   void onWindowUndocked() {}
 
   /// Emitted all events.

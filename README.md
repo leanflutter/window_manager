@@ -58,6 +58,10 @@ English | [简体中文](./README-ZH.md)
       - [restore](#restore)
       - [isFullScreen](#isfullscreen)
       - [setFullScreen](#setfullscreen)
+      - [isDockable  `windows`](#isdockable--windows)
+      - [isDocked  `windows`](#isdocked--windows)
+      - [dock  `windows`](#dock--windows)
+      - [undock  `windows`](#undock--windows)
       - [setAspectRatio](#setaspectratio)
       - [setBackgroundColor](#setbackgroundcolor)
       - [setAlignment](#setalignment)
@@ -77,13 +81,13 @@ English | [简体中文](./README-ZH.md)
       - [isMinimizable  `macos`  `windows`](#isminimizable--macos--windows)
       - [setMinimizable  `macos`  `windows`](#setminimizable--macos--windows)
       - [isClosable  `windows`](#isclosable--windows)
-      - [isMaximizable `macos` `windows`](#ismaximizable--macos--windows)
+      - [isMaximizable  `macos`  `windows`](#ismaximizable--macos--windows)
       - [setMaximizable](#setmaximizable)
       - [setClosable  `macos`  `windows`](#setclosable--macos--windows)
       - [isAlwaysOnTop](#isalwaysontop)
       - [setAlwaysOnTop](#setalwaysontop)
       - [isAlwaysOnBottom](#isalwaysonbottom)
-      - [setAlwaysOnBottom  `linux` `windows`](#setalwaysonbottom--linux--windows)
+      - [setAlwaysOnBottom  `linux`  `windows`](#setalwaysonbottom--linux--windows)
       - [getTitle](#gettitle)
       - [setTitle](#settitle)
       - [setTitleBarStyle](#settitlebarstyle)
@@ -92,6 +96,9 @@ English | [简体中文](./README-ZH.md)
       - [setSkipTaskbar](#setskiptaskbar)
       - [setProgressBar  `macos`  `windows`](#setprogressbar--macos--windows)
       - [setIcon  `windows`](#seticon--windows)
+      - [isVisibleOnAllWorkspaces  `macos`](#isvisibleonallworkspaces--macos)
+      - [setVisibleOnAllWorkspaces  `macos`](#setvisibleonallworkspaces--macos)
+      - [setBadgeLabel  `macos`](#setbadgelabel--macos)
       - [hasShadow  `macos`  `windows`](#hasshadow--macos--windows)
       - [setHasShadow  `macos`  `windows`](#sethasshadow--macos--windows)
       - [getOpacity](#getopacity)
@@ -117,7 +124,10 @@ English | [简体中文](./README-ZH.md)
       - [onWindowMoved  `macos`  `windows`](#onwindowmoved--macos--windows)
       - [onWindowEnterFullScreen](#onwindowenterfullscreen)
       - [onWindowLeaveFullScreen](#onwindowleavefullscreen)
+      - [onWindowDocked  `windows`](#onwindowdocked--windows)
+      - [onWindowUndocked  `windows`](#onwindowundocked--windows)
       - [onWindowEvent](#onwindowevent)
+- [Contributors](#contributors)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -593,6 +603,26 @@ Returns `bool` - Whether the window is in fullscreen mode.
 
 Sets whether the window should be in fullscreen mode.
 
+##### isDockable  `windows`
+
+Returns `bool` - Whether the window is dockable or not.
+
+
+##### isDocked  `windows`
+
+Returns `bool` - Whether the window is docked.
+
+
+##### dock  `windows`
+
+Docks the window. only works on Windows
+
+
+##### undock  `windows`
+
+Undocks the window. only works on Windows
+
+
 ##### setAspectRatio
 
 This will make a window maintain an aspect ratio.
@@ -674,7 +704,7 @@ Sets whether the window can be manually minimized by user.
 Returns `bool` - Whether the window can be manually closed by user.
 
 
-##### isMaximizable  `windows`
+##### isMaximizable  `macos`  `windows`
 
 Returns `bool` - Whether the window can be manually maximized by the user.
 
@@ -869,6 +899,16 @@ Emitted when the window enters a full-screen state.
 ##### onWindowLeaveFullScreen
 
 Emitted when the window leaves a full-screen state.
+
+##### onWindowDocked  `windows`
+
+Emitted when the window entered a docked state.
+
+
+##### onWindowUndocked  `windows`
+
+Emitted when the window leaves a docked state.
+
 
 ##### onWindowEvent
 
