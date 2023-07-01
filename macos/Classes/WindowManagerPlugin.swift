@@ -122,6 +122,20 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.restore()
             result(true)
             break
+        case "isDockable":
+            result(windowManager.isDockable())
+            break
+        case "isDocked":
+            result(windowManager.isDocked())
+            break
+        case "dock":
+            windowManager.dock(args)
+            result(true)
+            break
+        case "undock":
+            windowManager.undock()
+            result(true)
+            break
         case "isFullScreen":
             result(windowManager.isFullScreen())
             break

@@ -1,7 +1,10 @@
 #include "include/window_manager/window_manager_plugin.h"
 
 // This must be included before many other Windows headers.
-#include <windows.h>
+#pragma once
+
+#include <Windows.h>
+#include <ShellScalingApi.h>
 
 #include <shobjidl_core.h>
 
@@ -16,13 +19,19 @@
 #include <sstream>
 
 #pragma comment(lib, "dwmapi.lib")
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "shcore.lib")
+#pragma comment(lib, "Gdi32.lib")
 
 #define STATE_NORMAL 0
 #define STATE_MAXIMIZED 1
 #define STATE_MINIMIZED 2
 #define STATE_FULLSCREEN_ENTERED 3
+#define STATE_DOCKED 4
 
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 19
+
+#define APPBAR_CALLBACK WM_USER + 0x01;
 
 namespace {
 
@@ -54,6 +63,8 @@ class WindowManager {
   POINT maximum_size_ = {-1, -1};
   double pixel_ratio_ = 1;
   bool is_resizable_ = true;
+  int is_docked_ = 0;
+  bool is_registered_for_docking_ = false;
   bool is_skip_taskbar_ = true;
   std::string title_bar_style_ = "normal";
   double opacity_ = 1;
@@ -82,6 +93,10 @@ class WindowManager {
   bool WindowManager::IsMinimized();
   void WindowManager::Minimize();
   void WindowManager::Restore();
+  bool WindowManager::IsDockable();
+  int WindowManager::IsDocked();
+  void WindowManager::Dock(const flutter::EncodableMap& args);
+  bool WindowManager::Undock();
   bool WindowManager::IsFullScreen();
   void WindowManager::SetFullScreen(const flutter::EncodableMap& args);
   void WindowManager::SetAspectRatio(const flutter::EncodableMap& args);
@@ -130,6 +145,13 @@ class WindowManager {
   LONG g_style_before_fullscreen;
   LONG g_ex_style_before_fullscreen;
   ITaskbarList3* taskbar_ = nullptr;
+  double GetDpiForHwnd(HWND hWnd);
+  BOOL WindowManager::RegisterAccessBar(HWND hwnd, BOOL fRegister);
+  void PASCAL WindowManager::AppBarQuerySetPos(HWND hwnd,
+                                               UINT uEdge,
+                                               LPRECT lprc,
+                                               PAPPBARDATA pabd);
+  void WindowManager::DockAccessBar(HWND hwnd, UINT edge, UINT windowWidth);
 };
 
 WindowManager::WindowManager() {}
@@ -320,6 +342,187 @@ void WindowManager::Restore() {
   if (windowPlacement.showCmd != SW_NORMAL) {
     PostMessage(mainWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
   }
+}
+
+bool WindowManager::IsDockable() {
+  return true;
+}
+
+int WindowManager::IsDocked() {
+  return is_docked_;
+}
+
+double WindowManager::GetDpiForHwnd(HWND hWnd)
+{
+	auto monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+	UINT newDpiX;
+	UINT newDpiY;
+	if (FAILED(GetDpiForMonitor(monitor, MONITOR_DPI_TYPE::MDT_EFFECTIVE_DPI, &newDpiX, &newDpiY)))
+	{
+		newDpiX = 96;
+		newDpiY = 96;
+	}
+	return ((double) newDpiX);
+} 
+
+void WindowManager::Dock(const flutter::EncodableMap& args) {
+  HWND mainWindow = GetMainWindow();
+
+  double dpi = GetDpiForHwnd(mainWindow);
+  double scalingFactor = dpi / 96.0;
+
+  bool left = std::get<bool>(args.at(flutter::EncodableValue("left")));
+  bool right = std::get<bool>(args.at(flutter::EncodableValue("right")));
+  int width = std::get<int>(args.at(flutter::EncodableValue("width")));
+
+  // first register bar
+  RegisterAccessBar(mainWindow, true);
+
+  //
+  UINT edge = ABE_LEFT;
+  if (right && !left) {
+    edge = ABE_RIGHT;
+  }
+
+  UINT uw = static_cast<UINT>(width * scalingFactor + 0.5);
+
+  // dock window
+  DockAccessBar(mainWindow, edge, uw);
+}
+
+bool WindowManager::Undock() {
+  HWND mainWindow = GetMainWindow();
+  bool result = RegisterAccessBar(mainWindow, false);
+  is_docked_ = 0;
+  return result;
+}
+
+void PASCAL WindowManager::AppBarQuerySetPos(HWND hwnd,
+                                             UINT uEdge,
+                                             LPRECT lprc,
+                                             PAPPBARDATA pabd) {
+  int iHeight = 0;
+  int iWidth = 0;
+
+  pabd->hWnd = hwnd;
+  pabd->rc = *lprc;
+  pabd->uEdge = uEdge;
+
+  // Copy the screen coordinates of the appbar's bounding
+  // rectangle into the APPBARDATA structure.
+  if ((uEdge == ABE_LEFT) || (uEdge == ABE_RIGHT)) {
+    iWidth = pabd->rc.right - pabd->rc.left;
+    pabd->rc.top = 0;
+    pabd->rc.bottom = GetSystemMetrics(SM_CYSCREEN);
+  } else {
+    iHeight = pabd->rc.bottom - pabd->rc.top;
+    pabd->rc.left = 0;
+    pabd->rc.right = GetSystemMetrics(SM_CXSCREEN);
+  }
+
+  // Query the system for an approved size and position.
+  SHAppBarMessage(ABM_QUERYPOS, pabd);
+
+  // Adjust the rectangle, depending on the edge to which the appbar is
+  // anchored.
+  switch (uEdge) {
+    case ABE_LEFT:
+      pabd->rc.right = pabd->rc.left + iWidth;
+      break;
+
+    case ABE_RIGHT:
+      pabd->rc.left = pabd->rc.right - iWidth;
+      break;
+
+    case ABE_TOP:
+      pabd->rc.bottom = pabd->rc.top + iHeight;
+      break;
+
+    case ABE_BOTTOM:
+      pabd->rc.top = pabd->rc.bottom - iHeight;
+      break;
+  }
+
+  // Pass the final bounding rectangle to the system.
+  SHAppBarMessage(ABM_SETPOS, pabd);
+
+  // Move and size the appbar so that it conforms to the
+  // bounding rectangle passed to the system.
+  UINT uFlags = NULL;
+  SetWindowPos(hwnd, HWND_TOP, pabd->rc.left, pabd->rc.top,
+               pabd->rc.right - pabd->rc.left, pabd->rc.bottom - pabd->rc.top,
+               uFlags);
+}
+
+BOOL WindowManager::RegisterAccessBar(HWND hwnd, BOOL fRegister) {
+
+  APPBARDATA abd;
+
+  // Specify the structure size and handle to the appbar.
+  abd.cbSize = sizeof(APPBARDATA);
+  abd.hWnd = hwnd;
+
+  if (fRegister && is_registered_for_docking_) {
+    return false;
+  }
+
+  if (!fRegister && !is_registered_for_docking_) {
+    return false;
+  }
+
+  if (!fRegister && is_registered_for_docking_) {
+    // Unregister the appbar.
+    SHAppBarMessage(ABM_REMOVE, &abd);
+    is_registered_for_docking_ = false;
+    is_docked_ = 0;
+    return true;
+  }
+
+  if (fRegister && !is_registered_for_docking_) {
+    // Provide an identifier for notification messages.
+    abd.uCallbackMessage = APPBAR_CALLBACK;
+
+    // Register the appbar.
+    if (!SHAppBarMessage(ABM_NEW, &abd))
+      return false;
+
+    is_docked_ = 1;  // default edge
+    is_registered_for_docking_ = true;
+    return false;
+  }
+
+  return false;
+}
+
+void WindowManager::DockAccessBar(HWND hwnd, UINT edge, UINT windowWidth) {
+  APPBARDATA abd;
+  RECT lprc;
+
+  lprc.top = 0;
+  lprc.bottom = 0;
+
+  if (edge == ABE_LEFT) {
+    lprc.left = 0;
+    lprc.right = windowWidth;
+  } else {
+    lprc.left = GetSystemMetrics(SM_CXSCREEN) - windowWidth;
+    lprc.right = GetSystemMetrics(SM_CXSCREEN);
+  }
+
+  // Specify the structure size and handle to the appbar.
+  abd.cbSize = sizeof(APPBARDATA);
+  abd.hWnd = hwnd;
+  abd.uCallbackMessage = APPBAR_CALLBACK;
+
+  AppBarQuerySetPos(hwnd, edge, &lprc, &abd);
+
+  if (edge == ABE_LEFT) {
+    is_docked_ = 1;
+  } else if (edge == ABE_RIGHT) {
+    is_docked_ = 2;
+  }
+
+  return;
 }
 
 bool WindowManager::IsFullScreen() {
@@ -842,6 +1045,7 @@ void WindowManager::PopUpWindowMenu(const flutter::EncodableMap& args) {
 
 void WindowManager::StartDragging() {
   ReleaseCapture();
+  Undock();
   SendMessage(GetMainWindow(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
 }
 
@@ -852,6 +1056,7 @@ void WindowManager::StartResizing(const flutter::EncodableMap& args) {
   bool right = std::get<bool>(args.at(flutter::EncodableValue("right")));
 
   HWND hWnd = GetMainWindow();
+  Undock();
   ReleaseCapture();
   LONG command;
   if (top && !bottom && !right && !left) {
