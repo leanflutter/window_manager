@@ -137,6 +137,7 @@ class WindowManager {
   void WindowManager::StartResizing(const flutter::EncodableMap& args);
 
  private:
+  static constexpr auto kFlutterViewWindowClassName = L"FLUTTERVIEW";
   bool g_is_window_fullscreen = false;
   std::string g_title_bar_style_before_fullscreen;
   bool g_is_frameless_before_fullscreen;
@@ -541,69 +542,55 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
   // Save current window state if not already fullscreen.
   if (!g_is_window_fullscreen) {
     // Save current window information.
-    g_maximized_before_fullscreen = !!::IsZoomed(mainWindow);
+    g_maximized_before_fullscreen = ::IsZoomed(mainWindow);
     g_style_before_fullscreen = GetWindowLong(mainWindow, GWL_STYLE);
     g_ex_style_before_fullscreen = GetWindowLong(mainWindow, GWL_EXSTYLE);
-    if (g_maximized_before_fullscreen) {
-      SendMessage(mainWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
-    }
     ::GetWindowRect(mainWindow, &g_frame_before_fullscreen);
     g_title_bar_style_before_fullscreen = title_bar_style_;
     g_is_frameless_before_fullscreen = is_frameless_;
   }
 
   if (isFullScreen) {
-    flutter::EncodableMap args2 = flutter::EncodableMap();
-    args2[flutter::EncodableValue("titleBarStyle")] =
-        flutter::EncodableValue("normal");
-    SetTitleBarStyle(args2);
-
-    // Set new window style and size.
-    ::SetWindowLong(mainWindow, GWL_STYLE,
-                    g_style_before_fullscreen & ~(WS_CAPTION | WS_THICKFRAME));
-    ::SetWindowLong(mainWindow, GWL_EXSTYLE,
-                    g_ex_style_before_fullscreen &
-                        ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE |
-                          WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
-
-    MONITORINFO monitor_info;
-    monitor_info.cbSize = sizeof(monitor_info);
-    ::GetMonitorInfo(::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST),
-                     &monitor_info);
-    ::SetWindowPos(mainWindow, NULL, monitor_info.rcMonitor.left,
-                   monitor_info.rcMonitor.top,
-                   monitor_info.rcMonitor.right - monitor_info.rcMonitor.left,
-                   monitor_info.rcMonitor.bottom - monitor_info.rcMonitor.top,
-                   SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     ::SendMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-  } else {
-    ::SetWindowLong(mainWindow, GWL_STYLE, g_style_before_fullscreen);
-    ::SetWindowLong(mainWindow, GWL_EXSTYLE, g_ex_style_before_fullscreen);
-
-    SendMessage(mainWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
-
-    if (title_bar_style_ != g_title_bar_style_before_fullscreen) {
-      flutter::EncodableMap args2 = flutter::EncodableMap();
-      args2[flutter::EncodableValue("titleBarStyle")] =
-          flutter::EncodableValue(g_title_bar_style_before_fullscreen);
-      SetTitleBarStyle(args2);
+    if (!is_frameless_) {
+    auto monitor = MONITORINFO{};
+    auto placement = WINDOWPLACEMENT{};
+    monitor.cbSize = sizeof(MONITORINFO);
+    placement.length = sizeof(WINDOWPLACEMENT);
+    ::GetWindowPlacement(mainWindow, &placement);
+    ::GetMonitorInfo(::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST),
+                     &monitor);
+        ::SetWindowLongPtr(mainWindow, GWL_STYLE, g_style_before_fullscreen & ~WS_OVERLAPPEDWINDOW);
+    ::SetWindowPos(mainWindow, HWND_TOP, monitor.rcMonitor.left,
+                   monitor.rcMonitor.top, monitor.rcMonitor.right,
+                   monitor.rcMonitor.bottom,
+                   SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
     }
-
-    if (g_is_frameless_before_fullscreen)
-      SetAsFrameless();
-
-    if (g_maximized_before_fullscreen) {
-      flutter::EncodableMap args2 = flutter::EncodableMap();
-      args2[flutter::EncodableValue("vertically")] =
-          flutter::EncodableValue(false);
-      Maximize(args2);
+  } else {
+    if (!g_maximized_before_fullscreen)
+      Restore();
+    ::SetWindowLongPtr(mainWindow, GWL_STYLE, g_style_before_fullscreen | WS_OVERLAPPEDWINDOW);
+    if (::IsZoomed(mainWindow)) {
+      // Refresh the parent mainWindow.
+      ::SetWindowPos(mainWindow, nullptr, 0, 0, 0, 0,
+                     SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                         SWP_FRAMECHANGED);
+      auto rect = RECT{};
+      ::GetClientRect(mainWindow, &rect);
+      auto flutter_view =
+          ::FindWindowEx(mainWindow, nullptr, kFlutterViewWindowClassName, nullptr);
+      ::SetWindowPos(flutter_view, nullptr, rect.left, rect.top,
+                     rect.right - rect.left, rect.bottom - rect.top,
+                     SWP_NOACTIVATE | SWP_NOZORDER);
+      if (g_maximized_before_fullscreen)
+        PostMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
     } else {
       ::SetWindowPos(
-          mainWindow, NULL, g_frame_before_fullscreen.left,
+          mainWindow, nullptr, g_frame_before_fullscreen.left,
           g_frame_before_fullscreen.top,
           g_frame_before_fullscreen.right - g_frame_before_fullscreen.left,
           g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top,
-          SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+          SWP_NOACTIVATE | SWP_NOZORDER);
     }
   }
 

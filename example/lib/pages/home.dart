@@ -930,7 +930,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
             // ],
           ),
           child: Scaffold(
-            appBar: PreferredSize(
+            appBar: _isFullScreen ? null : PreferredSize(
               preferredSize: const Size.fromHeight(kWindowCaptionHeight),
               child: WindowCaption(
                 brightness: Theme.of(context).brightness,
