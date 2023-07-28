@@ -703,12 +703,14 @@ class WindowManager {
   }
 
   /// Starts a window drag based on the specified mouse-down event.
+  /// On Windows, this is disabled during full screen mode.
   Future<void> startDragging() async {
     if (Platform.isWindows && await isFullScreen()) return;
     await _channel.invokeMethod('startDragging');
   }
 
   /// Starts a window resize based on the specified mouse-down & mouse-move event.
+  /// On Windows, this is disabled during full screen mode.
   ///
   /// @platforms linux,windows
   Future<void> startResizing(ResizeEdge resizeEdge) async {

@@ -140,11 +140,8 @@ class WindowManager {
   static constexpr auto kFlutterViewWindowClassName = L"FLUTTERVIEW";
   bool g_is_window_fullscreen = false;
   std::string g_title_bar_style_before_fullscreen;
-  bool g_is_frameless_before_fullscreen;
-  RECT g_frame_before_fullscreen;
   bool g_maximized_before_fullscreen;
   LONG g_style_before_fullscreen;
-  LONG g_ex_style_before_fullscreen;
   ITaskbarList3* taskbar_ = nullptr;
   double GetDpiForHwnd(HWND hWnd);
   BOOL WindowManager::RegisterAccessBar(HWND hwnd, BOOL fRegister);
@@ -536,18 +533,19 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
 
   HWND mainWindow = GetMainWindow();
 
-  // Inspired by how Chromium does this
+  // Previously inspired by how Chromium does this
   // https://src.chromium.org/viewvc/chrome/trunk/src/ui/views/win/fullscreen_handler.cc?revision=247204&view=markup
+  // Instead, we use a modified implementation of how the media_kit package implements this
+  // (we got permission from the author, I believe)
+  // https://github.com/alexmercerind/media_kit/blob/1226bcff36eab27cb17d60c33e9c15ca489c1f06/media_kit_video/windows/utils.cc
 
   // Save current window state if not already fullscreen.
   if (!g_is_window_fullscreen) {
     // Save current window information.
     g_maximized_before_fullscreen = ::IsZoomed(mainWindow);
     g_style_before_fullscreen = GetWindowLong(mainWindow, GWL_STYLE);
-    g_ex_style_before_fullscreen = GetWindowLong(mainWindow, GWL_EXSTYLE);
     ::GetWindowRect(mainWindow, &g_frame_before_fullscreen);
     g_title_bar_style_before_fullscreen = title_bar_style_;
-    g_is_frameless_before_fullscreen = is_frameless_;
   }
 
   if (isFullScreen) {
@@ -560,7 +558,7 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
     ::GetWindowPlacement(mainWindow, &placement);
     ::GetMonitorInfo(::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST),
                      &monitor);
-        ::SetWindowLongPtr(mainWindow, GWL_STYLE, g_style_before_fullscreen & ~WS_OVERLAPPEDWINDOW);
+    ::SetWindowLongPtr(mainWindow, GWL_STYLE, g_style_before_fullscreen & ~WS_OVERLAPPEDWINDOW);
     ::SetWindowPos(mainWindow, HWND_TOP, monitor.rcMonitor.left,
                    monitor.rcMonitor.top, monitor.rcMonitor.right,
                    monitor.rcMonitor.bottom,
