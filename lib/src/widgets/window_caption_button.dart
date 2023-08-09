@@ -182,6 +182,121 @@ class _WindowCaptionButtonState extends State<WindowCaptionButton> {
   }
 }
 
+/// The [WindowCaptionOption] widget is intended to be used within a [WindowCaption].
+/// When added to the list of the options, each window caption option will provide an addtional toolbar item with uneque [onPressed] callback.
+/// usage example (Adding a button to change themes from light to dark):
+/// ```dart
+/// WindowCaption(
+/// options: [
+///   WindowCaptionOption.icon(() { 
+///      ref.read(themeProvider.notifier).toggleDarkMode();
+///   }, 
+///   theme.darkMode ? Icons.dark_mode_outlined : Icons.light_mode),
+///   ],
+///),
+/// ```
+class WindowCaptionOption extends StatefulWidget {
+  WindowCaptionOption(this.onPressed, {
+    Key? key,
+    this.brightness,
+    this.icon,
+  }) : super(key: key);
+
+  WindowCaptionOption.icon(this.onPressed, IconData iconData,{
+    Key? key,
+    this.brightness,
+  })  :
+       icon = Icon(iconData, size: 18,),
+       super(key: key);
+
+  final Brightness? brightness;
+  final Widget? icon;
+  final VoidCallback onPressed;
+
+  final _ButtonBgColorScheme _lightButtonBgColorScheme = _ButtonBgColorScheme(
+    normal: Colors.transparent,
+    hovered: Colors.black.withOpacity(0.0373),
+    pressed: Colors.black.withOpacity(0.0241),
+  );
+  final _ButtonIconColorScheme _lightButtonIconColorScheme = _ButtonIconColorScheme(
+    normal: Colors.black.withOpacity(0.8956),
+    hovered: Colors.black.withOpacity(0.8956),
+    pressed: Colors.black.withOpacity(0.6063),
+    disabled: Colors.black.withOpacity(0.3614),
+  );
+  final _ButtonBgColorScheme _darkButtonBgColorScheme = _ButtonBgColorScheme(
+    normal: Colors.transparent,
+    hovered: Colors.white.withOpacity(0.0605),
+    pressed: Colors.white.withOpacity(0.0419),
+  );
+  final _ButtonIconColorScheme _darkButtonIconColorScheme = _ButtonIconColorScheme(
+    normal: Colors.white,
+    hovered: Colors.white,
+    pressed: Colors.white.withOpacity(0.786),
+    disabled: Colors.black.withOpacity(0.3628),
+  );
+
+  _ButtonBgColorScheme get buttonBgColorScheme => brightness != Brightness.dark
+      ? _lightButtonBgColorScheme
+      : _darkButtonBgColorScheme;
+
+  _ButtonIconColorScheme get buttonIconColorScheme =>
+      brightness != Brightness.dark
+          ? _lightButtonIconColorScheme
+          : _darkButtonIconColorScheme;
+
+  @override
+  State<WindowCaptionOption> createState() => _WindowCaptionOptionState();
+}
+
+class _WindowCaptionOptionState extends State<WindowCaptionOption> {
+  bool _isHovering = false;
+  bool _isPressed = false;
+
+  void _onEntered({required bool hovered}) {
+    setState(() => _isHovering = hovered);
+  }
+
+  void _onActive({required bool pressed}) {
+    setState(() => _isPressed = pressed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Color bgColor = widget.buttonBgColorScheme.normal;
+
+    if (_isHovering) {
+      bgColor = widget.buttonBgColorScheme.hovered;
+    }
+    if (_isPressed) {
+      bgColor = widget.buttonBgColorScheme.pressed;
+    }
+
+    return MouseRegion(
+      onExit: (value) => _onEntered(hovered: false),
+      onHover: (value) => _onEntered(hovered: true),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => _onActive(pressed: true),
+        onTapCancel: () => _onActive(pressed: false),
+        onTapUp: (_) => _onActive(pressed: false),
+        onTap: widget.onPressed,
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 46, minHeight: 32),
+          decoration: BoxDecoration(
+            color: bgColor,
+          ),
+          child: Center(
+            child: Opacity(
+              opacity: .7, 
+              child: widget.icon,) ,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ButtonBgColorScheme {
   _ButtonBgColorScheme({
     required this.normal,

@@ -23,17 +23,33 @@ const double kWindowCaptionHeight = 32;
 /// )
 /// ```
 /// {@end-tool}
+/// 
+/// An optional List<Widget>[options] can be added to the [WindowCaption] to provide addtional buttons in the toolbar.
+/// Each child option will be displayed to the left of the minimize button.
+/// usage example (Adding a button to change themes from light to dark):
+/// ```dart
+/// WindowCaption(
+/// options: [
+///   WindowCaptionOption.icon(() { 
+///     ref.read(themeProvider.notifier).toggleDarkMode();
+///     }, 
+///     theme.darkMode ? Icons.dark_mode_outlined : Icons.light_mode),
+///   ],
+///),
+/// ```
 class WindowCaption extends StatefulWidget {
   const WindowCaption({
     Key? key,
     this.title,
     this.backgroundColor,
     this.brightness,
+    this.options
   }) : super(key: key);
 
   final Widget? title;
   final Color? backgroundColor;
   final Brightness? brightness;
+  final List<Widget>? options;
 
   @override
   State<WindowCaption> createState() => _WindowCaptionState();
@@ -86,6 +102,9 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
               ),
             ),
           ),
+          if(widget.options != null)
+          for(final option in widget.options!)
+          option,
           WindowCaptionButton.minimize(
             brightness: widget.brightness,
             onPressed: () async {
