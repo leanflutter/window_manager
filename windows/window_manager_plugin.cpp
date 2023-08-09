@@ -184,8 +184,6 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     } else {
       _EmitEvent("blur");
     }
-    if (window_manager->is_frameless_)
-      return 1;
   } else if (message == WM_EXITSIZEMOVE) {
     if (window_manager->is_resizing_) {
       _EmitEvent("resized");
