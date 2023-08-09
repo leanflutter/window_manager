@@ -140,6 +140,7 @@ class WindowManager {
   static constexpr auto kFlutterViewWindowClassName = L"FLUTTERVIEW";
   bool g_is_window_fullscreen = false;
   std::string g_title_bar_style_before_fullscreen;
+  RECT g_frame_before_fullscreen;
   bool g_maximized_before_fullscreen;
   LONG g_style_before_fullscreen;
   ITaskbarList3* taskbar_ = nullptr;
