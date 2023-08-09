@@ -402,7 +402,7 @@ static void my_application_activate(GApplication* application) {
 
 ...
 
-```
+```usage
 
 ##### macOS
 
