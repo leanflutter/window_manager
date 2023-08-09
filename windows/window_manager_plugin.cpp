@@ -184,9 +184,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     } else {
       _EmitEvent("blur");
     }
-
-    if (window_manager->title_bar_style_ == "hidden" ||
-        window_manager->is_frameless_)
+    if (window_manager->is_frameless_)
       return 1;
   } else if (message == WM_EXITSIZEMOVE) {
     if (window_manager->is_resizing_) {
