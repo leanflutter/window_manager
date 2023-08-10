@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_acrylic/flutter_acrylic.dart';
 import 'package:preference_list/preference_list.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -123,19 +124,229 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
               title: const Text('ThemeMode'),
               detailText: Text('${sharedConfig.themeMode}'),
               onTap: () async {
-                ThemeMode newThemeMode =
-                    sharedConfig.themeMode == ThemeMode.light
-                        ? ThemeMode.dark
-                        : ThemeMode.light;
+                ThemeMode newThemeMode;
+                if (sharedConfig.themeMode == ThemeMode.light) {
+                  newThemeMode = ThemeMode.dark;
+                } else if (sharedConfig.themeMode == ThemeMode.dark) {
+                  newThemeMode = ThemeMode.system;
+                } else {
+                  newThemeMode = ThemeMode.light;
+                }
+
+                final brightness = {
+                  ThemeMode.light: Brightness.light,
+                  ThemeMode.dark: Brightness.dark,
+                  ThemeMode.system: MediaQuery.of(context).platformBrightness,
+                };
 
                 await sharedConfigManager.setThemeMode(newThemeMode);
-                await windowManager.setBrightness(
-                  newThemeMode == ThemeMode.light
-                      ? Brightness.light
-                      : Brightness.dark,
-                );
+                await windowManager.setBrightness(brightness[newThemeMode]!);
+                setState(() {});
               },
             ),
+          ],
+        ),
+        PreferenceListSection(
+          title: const Text('flutter_acrylic'),
+          children: [
+            PreferenceListSwitchItem(
+              title: const Text('Use Native Background'),
+              value: sharedConfig.useNativeBackground,
+              onChanged: (value) {
+                sharedConfigManager.setUseNativeBackground(value);
+                setState(() {});
+              },
+            ),
+            PreferenceListItem(
+              title: const Text('Window.setEffect'),
+              accessoryView: SizedBox(
+                width: 300,
+                child: Wrap(
+                  children: [
+                    CupertinoButton(
+                      child: const Text('WindowEffect.transparent'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.transparent,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.disabled'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.disabled,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.solid'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.solid,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.aero'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.aero,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.acrylic'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.acrylic,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.mica'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.mica,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.tabbed'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.tabbed,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.titlebar'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.titlebar,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.menu'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.menu,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.popover'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.popover,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.sidebar'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.sidebar,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.headerView'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.headerView,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.sheet'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.sheet,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.windowBackground'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.windowBackground,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.hudWindow'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.hudWindow,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.fullScreenUI'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.fullScreenUI,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.toolTip'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.toolTip,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.contentBackground'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.contentBackground,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.underWindowBackground'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.underWindowBackground,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                    CupertinoButton(
+                      child: const Text('WindowEffect.underPageBackground'),
+                      onPressed: () async {
+                        await Window.setEffect(
+                          effect: WindowEffect.underPageBackground,
+                          dark: Theme.of(context).brightness == Brightness.dark,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            )
           ],
         ),
         PreferenceListSection(
@@ -918,8 +1129,10 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
       children: [
         Container(
           margin: const EdgeInsets.all(0),
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: sharedConfig.useNativeBackground
+                ? Colors.transparent
+                : Colors.white,
             // border: Border.all(color: Colors.grey.withOpacity(0.4), width: 1),
             // boxShadow: <BoxShadow>[
             //   BoxShadow(
@@ -956,7 +1169,9 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                     margin: const EdgeInsets.all(0),
                     width: double.infinity,
                     height: 54,
-                    color: Colors.grey.withOpacity(0.3),
+                    color: sharedConfig.useNativeBackground
+                        ? Theme.of(context).canvasColor.withOpacity(.25)
+                        : Colors.grey.withOpacity(0.3),
                     child: const Center(
                       child: Text('DragToMoveArea'),
                     ),
@@ -972,7 +1187,9 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                       child: Container(
                         width: double.infinity,
                         height: double.infinity,
-                        color: Colors.grey.withOpacity(0.3),
+                        color: sharedConfig.useNativeBackground
+                            ? Theme.of(context).canvasColor.withOpacity(.5)
+                            : Colors.grey.withOpacity(0.3),
                         child: Center(
                           child: GestureDetector(
                             child: const Text('DragToResizeArea'),

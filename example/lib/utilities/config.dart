@@ -57,7 +57,9 @@ class Config {
   /// The shared instance of [Config].
   static final Config instance = Config._();
 
-  ThemeMode themeMode = ThemeMode.light;
+  ThemeMode themeMode = ThemeMode.system;
+
+  bool useNativeBackground = true;
 }
 
 class ConfigManager extends _ConfigChangeNotifier {
@@ -70,6 +72,11 @@ class ConfigManager extends _ConfigChangeNotifier {
 
   Future<void> setThemeMode(ThemeMode value) async {
     sharedConfig.themeMode = value;
+    notifyListeners();
+  }
+
+  Future<void> setUseNativeBackground(bool value) async {
+    sharedConfig.useNativeBackground = value;
     notifyListeners();
   }
 }
