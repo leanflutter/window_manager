@@ -6,24 +6,39 @@ Future<Offset> calcWindowPosition(
   Alignment alignment,
 ) async {
   Display primaryDisplay = await screenRetriever.getPrimaryDisplay();
+  List<Display> allDisplays = await screenRetriever.getAllDisplays();
+  Offset cursorScreenPoint = await screenRetriever.getCursorScreenPoint();
 
-  num visibleWidth = primaryDisplay.size.width;
-  num visibleHeight = primaryDisplay.size.height;
+  Display currentDisplay = allDisplays.firstWhere(
+    (display) => Rect.fromLTWH(
+      display.visiblePosition!.dx,
+      display.visiblePosition!.dy,
+      display.size.width,
+      display.size.height,
+    ).contains(cursorScreenPoint),
+    orElse: () => primaryDisplay,
+  );
+
+  num visibleWidth = currentDisplay.size.width;
+  num visibleHeight = currentDisplay.size.height;
   num visibleStartX = 0;
   num visibleStartY = 0;
 
-  if (primaryDisplay.visibleSize != null) {
-    visibleWidth = primaryDisplay.visibleSize!.width;
-    visibleHeight = primaryDisplay.visibleSize!.height;
+  if (currentDisplay.visibleSize != null) {
+    visibleWidth = currentDisplay.visibleSize!.width;
+    visibleHeight = currentDisplay.visibleSize!.height;
   }
-  if (primaryDisplay.visiblePosition != null) {
-    visibleStartX = primaryDisplay.visiblePosition!.dx;
-    visibleStartY = primaryDisplay.visiblePosition!.dy;
+  if (currentDisplay.visiblePosition != null) {
+    visibleStartX = currentDisplay.visiblePosition!.dx;
+    visibleStartY = currentDisplay.visiblePosition!.dy;
   }
   Offset position = const Offset(0, 0);
 
   if (alignment == Alignment.topLeft) {
-    position = const Offset(0, 0);
+    position = Offset(
+      visibleStartX + 0,
+      visibleStartY + 0,
+    );
   } else if (alignment == Alignment.topCenter) {
     position = Offset(
       visibleStartX + (visibleWidth / 2) - (windowSize.width / 2),
@@ -65,6 +80,5 @@ Future<Offset> calcWindowPosition(
       visibleStartY + (visibleHeight - windowSize.height),
     );
   }
-
   return position;
 }
