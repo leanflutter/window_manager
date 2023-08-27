@@ -4,7 +4,6 @@
 #pragma once
 
 #include <Windows.h>
-#include <ShellScalingApi.h>
 
 #include <shobjidl_core.h>
 
@@ -351,17 +350,32 @@ int WindowManager::IsDocked() {
   return is_docked_;
 }
 
-double WindowManager::GetDpiForHwnd(HWND hWnd)
-{
-	auto monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-	UINT newDpiX;
-	UINT newDpiY;
-	if (FAILED(GetDpiForMonitor(monitor, MONITOR_DPI_TYPE::MDT_EFFECTIVE_DPI, &newDpiX, &newDpiY)))
-	{
-		newDpiX = 96;
-		newDpiY = 96;
-	}
-	return ((double) newDpiX);
+double WindowManager::GetDpiForHwnd(HWND hWnd) {
+  auto monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+  UINT newDpiX = 96; // Default values
+  UINT newDpiY = 96;
+
+  // Dynamically load shcore.dll and get the GetDpiForMonitor function address
+  // We need to do this to ensure Windows 7 support
+  HMODULE shcore = LoadLibrary(TEXT("shcore.dll"));
+  if (shcore) {
+    typedef HRESULT (*GetDpiForMonitor)(HMONITOR, int, UINT*, UINT*);
+
+    GetDpiForMonitor GetDpiForMonitorFunc =
+      (GetDpiForMonitor)GetProcAddress(shcore, "GetDpiForMonitor");
+
+    if (GetDpiForMonitorFunc) {
+      // Use the loaded function if available
+      const int MDT_EFFECTIVE_DPI = 0;
+      if (FAILED(GetDpiForMonitorFunc(monitor, MDT_EFFECTIVE_DPI, &newDpiX, &newDpiY))) {
+        // If it fails, set the default values again
+        newDpiX = 96;
+        newDpiY = 96;
+      }
+    }
+    FreeLibrary(shcore);
+  }
+  return ((double) newDpiX);
 } 
 
 void WindowManager::Dock(const flutter::EncodableMap& args) {
