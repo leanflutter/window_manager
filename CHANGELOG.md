@@ -1,3 +1,9 @@
+### 0.3.6
+
+* [macos] Fix incorrect centering when multi-screen
+* [windows] feat: restore Windows 7 support (#388)
+* [windows] Better fullscreen implementation (#367)
+
 ### 0.3.5
 
 * [macos] fixes setMinimumSize and setMaximumSize (#341)

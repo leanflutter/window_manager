@@ -190,10 +190,10 @@ packages:
     dependency: transitive
     description:
       name: screen_retriever
-      sha256: "63694235c194d0d953f698fbb04471eb6c8d0e6bbb283a369b40414ed07ef83a"
+      sha256: "6ee02c8a1158e6dae7ca430da79436e3b1c9563c8cf02f524af997c201ac2b90"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.8"
+    version: "0.1.9"
   shortid:
     dependency: transitive
     description:
