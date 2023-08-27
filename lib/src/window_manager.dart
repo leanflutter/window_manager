@@ -261,7 +261,7 @@ class WindowManager {
     await _channel.invokeMethod('setFullScreen', arguments);
     // (Windows) Force refresh the app so it 's back to the correct size
     // (see GitHub issue #311)
-    if (!isFullScreen && Platform.isWindows) {
+    if (Platform.isWindows) {
       final size = await getSize();
       setSize(size + const Offset(1, 1));
       setSize(size);
@@ -703,15 +703,19 @@ class WindowManager {
   }
 
   /// Starts a window drag based on the specified mouse-down event.
+  /// On Windows, this is disabled during full screen mode.
   Future<void> startDragging() async {
+    if (Platform.isWindows && await isFullScreen()) return;
     await _channel.invokeMethod('startDragging');
   }
 
   /// Starts a window resize based on the specified mouse-down & mouse-move event.
+  /// On Windows, this is disabled during full screen mode.
   ///
   /// @platforms linux,windows
-  Future<void> startResizing(ResizeEdge resizeEdge) {
-    return _channel.invokeMethod<bool>(
+  Future<void> startResizing(ResizeEdge resizeEdge) async {
+    if (Platform.isWindows && await isFullScreen()) return;
+    await _channel.invokeMethod<bool>(
       'startResizing',
       {
         'resizeEdge': describeEnum(resizeEdge),
