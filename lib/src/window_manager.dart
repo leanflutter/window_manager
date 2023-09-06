@@ -596,7 +596,8 @@ class WindowManager {
     final Map<String, dynamic> arguments = {
       'iconPath': path.joinAll([
         path.dirname(Platform.resolvedExecutable),
-        'data/flutter_assets',
+        'data',
+        'flutter_assets',
         iconPath,
       ]),
     };
