@@ -593,14 +593,7 @@ class WindowManager {
   ///
   /// @platforms windows
   Future<void> setIcon(String iconPath) async {
-    final Map<String, dynamic> arguments = {
-      'iconPath': path.joinAll([
-        path.dirname(Platform.resolvedExecutable),
-        'data',
-        'flutter_assets',
-        iconPath,
-      ]),
-    };
+    final Map<String, dynamic> arguments = {'iconPath': iconPath};
 
     await _channel.invokeMethod('setIcon', arguments);
   }
