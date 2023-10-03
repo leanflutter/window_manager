@@ -525,6 +525,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
         }
         return true;
     }
+
+    public func window(_ window: NSWindow, willUseFullScreenPresentationOptions proposedOptions: NSApplication.PresentationOptions = []) -> NSApplication.PresentationOptions {
+        return [.autoHideToolbar, .autoHideMenuBar, .fullScreen]
+    }
     
     public func windowShouldZoom(_ window: NSWindow, toFrame newFrame: NSRect) -> Bool {
         _emitEvent("maximize")
