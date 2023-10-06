@@ -575,9 +575,9 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
                      &monitor);
     ::SetWindowLongPtr(mainWindow, GWL_STYLE, g_style_before_fullscreen & ~WS_OVERLAPPEDWINDOW);
     ::SetWindowPos(mainWindow, HWND_TOP, monitor.rcMonitor.left,
-                   monitor.rcMonitor.top, monitor.rcMonitor.right,
-                   monitor.rcMonitor.bottom,
-                   SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+                 monitor.rcMonitor.top, monitor.rcMonitor.right - monitor.rcMonitor.left,
+                 monitor.rcMonitor.bottom - monitor.rcMonitor.top,
+                 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
     }
   } else {
     if (!g_maximized_before_fullscreen)
