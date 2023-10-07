@@ -104,6 +104,7 @@ class WindowManager {
     await _channel.invokeMethod('ensureInitialized');
   }
 
+  /// You can call this to remove title bar, also can call setTitleBarStyle(TitleBarStyle.normal) to restore it.
   Future<void> setAsFrameless() async {
     await _channel.invokeMethod('setAsFrameless');
   }
