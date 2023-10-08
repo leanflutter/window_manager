@@ -115,6 +115,13 @@ class WindowManager {
   ]) async {
     await _channel.invokeMethod('waitUntilReadyToShow');
 
+    if (options?.titleBarStyle != null) {
+      await setTitleBarStyle(
+        options!.titleBarStyle!,
+        windowButtonVisibility: options.windowButtonVisibility ?? true,
+      );
+    }
+
     if (await isFullScreen()) await setFullScreen(false);
     if (await isMaximized()) await unmaximize();
     if (await isMinimized()) await restore();
@@ -138,12 +145,6 @@ class WindowManager {
       await setSkipTaskbar(options!.skipTaskbar!);
     }
     if (options?.title != null) await setTitle(options!.title!);
-    if (options?.titleBarStyle != null) {
-      await setTitleBarStyle(
-        options!.titleBarStyle!,
-        windowButtonVisibility: options.windowButtonVisibility ?? true,
-      );
-    }
 
     if (callback != null) {
       callback();
