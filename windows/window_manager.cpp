@@ -323,6 +323,10 @@ bool WindowManager::IsMinimized() {
 }
 
 void WindowManager::Minimize() {
+  if (IsFullScreen()) {  // Like chromium, we don't want to minimize fullscreen
+                         // windows
+    return;
+  }
   HWND mainWindow = GetMainWindow();
   WINDOWPLACEMENT windowPlacement;
   GetWindowPlacement(mainWindow, &windowPlacement);
@@ -352,7 +356,7 @@ int WindowManager::IsDocked() {
 
 double WindowManager::GetDpiForHwnd(HWND hWnd) {
   auto monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-  UINT newDpiX = 96; // Default values
+  UINT newDpiX = 96;  // Default values
   UINT newDpiY = 96;
 
   // Dynamically load shcore.dll and get the GetDpiForMonitor function address
@@ -362,12 +366,13 @@ double WindowManager::GetDpiForHwnd(HWND hWnd) {
     typedef HRESULT (*GetDpiForMonitor)(HMONITOR, int, UINT*, UINT*);
 
     GetDpiForMonitor GetDpiForMonitorFunc =
-      (GetDpiForMonitor)GetProcAddress(shcore, "GetDpiForMonitor");
+        (GetDpiForMonitor)GetProcAddress(shcore, "GetDpiForMonitor");
 
     if (GetDpiForMonitorFunc) {
       // Use the loaded function if available
       const int MDT_EFFECTIVE_DPI = 0;
-      if (FAILED(GetDpiForMonitorFunc(monitor, MDT_EFFECTIVE_DPI, &newDpiX, &newDpiY))) {
+      if (FAILED(GetDpiForMonitorFunc(monitor, MDT_EFFECTIVE_DPI, &newDpiX,
+                                      &newDpiY))) {
         // If it fails, set the default values again
         newDpiX = 96;
         newDpiY = 96;
@@ -375,8 +380,8 @@ double WindowManager::GetDpiForHwnd(HWND hWnd) {
     }
     FreeLibrary(shcore);
   }
-  return ((double) newDpiX);
-} 
+  return ((double)newDpiX);
+}
 
 void WindowManager::Dock(const flutter::EncodableMap& args) {
   HWND mainWindow = GetMainWindow();
@@ -468,7 +473,6 @@ void PASCAL WindowManager::AppBarQuerySetPos(HWND hwnd,
 }
 
 BOOL WindowManager::RegisterAccessBar(HWND hwnd, BOOL fRegister) {
-
   APPBARDATA abd;
 
   // Specify the structure size and handle to the appbar.
@@ -550,8 +554,8 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
 
   // Previously inspired by how Chromium does this
   // https://src.chromium.org/viewvc/chrome/trunk/src/ui/views/win/fullscreen_handler.cc?revision=247204&view=markup
-  // Instead, we use a modified implementation of how the media_kit package implements this
-  // (we got permission from the author, I believe)
+  // Instead, we use a modified implementation of how the media_kit package
+  // implements this (we got permission from the author, I believe)
   // https://github.com/alexmercerind/media_kit/blob/1226bcff36eab27cb17d60c33e9c15ca489c1f06/media_kit_video/windows/utils.cc
 
   // Save current window state if not already fullscreen.
@@ -563,26 +567,31 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
     g_title_bar_style_before_fullscreen = title_bar_style_;
   }
 
-  if (isFullScreen) {
+  g_is_window_fullscreen = isFullScreen;
+
+  if (isFullScreen) {  // Set to fullscreen
     ::SendMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
     if (!is_frameless_) {
-    auto monitor = MONITORINFO{};
-    auto placement = WINDOWPLACEMENT{};
-    monitor.cbSize = sizeof(MONITORINFO);
-    placement.length = sizeof(WINDOWPLACEMENT);
-    ::GetWindowPlacement(mainWindow, &placement);
-    ::GetMonitorInfo(::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST),
-                     &monitor);
-    ::SetWindowLongPtr(mainWindow, GWL_STYLE, g_style_before_fullscreen & ~WS_OVERLAPPEDWINDOW);
-    ::SetWindowPos(mainWindow, HWND_TOP, monitor.rcMonitor.left,
-                 monitor.rcMonitor.top, monitor.rcMonitor.right - monitor.rcMonitor.left,
-                 monitor.rcMonitor.bottom - monitor.rcMonitor.top,
-                 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+      auto monitor = MONITORINFO{};
+      auto placement = WINDOWPLACEMENT{};
+      monitor.cbSize = sizeof(MONITORINFO);
+      placement.length = sizeof(WINDOWPLACEMENT);
+      ::GetWindowPlacement(mainWindow, &placement);
+      ::GetMonitorInfo(
+          ::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST), &monitor);
+      ::SetWindowLongPtr(mainWindow, GWL_STYLE,
+                         g_style_before_fullscreen & ~WS_OVERLAPPEDWINDOW);
+      ::SetWindowPos(mainWindow, HWND_TOP, monitor.rcMonitor.left,
+                     monitor.rcMonitor.top,
+                     monitor.rcMonitor.right - monitor.rcMonitor.left,
+                     monitor.rcMonitor.bottom - monitor.rcMonitor.top,
+                     SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
     }
-  } else {
+  } else {  // Restore from fullscreen
     if (!g_maximized_before_fullscreen)
       Restore();
-    ::SetWindowLongPtr(mainWindow, GWL_STYLE, g_style_before_fullscreen | WS_OVERLAPPEDWINDOW);
+    ::SetWindowLongPtr(mainWindow, GWL_STYLE,
+                       g_style_before_fullscreen | WS_OVERLAPPEDWINDOW);
     if (::IsZoomed(mainWindow)) {
       // Refresh the parent mainWindow.
       ::SetWindowPos(mainWindow, nullptr, 0, 0, 0, 0,
@@ -590,8 +599,8 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
                          SWP_FRAMECHANGED);
       auto rect = RECT{};
       ::GetClientRect(mainWindow, &rect);
-      auto flutter_view =
-          ::FindWindowEx(mainWindow, nullptr, kFlutterViewWindowClassName, nullptr);
+      auto flutter_view = ::FindWindowEx(mainWindow, nullptr,
+                                         kFlutterViewWindowClassName, nullptr);
       ::SetWindowPos(flutter_view, nullptr, rect.left, rect.top,
                      rect.right - rect.left, rect.bottom - rect.top,
                      SWP_NOACTIVATE | SWP_NOZORDER);
@@ -606,8 +615,6 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
           SWP_NOACTIVATE | SWP_NOZORDER);
     }
   }
-
-  g_is_window_fullscreen = isFullScreen;
 }
 
 void WindowManager::SetAspectRatio(const flutter::EncodableMap& args) {
@@ -838,22 +845,16 @@ void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap& args) {
 }
 
 bool WindowManager::IsAlwaysOnBottom() {
-    return is_always_on_bottom_;
+  return is_always_on_bottom_;
 }
 
 void WindowManager::SetAlwaysOnBottom(const flutter::EncodableMap& args) {
   is_always_on_bottom_ =
       std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnBottom")));
 
-  SetWindowPos(
-    GetMainWindow(),
-    is_always_on_bottom_ ? HWND_BOTTOM : HWND_NOTOPMOST,
-    0,
-    0,
-    0,
-    0,
-    SWP_NOMOVE | SWP_NOSIZE
-  );
+  SetWindowPos(GetMainWindow(),
+               is_always_on_bottom_ ? HWND_BOTTOM : HWND_NOTOPMOST, 0, 0, 0, 0,
+               SWP_NOMOVE | SWP_NOSIZE);
 }
 
 std::string WindowManager::GetTitle() {

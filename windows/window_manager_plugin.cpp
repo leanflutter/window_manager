@@ -109,13 +109,15 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
   std::optional<LRESULT> result = std::nullopt;
 
   if (message == WM_DPICHANGED) {
-    window_manager->pixel_ratio_ = (float) LOWORD(wParam) / USER_DEFAULT_SCREEN_DPI;
+    window_manager->pixel_ratio_ =
+        (float)LOWORD(wParam) / USER_DEFAULT_SCREEN_DPI;
   }
 
   if (wParam && message == WM_NCCALCSIZE) {
-    if (window_manager->IsFullScreen() && window_manager->title_bar_style_ != "normal") {
+    if (window_manager->IsFullScreen() &&
+        window_manager->title_bar_style_ != "normal") {
       if (window_manager->is_frameless_) {
-      NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+        NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
         sz->rgrc[0].left += 8;
         sz->rgrc[0].top += 8;
         sz->rgrc[0].right -= 8;
@@ -166,21 +168,17 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lParam);
     // For the special "unconstrained" values, leave the defaults.
     if (window_manager->minimum_size_.x != 0)
-      info->ptMinTrackSize.x =
-          static_cast<LONG> (window_manager->minimum_size_.x *
-          window_manager->pixel_ratio_);
+      info->ptMinTrackSize.x = static_cast<LONG>(
+          window_manager->minimum_size_.x * window_manager->pixel_ratio_);
     if (window_manager->minimum_size_.y != 0)
-      info->ptMinTrackSize.y =
-          static_cast<LONG> (window_manager->minimum_size_.y *
-          window_manager->pixel_ratio_);
+      info->ptMinTrackSize.y = static_cast<LONG>(
+          window_manager->minimum_size_.y * window_manager->pixel_ratio_);
     if (window_manager->maximum_size_.x != -1)
-      info->ptMaxTrackSize.x =
-          static_cast<LONG> (window_manager->maximum_size_.x *
-          window_manager->pixel_ratio_);
+      info->ptMaxTrackSize.x = static_cast<LONG>(
+          window_manager->maximum_size_.x * window_manager->pixel_ratio_);
     if (window_manager->maximum_size_.y != -1)
-      info->ptMaxTrackSize.y =
-          static_cast<LONG> (window_manager->maximum_size_.y *
-          window_manager->pixel_ratio_);
+      info->ptMaxTrackSize.y = static_cast<LONG>(
+          window_manager->maximum_size_.y * window_manager->pixel_ratio_);
     result = 0;
   } else if (message == WM_NCACTIVATE) {
     if (wParam == TRUE) {
@@ -268,31 +266,31 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       rect->bottom = bottom;
     }
   } else if (message == WM_SIZE) {
-    LONG_PTR gwlStyle =
-        GetWindowLongPtr(window_manager->GetMainWindow(), GWL_STYLE);
-    if ((gwlStyle & (WS_CAPTION | WS_THICKFRAME)) == 0 &&
-        wParam == SIZE_MAXIMIZED) {
+    if (window_manager->IsFullScreen() && wParam == SIZE_MAXIMIZED &&
+        window_manager->last_state != STATE_FULLSCREEN_ENTERED) {
       _EmitEvent("enter-full-screen");
       window_manager->last_state = STATE_FULLSCREEN_ENTERED;
-    } else if (window_manager->last_state == STATE_FULLSCREEN_ENTERED &&
-               wParam == SIZE_RESTORED) {
+    } else if (!window_manager->IsFullScreen() && wParam == SIZE_RESTORED &&
+               window_manager->last_state == STATE_FULLSCREEN_ENTERED) {
       window_manager->ForceChildRefresh();
       _EmitEvent("leave-full-screen");
       window_manager->last_state = STATE_NORMAL;
-    } else if (wParam == SIZE_MAXIMIZED) {
-      _EmitEvent("maximize");
-      window_manager->last_state = STATE_MAXIMIZED;
-    } else if (wParam == SIZE_MINIMIZED) {
-      _EmitEvent("minimize");
-      window_manager->last_state = STATE_MINIMIZED;
-      return 0;
-    } else if (wParam == SIZE_RESTORED) {
-      if (window_manager->last_state == STATE_MAXIMIZED) {
-        _EmitEvent("unmaximize");
-        window_manager->last_state = STATE_NORMAL;
-      } else if (window_manager->last_state == STATE_MINIMIZED) {
-        _EmitEvent("restore");
-        window_manager->last_state = STATE_NORMAL;
+    } else if (window_manager->last_state != STATE_FULLSCREEN_ENTERED) {
+      if (wParam == SIZE_MAXIMIZED) {
+        _EmitEvent("maximize");
+        window_manager->last_state = STATE_MAXIMIZED;
+      } else if (wParam == SIZE_MINIMIZED) {
+        _EmitEvent("minimize");
+        window_manager->last_state = STATE_MINIMIZED;
+        return 0;
+      } else if (wParam == SIZE_RESTORED) {
+        if (window_manager->last_state == STATE_MAXIMIZED) {
+          _EmitEvent("unmaximize");
+          window_manager->last_state = STATE_NORMAL;
+        } else if (window_manager->last_state == STATE_MINIMIZED) {
+          _EmitEvent("restore");
+          window_manager->last_state = STATE_NORMAL;
+        }
       }
     }
   } else if (message == WM_CLOSE) {
@@ -308,13 +306,13 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     }
   } else if (message == WM_WINDOWPOSCHANGED) {
     if (window_manager->IsAlwaysOnBottom()) {
-        const flutter::EncodableMap& args = {
-		  {flutter::EncodableValue("isAlwaysOnBottom"),
-            		   flutter::EncodableValue(true)}};
-	    window_manager->SetAlwaysOnBottom(args);
-	  }
+      const flutter::EncodableMap& args = {
+          {flutter::EncodableValue("isAlwaysOnBottom"),
+           flutter::EncodableValue(true)}};
+      window_manager->SetAlwaysOnBottom(args);
+    }
   }
-  
+
   return result;
 }
 
@@ -561,7 +559,7 @@ void WindowManagerPlugin::HandleMethodCall(
   } else {
     result->NotImplemented();
   }
- }
+}
 
 }  // namespace
 
