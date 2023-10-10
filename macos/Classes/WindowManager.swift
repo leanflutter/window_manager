@@ -68,9 +68,41 @@ public class WindowManager: NSObject, NSWindowDelegate {
     private var _isPreventClose: Bool = false
     private var _isMaximized: Bool = false
     private var _isMaximizable: Bool = true
+
+    private var mouseEntryMonitor: Any?
+    private var mouseExitMonitor: Any?
     
     override public init() {
         super.init()
+        mouseEntered()
+        mouseExited()
+    }
+
+    deinit {
+        if let monitor = mouseEntryMonitor {
+            NSEvent.removeMonitor(monitor)
+        }
+        if let monitor = mouseExitMonitor {
+            NSEvent.removeMonitor(monitor)
+        }
+    }
+
+    public func mouseEntered() {
+        mouseEntryMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .mouseMoved]) { [weak self] (event) in
+        guard let strongSelf = self else { return }
+            if strongSelf.mainWindow.windowNumber == event.windowNumber {
+                strongSelf._emitEvent("mouse-entered")
+            }
+        }
+    }
+
+    public func mouseExited() {
+        mouseExitMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .mouseMoved]) { [weak self] (event) in
+        guard let strongSelf = self else { return }
+            if strongSelf.mainWindow.windowNumber != event.windowNumber {
+                strongSelf._emitEvent("mouse-exited")
+            }
+        }
     }
     
     public func waitUntilReadyToShow() {

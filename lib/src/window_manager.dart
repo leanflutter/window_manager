@@ -12,6 +12,8 @@ import 'package:window_manager/src/utils/calc_window_position.dart';
 import 'package:window_manager/src/window_listener.dart';
 import 'package:window_manager/src/window_options.dart';
 
+const kMouseEventEntered = 'mouse-entered';
+const kMouseEventExited = 'mouse-exited';
 const kWindowEventClose = 'close';
 const kWindowEventFocus = 'focus';
 const kWindowEventBlur = 'blur';
@@ -56,6 +58,8 @@ class WindowManager {
       String eventName = call.arguments['eventName'];
       listener.onWindowEvent(eventName);
       Map<String, Function> funcMap = {
+        kMouseEventEntered: listener.onMouseEnter,
+        kMouseEventExited: listener.onMouseExit,
         kWindowEventClose: listener.onWindowClose,
         kWindowEventFocus: listener.onWindowFocus,
         kWindowEventBlur: listener.onWindowBlur,
