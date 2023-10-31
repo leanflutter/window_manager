@@ -112,8 +112,8 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     window_manager->pixel_ratio_ = (float) LOWORD(wParam) / USER_DEFAULT_SCREEN_DPI;
   }
 
-  if (wParam && message == WM_NCCALCSIZE && window_manager->title_bar_style_ != "normal") {
-    if (window_manager->IsFullScreen()) {
+  if (wParam && message == WM_NCCALCSIZE) {
+    if (window_manager->IsFullScreen() && window_manager->title_bar_style_ != "normal") {
       if (window_manager->is_frameless_) {
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
         sz->rgrc[0].left += 8;
