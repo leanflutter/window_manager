@@ -112,19 +112,23 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     window_manager->pixel_ratio_ = (float) LOWORD(wParam) / USER_DEFAULT_SCREEN_DPI;
   }
 
-  if (message == WM_NCCALCSIZE) {
-    // This must always be first or else the one of other two ifs will execute
-    //  when window is in full screen and we don't want that
-    if (wParam && window_manager->IsFullScreen()) {
+  if (wParam && message == WM_NCCALCSIZE) {
+    if (window_manager->IsFullScreen() && window_manager->title_bar_style_ != "normal") {
+      if (window_manager->is_frameless_) {
+      NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+        sz->rgrc[0].left += 8;
+        sz->rgrc[0].top += 8;
+        sz->rgrc[0].right -= 8;
+        sz->rgrc[0].bottom -= 8;
+      }
       return 0;
     }
-
     // This must always be before handling title_bar_style_ == "hidden" so
-    //  the if TitleBarStyle.hidden doesn't get executed.
-    if (wParam && window_manager->is_frameless_) {
+    // the `if TitleBarStyle.hidden` doesn't get executed.
+    if (window_manager->is_frameless_) {
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-      // Add borders when maximized so app doesn't get cut off.
       if (window_manager->IsMaximized()) {
+        // Add borders when maximized so app doesn't get cut off.
         sz->rgrc[0].left += 8;
         sz->rgrc[0].top += 8;
         sz->rgrc[0].right -= 8;

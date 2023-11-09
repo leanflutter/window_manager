@@ -40,12 +40,12 @@ extension NSWindow {
 extension NSRect {
     var topLeft: CGPoint {
         set {
-            let screenFrameRect = NSScreen.main!.frame
+            let screenFrameRect = NSScreen.screens[0].frame
             origin.x = newValue.x
             origin.y = screenFrameRect.height - newValue.y - size.height
         }
         get {
-            let screenFrameRect = NSScreen.main!.frame
+            let screenFrameRect = NSScreen.screens[0].frame
             return CGPoint(x: origin.x, y: screenFrameRect.height - origin.y - size.height)
         }
     }

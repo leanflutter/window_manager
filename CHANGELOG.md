@@ -1,3 +1,15 @@
+### 0.3.7
+
+* [windows] Wrong window position in fullscreen mode with external monitor #405
+* [windows] fix: incorrect window size before/after setTitleBarStyle #401
+* [windows] Fix #389 setAsFrameless on titleBarStyle.normal #400
+
+### 0.3.6
+
+* [macos] Fix incorrect centering when multi-screen
+* [windows] feat: restore Windows 7 support (#388)
+* [windows] Better fullscreen implementation (#367)
+
 ### 0.3.5
 
 * [macos] fixes setMinimumSize and setMaximumSize (#341)

@@ -1143,13 +1143,15 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
             // ],
           ),
           child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(kWindowCaptionHeight),
-              child: WindowCaption(
-                brightness: Theme.of(context).brightness,
-                title: const Text('window_manager_example'),
-              ),
-            ),
+            appBar: _isFullScreen
+                ? null
+                : PreferredSize(
+                    preferredSize: const Size.fromHeight(kWindowCaptionHeight),
+                    child: WindowCaption(
+                      brightness: Theme.of(context).brightness,
+                      title: const Text('window_manager_example'),
+                    ),
+                  ),
             body: Column(
               children: [
                 GestureDetector(

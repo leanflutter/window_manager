@@ -4,7 +4,6 @@
 #pragma once
 
 #include <Windows.h>
-#include <ShellScalingApi.h>
 
 #include <shobjidl_core.h>
 
@@ -137,13 +136,12 @@ class WindowManager {
   void WindowManager::StartResizing(const flutter::EncodableMap& args);
 
  private:
+  static constexpr auto kFlutterViewWindowClassName = L"FLUTTERVIEW";
   bool g_is_window_fullscreen = false;
   std::string g_title_bar_style_before_fullscreen;
-  bool g_is_frameless_before_fullscreen;
   RECT g_frame_before_fullscreen;
   bool g_maximized_before_fullscreen;
   LONG g_style_before_fullscreen;
-  LONG g_ex_style_before_fullscreen;
   ITaskbarList3* taskbar_ = nullptr;
   double GetDpiForHwnd(HWND hWnd);
   BOOL WindowManager::RegisterAccessBar(HWND hwnd, BOOL fRegister);
@@ -352,17 +350,32 @@ int WindowManager::IsDocked() {
   return is_docked_;
 }
 
-double WindowManager::GetDpiForHwnd(HWND hWnd)
-{
-	auto monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-	UINT newDpiX;
-	UINT newDpiY;
-	if (FAILED(GetDpiForMonitor(monitor, MONITOR_DPI_TYPE::MDT_EFFECTIVE_DPI, &newDpiX, &newDpiY)))
-	{
-		newDpiX = 96;
-		newDpiY = 96;
-	}
-	return ((double) newDpiX);
+double WindowManager::GetDpiForHwnd(HWND hWnd) {
+  auto monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+  UINT newDpiX = 96; // Default values
+  UINT newDpiY = 96;
+
+  // Dynamically load shcore.dll and get the GetDpiForMonitor function address
+  // We need to do this to ensure Windows 7 support
+  HMODULE shcore = LoadLibrary(TEXT("shcore.dll"));
+  if (shcore) {
+    typedef HRESULT (*GetDpiForMonitor)(HMONITOR, int, UINT*, UINT*);
+
+    GetDpiForMonitor GetDpiForMonitorFunc =
+      (GetDpiForMonitor)GetProcAddress(shcore, "GetDpiForMonitor");
+
+    if (GetDpiForMonitorFunc) {
+      // Use the loaded function if available
+      const int MDT_EFFECTIVE_DPI = 0;
+      if (FAILED(GetDpiForMonitorFunc(monitor, MDT_EFFECTIVE_DPI, &newDpiX, &newDpiY))) {
+        // If it fails, set the default values again
+        newDpiX = 96;
+        newDpiY = 96;
+      }
+    }
+    FreeLibrary(shcore);
+  }
+  return ((double) newDpiX);
 } 
 
 void WindowManager::Dock(const flutter::EncodableMap& args) {
@@ -535,75 +548,62 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
 
   HWND mainWindow = GetMainWindow();
 
-  // Inspired by how Chromium does this
+  // Previously inspired by how Chromium does this
   // https://src.chromium.org/viewvc/chrome/trunk/src/ui/views/win/fullscreen_handler.cc?revision=247204&view=markup
+  // Instead, we use a modified implementation of how the media_kit package implements this
+  // (we got permission from the author, I believe)
+  // https://github.com/alexmercerind/media_kit/blob/1226bcff36eab27cb17d60c33e9c15ca489c1f06/media_kit_video/windows/utils.cc
 
   // Save current window state if not already fullscreen.
   if (!g_is_window_fullscreen) {
     // Save current window information.
-    g_maximized_before_fullscreen = !!::IsZoomed(mainWindow);
+    g_maximized_before_fullscreen = ::IsZoomed(mainWindow);
     g_style_before_fullscreen = GetWindowLong(mainWindow, GWL_STYLE);
-    g_ex_style_before_fullscreen = GetWindowLong(mainWindow, GWL_EXSTYLE);
-    if (g_maximized_before_fullscreen) {
-      SendMessage(mainWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
-    }
     ::GetWindowRect(mainWindow, &g_frame_before_fullscreen);
     g_title_bar_style_before_fullscreen = title_bar_style_;
-    g_is_frameless_before_fullscreen = is_frameless_;
   }
 
   if (isFullScreen) {
-    flutter::EncodableMap args2 = flutter::EncodableMap();
-    args2[flutter::EncodableValue("titleBarStyle")] =
-        flutter::EncodableValue("normal");
-    SetTitleBarStyle(args2);
-
-    // Set new window style and size.
-    ::SetWindowLong(mainWindow, GWL_STYLE,
-                    g_style_before_fullscreen & ~(WS_CAPTION | WS_THICKFRAME));
-    ::SetWindowLong(mainWindow, GWL_EXSTYLE,
-                    g_ex_style_before_fullscreen &
-                        ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE |
-                          WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
-
-    MONITORINFO monitor_info;
-    monitor_info.cbSize = sizeof(monitor_info);
-    ::GetMonitorInfo(::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST),
-                     &monitor_info);
-    ::SetWindowPos(mainWindow, NULL, monitor_info.rcMonitor.left,
-                   monitor_info.rcMonitor.top,
-                   monitor_info.rcMonitor.right - monitor_info.rcMonitor.left,
-                   monitor_info.rcMonitor.bottom - monitor_info.rcMonitor.top,
-                   SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     ::SendMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-  } else {
-    ::SetWindowLong(mainWindow, GWL_STYLE, g_style_before_fullscreen);
-    ::SetWindowLong(mainWindow, GWL_EXSTYLE, g_ex_style_before_fullscreen);
-
-    SendMessage(mainWindow, WM_SYSCOMMAND, SC_RESTORE, 0);
-
-    if (title_bar_style_ != g_title_bar_style_before_fullscreen) {
-      flutter::EncodableMap args2 = flutter::EncodableMap();
-      args2[flutter::EncodableValue("titleBarStyle")] =
-          flutter::EncodableValue(g_title_bar_style_before_fullscreen);
-      SetTitleBarStyle(args2);
+    if (!is_frameless_) {
+    auto monitor = MONITORINFO{};
+    auto placement = WINDOWPLACEMENT{};
+    monitor.cbSize = sizeof(MONITORINFO);
+    placement.length = sizeof(WINDOWPLACEMENT);
+    ::GetWindowPlacement(mainWindow, &placement);
+    ::GetMonitorInfo(::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST),
+                     &monitor);
+    ::SetWindowLongPtr(mainWindow, GWL_STYLE, g_style_before_fullscreen & ~WS_OVERLAPPEDWINDOW);
+    ::SetWindowPos(mainWindow, HWND_TOP, monitor.rcMonitor.left,
+                 monitor.rcMonitor.top, monitor.rcMonitor.right - monitor.rcMonitor.left,
+                 monitor.rcMonitor.bottom - monitor.rcMonitor.top,
+                 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
     }
-
-    if (g_is_frameless_before_fullscreen)
-      SetAsFrameless();
-
-    if (g_maximized_before_fullscreen) {
-      flutter::EncodableMap args2 = flutter::EncodableMap();
-      args2[flutter::EncodableValue("vertically")] =
-          flutter::EncodableValue(false);
-      Maximize(args2);
+  } else {
+    if (!g_maximized_before_fullscreen)
+      Restore();
+    ::SetWindowLongPtr(mainWindow, GWL_STYLE, g_style_before_fullscreen | WS_OVERLAPPEDWINDOW);
+    if (::IsZoomed(mainWindow)) {
+      // Refresh the parent mainWindow.
+      ::SetWindowPos(mainWindow, nullptr, 0, 0, 0, 0,
+                     SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                         SWP_FRAMECHANGED);
+      auto rect = RECT{};
+      ::GetClientRect(mainWindow, &rect);
+      auto flutter_view =
+          ::FindWindowEx(mainWindow, nullptr, kFlutterViewWindowClassName, nullptr);
+      ::SetWindowPos(flutter_view, nullptr, rect.left, rect.top,
+                     rect.right - rect.left, rect.bottom - rect.top,
+                     SWP_NOACTIVATE | SWP_NOZORDER);
+      if (g_maximized_before_fullscreen)
+        PostMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
     } else {
       ::SetWindowPos(
-          mainWindow, NULL, g_frame_before_fullscreen.left,
+          mainWindow, nullptr, g_frame_before_fullscreen.left,
           g_frame_before_fullscreen.top,
           g_frame_before_fullscreen.right - g_frame_before_fullscreen.left,
           g_frame_before_fullscreen.bottom - g_frame_before_fullscreen.top,
-          SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+          SWP_NOACTIVATE | SWP_NOZORDER);
     }
   }
 
