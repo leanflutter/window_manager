@@ -141,9 +141,11 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     if (wParam && window_manager->title_bar_style_ == "hidden") {
       NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 
-      // Add 8 pixel to the top border when maximized so the app isn't cut off
+      // Add 9 pixel to the top border when maximized so the app isn't cut off
+      // Previously 8 pixels, but Chrome -for example- actually leaves 1 pixel at the top, presumably for
+      // the Windows taskbar.
       if (window_manager->IsMaximized()) {
-        sz->rgrc[0].top += 8;
+        sz->rgrc[0].top += 9;
       } else {
         // on windows 10, if set to 0, there's a white line at the top
         // of the app and I've yet to find a way to remove that.
