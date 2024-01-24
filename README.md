@@ -509,6 +509,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
 ## Who's using it?
 
+- [Airclap](https://airclap.app/) - Send any file to any device. cross platform, ultra fast and easy to use.
 - [AuthPass](https://authpass.app/) - Password Manager based on Flutter for all platforms. Keepass 2.x (kdbx 3.x) compatible.
 - [Biyi (比译)](https://biyidev.com/) - A convenient translation and dictionary app written in dart / Flutter.
 - [BlueBubbles](https://github.com/BlueBubblesApp/bluebubbles-app) - BlueBubbles is an ecosystem of apps bringing iMessage to Android, Windows, and Linux
