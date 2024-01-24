@@ -508,6 +508,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
 ## 谁在用使用它？
 
+- [Airclap](https://airclap.app/) - 任何文件，任意设备，随意发送。简单好用的跨平台高速文件传输APP。
 - [AuthPass](https://authpass.app/) - 基于Flutter的密码管理器，适用于所有平台。兼容Keepass 2.x（kdbx 3.x）。
 - [Biyi (比译)](https://biyidev.com/) - 一个便捷的翻译和词典应用程序。
 - [BlueBubbles](https://github.com/BlueBubblesApp/bluebubbles-app) - BlueBubbles is an ecosystem of apps bringing iMessage to Android, Windows, and Linux
