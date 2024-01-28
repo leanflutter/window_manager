@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 
 class WindowCaptionButtonIcon extends StatelessWidget {
   const WindowCaptionButtonIcon({
-    Key? key,
+    super.key,
     required this.name,
     this.color,
     this.package = 'window_manager',
-  }) : super(key: key);
+  });
 
   final String name;
   final Color? color;
@@ -29,14 +29,15 @@ class WindowCaptionButtonIcon extends StatelessWidget {
 // ignore: must_be_immutable
 class WindowCaptionButton extends StatefulWidget {
   WindowCaptionButton({
-    Key? key,
+    super.key,
     this.brightness,
     this.icon,
     this.iconName,
     required this.onPressed,
-  }) : super(key: key);
+  });
+
   WindowCaptionButton.close({
-    Key? key,
+    super.key,
     this.brightness,
     this.icon,
     this.onPressed,
@@ -62,32 +63,28 @@ class WindowCaptionButton extends StatefulWidget {
           hovered: Colors.white,
           pressed: Colors.white.withOpacity(0.786),
           disabled: Colors.black.withOpacity(0.3628),
-        ),
-        super(key: key);
+        );
 
   WindowCaptionButton.unmaximize({
-    Key? key,
+    super.key,
     this.brightness,
     this.icon,
     this.onPressed,
-  })  : iconName = 'images/ic_chrome_unmaximize.png',
-        super(key: key);
+  }) : iconName = 'images/ic_chrome_unmaximize.png';
 
   WindowCaptionButton.maximize({
-    Key? key,
+    super.key,
     this.brightness,
     this.icon,
     this.onPressed,
-  })  : iconName = 'images/ic_chrome_maximize.png',
-        super(key: key);
+  }) : iconName = 'images/ic_chrome_maximize.png';
 
   WindowCaptionButton.minimize({
-    Key? key,
+    super.key,
     this.brightness,
     this.icon,
     this.onPressed,
-  })  : iconName = 'images/ic_chrome_minimize.png',
-        super(key: key);
+  }) : iconName = 'images/ic_chrome_minimize.png';
 
   final Brightness? brightness;
   final Widget? icon;

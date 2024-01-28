@@ -1,3 +1,9 @@
+### 0.3.8
+
+* Updates minimum supported SDK version to Flutter 3.3/Dart 3.0.
+* [windows] fix #396 fullscreen/unfullscreen events, disable minimize on fullscreen #409
+* setAlignment support custom Alignment #424
+
 ### 0.3.7
 
 * [windows] Wrong window position in fullscreen mode with external monitor #405

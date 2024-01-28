@@ -557,7 +557,7 @@ class WindowManager {
     bool windowButtonVisibility = true,
   }) async {
     final Map<String, dynamic> arguments = {
-      'titleBarStyle': describeEnum(titleBarStyle),
+      'titleBarStyle': titleBarStyle.name,
       'windowButtonVisibility': windowButtonVisibility,
     };
     await _channel.invokeMethod('setTitleBarStyle', arguments);
@@ -683,7 +683,7 @@ class WindowManager {
   /// Sets the brightness of the window.
   Future<void> setBrightness(Brightness brightness) async {
     final Map<String, dynamic> arguments = {
-      'brightness': describeEnum(brightness),
+      'brightness': brightness.name,
     };
     await _channel.invokeMethod('setBrightness', arguments);
   }
@@ -720,7 +720,7 @@ class WindowManager {
     await _channel.invokeMethod<bool>(
       'startResizing',
       {
-        'resizeEdge': describeEnum(resizeEdge),
+        'resizeEdge': resizeEdge.name,
         'top': resizeEdge == ResizeEdge.top ||
             resizeEdge == ResizeEdge.topLeft ||
             resizeEdge == ResizeEdge.topRight,

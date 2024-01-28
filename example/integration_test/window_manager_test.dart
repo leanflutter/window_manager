@@ -20,13 +20,19 @@ Future<void> main() async {
   );
 
   testWidgets('getBounds', (tester) async {
-    expect(await windowManager.getBounds(),
-        isA<Rect>().having((r) => r.size, 'size', const Size(640, 480)));
+    expect(
+      await windowManager.getBounds(),
+      isA<Rect>().having((r) => r.size, 'size', const Size(640, 480)),
+    );
   });
 
-  testWidgets('isAlwaysOnBottom', (tester) async {
-    expect(await windowManager.isAlwaysOnBottom(), isFalse);
-  }, skip: Platform.isMacOS || Platform.isWindows);
+  testWidgets(
+    'isAlwaysOnBottom',
+    (tester) async {
+      expect(await windowManager.isAlwaysOnBottom(), isFalse);
+    },
+    skip: Platform.isMacOS || Platform.isWindows,
+  );
 
   testWidgets('isAlwaysOnTop', (tester) async {
     expect(await windowManager.isAlwaysOnTop(), isFalse);
@@ -44,9 +50,13 @@ Future<void> main() async {
     expect(await windowManager.isFullScreen(), isFalse);
   });
 
-  testWidgets('hasShadow', (tester) async {
-    expect(await windowManager.hasShadow(), isTrue);
-  }, skip: Platform.isLinux);
+  testWidgets(
+    'hasShadow',
+    (tester) async {
+      expect(await windowManager.hasShadow(), isTrue);
+    },
+    skip: Platform.isLinux,
+  );
 
   testWidgets('isMaximizable', (tester) async {
     expect(await windowManager.isMaximizable(), isTrue);
@@ -56,17 +66,25 @@ Future<void> main() async {
     expect(await windowManager.isMaximized(), isFalse);
   });
 
-  testWidgets('isMinimizable', (tester) async {
-    expect(await windowManager.isMinimizable(), isTrue);
-  }, skip: Platform.isMacOS);
+  testWidgets(
+    'isMinimizable',
+    (tester) async {
+      expect(await windowManager.isMinimizable(), isTrue);
+    },
+    skip: Platform.isMacOS,
+  );
 
   testWidgets('isMinimized', (tester) async {
     expect(await windowManager.isMinimized(), isFalse);
   });
 
-  testWidgets('isMovable', (tester) async {
-    expect(await windowManager.isMovable(), isTrue);
-  }, skip: Platform.isLinux || Platform.isWindows);
+  testWidgets(
+    'isMovable',
+    (tester) async {
+      expect(await windowManager.isMovable(), isTrue);
+    },
+    skip: Platform.isLinux || Platform.isWindows,
+  );
 
   testWidgets('getOpacity', (tester) async {
     expect(await windowManager.getOpacity(), 1.0);
@@ -88,9 +106,13 @@ Future<void> main() async {
     expect(await windowManager.getSize(), const Size(640, 480));
   });
 
-  testWidgets('isSkipTaskbar', (tester) async {
-    expect(await windowManager.isSkipTaskbar(), isFalse);
-  }, skip: Platform.isWindows);
+  testWidgets(
+    'isSkipTaskbar',
+    (tester) async {
+      expect(await windowManager.isSkipTaskbar(), isFalse);
+    },
+    skip: Platform.isWindows,
+  );
 
   testWidgets('getTitle', (tester) async {
     expect(await windowManager.getTitle(), 'window_manager_test');

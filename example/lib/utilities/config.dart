@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
-class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
+final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
   _ListenerEntry(this.listener);
   final VoidCallback listener;
 }
@@ -42,10 +42,12 @@ class _ConfigChangeNotifier implements Listenable {
       try {
         if (entry.list != null) entry.listener();
       } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-        ));
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+          ),
+        );
       }
     }
   }

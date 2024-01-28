@@ -26,13 +26,13 @@ import 'package:window_manager/src/window_manager.dart';
 /// {@end-tool}
 class DragToResizeArea extends StatelessWidget {
   const DragToResizeArea({
-    Key? key,
+    super.key,
     required this.child,
     this.resizeEdgeColor = Colors.transparent,
     this.resizeEdgeSize = 8,
     this.resizeEdgeMargin = EdgeInsets.zero,
     this.enableResizeEdges,
-  }) : super(key: key);
+  });
 
   final Widget child;
   final double resizeEdgeSize;

@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:bot_toast/bot_toast.dart';
+import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
-
-import './pages/home.dart';
-import 'themes/themes.dart';
-import 'utilities/utilities.dart';
+import 'package:window_manager_example/pages/home.dart';
+import 'package:window_manager_example/themes/themes.dart';
+import 'package:window_manager_example/utilities/utilities.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +26,7 @@ void main() async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
