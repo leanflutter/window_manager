@@ -98,6 +98,11 @@ void WindowManagerPlugin::_EmitEvent(std::string eventName) {
   flutter::EncodableMap args = flutter::EncodableMap();
   args[flutter::EncodableValue("eventName")] =
       flutter::EncodableValue(eventName);
+  //add this to update channel
+  channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      registrar->messenger(), "window_manager",
+      &flutter::StandardMethodCodec::GetInstance());
+  //
   channel->InvokeMethod("onEvent",
                         std::make_unique<flutter::EncodableValue>(args));
 }
