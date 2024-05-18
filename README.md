@@ -146,7 +146,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.3.8
+  window_manager: ^0.3.9
 ```
 
 Or
