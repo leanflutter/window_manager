@@ -92,9 +92,11 @@ WindowManagerPlugin::WindowManagerPlugin(
 
 WindowManagerPlugin::~WindowManagerPlugin() {
   registrar->UnregisterTopLevelWindowProcDelegate(window_proc_id);
+  channel = nullptr;
 }
 
 void WindowManagerPlugin::_EmitEvent(std::string eventName) {
+  if (channel == nullptr) return;
   flutter::EncodableMap args = flutter::EncodableMap();
   args[flutter::EncodableValue("eventName")] =
       flutter::EncodableValue(eventName);
