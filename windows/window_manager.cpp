@@ -251,7 +251,7 @@ void WindowManager::Blur() {
 }
 
 bool WindowManager::IsFocused() {
-  return GetMainWindow() == GetActiveWindow();
+  return GetMainWindow() == GetForegroundWindow();
 }
 
 void WindowManager::Show() {
