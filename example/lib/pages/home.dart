@@ -133,6 +133,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                       ? Brightness.light
                       : Brightness.dark,
                 );
+                setState(() {});
               },
             ),
           ],
