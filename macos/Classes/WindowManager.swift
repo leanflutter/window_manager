@@ -433,7 +433,6 @@ public class WindowManager: NSObject, NSWindowDelegate {
             let progressIndicator: NSProgressIndicator = NSProgressIndicator.init(frame: frame)
             progressIndicator.style = .bar
             progressIndicator.isIndeterminate = false
-            progressIndicator.isBezeled = true
             progressIndicator.minValue = 0
             progressIndicator.maxValue = 1
             progressIndicator.isHidden = false
