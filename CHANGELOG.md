@@ -1,3 +1,9 @@
+### 0.4.0
+
+* chore: Use custom paint icons to replace png icons (#467)
+* chore: Remove the deprecated isBezeled property (#468)
+* fix: windows, window size, fullscree & maximized (#477)
+
 ### 0.3.9
 
 * fix(windows): fix TitleBar buttons does not display correctly #415

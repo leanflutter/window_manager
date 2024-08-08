@@ -145,7 +145,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.3.9
+  window_manager: ^0.4.0
 ```
 
 或
@@ -516,6 +516,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
 - [Linwood Butterfly](https://github.com/LinwoodCloud/Butterfly) - 用 Flutter 编写的开源笔记应用
 - [RustDesk](https://github.com/rustdesk/rustdesk) - 远程桌面软件，开箱即用，无需任何配置。您完全掌控数据，不用担心安全问题。
 - [Ubuntu Desktop Installer](https://github.com/canonical/ubuntu-desktop-installer) - This project is a modern implementation of the Ubuntu Desktop installer.
+- [UniControlHub](https://github.com/rohitsangwan01/uni_control_hub) - Seamlessly bridge your Desktop and Mobile devices
 
 ## API
 
