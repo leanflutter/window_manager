@@ -1020,21 +1020,12 @@ void WindowManager::SetOpacity(const flutter::EncodableMap& args) {
 }
 
 void WindowManager::SetBrightness(const flutter::EncodableMap& args) {
-  DWORD light_mode;
-  DWORD light_mode_size = sizeof(light_mode);
-  LSTATUS result =
-      RegGetValue(HKEY_CURRENT_USER, kGetPreferredBrightnessRegKey,
-                  kGetPreferredBrightnessRegValue, RRF_RT_REG_DWORD, nullptr,
-                  &light_mode, &light_mode_size);
-
-  if (result == ERROR_SUCCESS) {
-    std::string brightness =
-        std::get<std::string>(args.at(flutter::EncodableValue("brightness")));
-    HWND hWnd = GetMainWindow();
-    BOOL enable_dark_mode = light_mode == 0 && brightness == "dark";
-    DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
-                          &enable_dark_mode, sizeof(enable_dark_mode));
-  }
+  std::string brightness =
+      std::get<std::string>(args.at(flutter::EncodableValue("brightness")));
+  HWND hWnd = GetMainWindow();
+  BOOL enable_dark_mode = brightness == "dark";
+  DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                        &enable_dark_mode, sizeof(enable_dark_mode));
 }
 
 void WindowManager::SetIgnoreMouseEvents(const flutter::EncodableMap& args) {
