@@ -62,9 +62,24 @@ class WindowManagerPlugin : public flutter::Plugin {
       const flutter::MethodCall<flutter::EncodableValue>& method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 
-  void adjustNCCALCSIZE(NCCALCSIZE_PARAMS* sz) {
-    LONG l = sz->rgrc[0].left;
-    LONG t = sz->rgrc[0].top;
+  void adjustNCCALCSIZE(HWND hwnd, NCCALCSIZE_PARAMS* sz) {
+    LONG l = 8;
+    LONG t = 8;
+
+    HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    if (monitor != NULL) {
+      MONITORINFO monitorInfo;
+      monitorInfo.cbSize = sizeof(MONITORINFO);
+      if (TRUE == GetMonitorInfo(monitor, &monitorInfo)) {
+        l = sz->rgrc[0].left - monitorInfo.rcWork.left;
+        t = sz->rgrc[0].top - monitorInfo.rcWork.top;
+      } else {
+        // GetMonitorInfo failed, use (8, 8) as default value
+      }
+    } else {
+      // unreachable code
+    }
+
     sz->rgrc[0].left -= l;
     sz->rgrc[0].top -= t;
     sz->rgrc[0].right += l;
@@ -128,7 +143,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     if (window_manager->IsFullScreen() &&
         window_manager->title_bar_style_ != "normal") {
       if (window_manager->is_frameless_) {
-        adjustNCCALCSIZE(reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam));
+        adjustNCCALCSIZE(hWnd, reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam));
       }
       return 0;
     }
@@ -136,7 +151,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     // the `if TitleBarStyle.hidden` doesn't get executed.
     if (window_manager->is_frameless_) {
       if (window_manager->IsMaximized()) {
-        adjustNCCALCSIZE(reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam));
+        adjustNCCALCSIZE(hWnd, reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam));
       }
       return 0;
     }
@@ -145,7 +160,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     if (wParam && window_manager->title_bar_style_ == "hidden") {
       if (window_manager->IsMaximized()) {
         // Adjust the borders when maximized so the app isn't cut off
-        adjustNCCALCSIZE(reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam));
+        adjustNCCALCSIZE(hWnd, reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam));
       } else {
         NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
         // on windows 10, if set to 0, there's a white line at the top
