@@ -120,7 +120,8 @@ WindowManagerPlugin::~WindowManagerPlugin() {
 }
 
 void WindowManagerPlugin::_EmitEvent(std::string eventName) {
-  if (channel == nullptr) return;
+  if (channel == nullptr)
+    return;
   flutter::EncodableMap args = flutter::EncodableMap();
   args[flutter::EncodableValue("eventName")] =
       flutter::EncodableValue(eventName);
@@ -166,6 +167,11 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
         // on windows 10, if set to 0, there's a white line at the top
         // of the app and I've yet to find a way to remove that.
         sz->rgrc[0].top += IsWindows11OrGreater() ? 0 : 1;
+        // The following lines are required for resizing the window.
+        // https://github.com/leanflutter/window_manager/issues/483
+        sz->rgrc[0].right -= 8;
+        sz->rgrc[0].bottom -= 8;
+        sz->rgrc[0].left -= -8;
       }
 
       // Previously (WVR_HREDRAW | WVR_VREDRAW), but returning 0 or 1 doesn't
