@@ -179,7 +179,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
           window_manager->maximum_size_.y * window_manager->pixel_ratio_);
     result = 0;
   } else if (message == WM_NCACTIVATE) {
-    if (wParam == TRUE) {
+    if (wParam != 0) {
       _EmitEvent("focus");
     } else {
       _EmitEvent("blur");
