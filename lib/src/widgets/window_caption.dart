@@ -25,11 +25,11 @@ const double kWindowCaptionHeight = 32;
 /// {@end-tool}
 class WindowCaption extends StatefulWidget {
   const WindowCaption({
-    Key? key,
+    super.key,
     this.title,
     this.backgroundColor,
     this.brightness,
-  }) : super(key: key);
+  });
 
   final Widget? title;
   final Color? backgroundColor;
@@ -54,7 +54,7 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: widget.backgroundColor ??
             (widget.brightness == Brightness.dark

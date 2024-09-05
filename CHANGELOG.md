@@ -1,3 +1,26 @@
+### 0.4.2
+
+* [windows] Update window_manager_plugin.cpp for fix #439 issue #486
+* [windows] fix: win, adjustNCCALCSIZE with monitor coords #482
+
+### 0.4.0
+
+* chore: Use custom paint icons to replace png icons (#467)
+* chore: Remove the deprecated isBezeled property (#468)
+* fix: windows, window size, fullscree & maximized (#477)
+
+### 0.3.9
+
+* fix(windows): fix TitleBar buttons does not display correctly #415
+* fix(windows): crash after deconstruction #423
+* fix(windows): WindowManager.IsFocused() method (#461)
+
+### 0.3.8
+
+* Updates minimum supported SDK version to Flutter 3.3/Dart 3.0.
+* [windows] fix #396 fullscreen/unfullscreen events, disable minimize on fullscreen #409
+* setAlignment support custom Alignment #424
+
 ### 0.3.7
 
 * [windows] Wrong window position in fullscreen mode with external monitor #405

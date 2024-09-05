@@ -12,6 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.22.2
       - run: |
           sudo apt-get update -y
           sudo apt-get install -y ninja-build libgtk-3-dev libappindicator3-dev xvfb
@@ -23,6 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.22.2
       - run: flutter config --enable-macos-desktop
       - run: cd example &&  flutter build macos -v
       # Blocked by https://github.com/flutter/flutter/issues/118469
@@ -32,5 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.22.2
       - run: cd example && flutter build windows -v
       - run: cd example && flutter test integration_test -v

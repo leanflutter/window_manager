@@ -61,6 +61,30 @@ class WindowManagerPlugin : public flutter::Plugin {
   void HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue>& method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+
+  void adjustNCCALCSIZE(HWND hwnd, NCCALCSIZE_PARAMS* sz) {
+    LONG l = 8;
+    LONG t = 8;
+
+    HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    if (monitor != NULL) {
+      MONITORINFO monitorInfo;
+      monitorInfo.cbSize = sizeof(MONITORINFO);
+      if (TRUE == GetMonitorInfo(monitor, &monitorInfo)) {
+        l = sz->rgrc[0].left - monitorInfo.rcWork.left;
+        t = sz->rgrc[0].top - monitorInfo.rcWork.top;
+      } else {
+        // GetMonitorInfo failed, use (8, 8) as default value
+      }
+    } else {
+      // unreachable code
+    }
+
+    sz->rgrc[0].left -= l;
+    sz->rgrc[0].top -= t;
+    sz->rgrc[0].right += l;
+    sz->rgrc[0].bottom += t;
+  }
 };
 
 // static
@@ -92,9 +116,12 @@ WindowManagerPlugin::WindowManagerPlugin(
 
 WindowManagerPlugin::~WindowManagerPlugin() {
   registrar->UnregisterTopLevelWindowProcDelegate(window_proc_id);
+  channel = nullptr;
 }
 
 void WindowManagerPlugin::_EmitEvent(std::string eventName) {
+  if (channel == nullptr)
+    return;
   flutter::EncodableMap args = flutter::EncodableMap();
   args[flutter::EncodableValue("eventName")] =
       flutter::EncodableValue(eventName);
@@ -109,49 +136,43 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
   std::optional<LRESULT> result = std::nullopt;
 
   if (message == WM_DPICHANGED) {
-    window_manager->pixel_ratio_ = (float) LOWORD(wParam) / USER_DEFAULT_SCREEN_DPI;
+    window_manager->pixel_ratio_ =
+        (float)LOWORD(wParam) / USER_DEFAULT_SCREEN_DPI;
   }
 
   if (wParam && message == WM_NCCALCSIZE) {
-    if (window_manager->IsFullScreen() && window_manager->title_bar_style_ != "normal") {
+    if (window_manager->IsFullScreen() &&
+        window_manager->title_bar_style_ != "normal") {
       if (window_manager->is_frameless_) {
-      NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-        sz->rgrc[0].left += 8;
-        sz->rgrc[0].top += 8;
-        sz->rgrc[0].right -= 8;
-        sz->rgrc[0].bottom -= 8;
+        adjustNCCALCSIZE(hWnd, reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam));
       }
       return 0;
     }
     // This must always be before handling title_bar_style_ == "hidden" so
     // the `if TitleBarStyle.hidden` doesn't get executed.
     if (window_manager->is_frameless_) {
-      NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
       if (window_manager->IsMaximized()) {
-        // Add borders when maximized so app doesn't get cut off.
-        sz->rgrc[0].left += 8;
-        sz->rgrc[0].top += 8;
-        sz->rgrc[0].right -= 8;
-        sz->rgrc[0].bottom -= 9;
+        adjustNCCALCSIZE(hWnd, reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam));
       }
       return 0;
     }
 
     // This must always be last.
     if (wParam && window_manager->title_bar_style_ == "hidden") {
-      NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-
-      // Add 8 pixel to the top border when maximized so the app isn't cut off
       if (window_manager->IsMaximized()) {
-        sz->rgrc[0].top += 8;
+        // Adjust the borders when maximized so the app isn't cut off
+        adjustNCCALCSIZE(hWnd, reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam));
       } else {
+        NCCALCSIZE_PARAMS* sz = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
         // on windows 10, if set to 0, there's a white line at the top
         // of the app and I've yet to find a way to remove that.
         sz->rgrc[0].top += IsWindows11OrGreater() ? 0 : 1;
+        // The following lines are required for resizing the window.
+        // https://github.com/leanflutter/window_manager/issues/483
+        sz->rgrc[0].right -= 8;
+        sz->rgrc[0].bottom -= 8;
+        sz->rgrc[0].left -= -8;
       }
-      sz->rgrc[0].right -= 8;
-      sz->rgrc[0].bottom -= 8;
-      sz->rgrc[0].left -= -8;
 
       // Previously (WVR_HREDRAW | WVR_VREDRAW), but returning 0 or 1 doesn't
       // actually break anything so I've set it to 0. Unless someone pointed a
@@ -166,24 +187,20 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lParam);
     // For the special "unconstrained" values, leave the defaults.
     if (window_manager->minimum_size_.x != 0)
-      info->ptMinTrackSize.x =
-          static_cast<LONG> (window_manager->minimum_size_.x *
-          window_manager->pixel_ratio_);
+      info->ptMinTrackSize.x = static_cast<LONG>(
+          window_manager->minimum_size_.x * window_manager->pixel_ratio_);
     if (window_manager->minimum_size_.y != 0)
-      info->ptMinTrackSize.y =
-          static_cast<LONG> (window_manager->minimum_size_.y *
-          window_manager->pixel_ratio_);
+      info->ptMinTrackSize.y = static_cast<LONG>(
+          window_manager->minimum_size_.y * window_manager->pixel_ratio_);
     if (window_manager->maximum_size_.x != -1)
-      info->ptMaxTrackSize.x =
-          static_cast<LONG> (window_manager->maximum_size_.x *
-          window_manager->pixel_ratio_);
+      info->ptMaxTrackSize.x = static_cast<LONG>(
+          window_manager->maximum_size_.x * window_manager->pixel_ratio_);
     if (window_manager->maximum_size_.y != -1)
-      info->ptMaxTrackSize.y =
-          static_cast<LONG> (window_manager->maximum_size_.y *
-          window_manager->pixel_ratio_);
+      info->ptMaxTrackSize.y = static_cast<LONG>(
+          window_manager->maximum_size_.y * window_manager->pixel_ratio_);
     result = 0;
   } else if (message == WM_NCACTIVATE) {
-    if (wParam == TRUE) {
+    if (wParam != 0) {
       _EmitEvent("focus");
     } else {
       _EmitEvent("blur");
@@ -268,31 +285,31 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       rect->bottom = bottom;
     }
   } else if (message == WM_SIZE) {
-    LONG_PTR gwlStyle =
-        GetWindowLongPtr(window_manager->GetMainWindow(), GWL_STYLE);
-    if ((gwlStyle & (WS_CAPTION | WS_THICKFRAME)) == 0 &&
-        wParam == SIZE_MAXIMIZED) {
+    if (window_manager->IsFullScreen() && wParam == SIZE_MAXIMIZED &&
+        window_manager->last_state != STATE_FULLSCREEN_ENTERED) {
       _EmitEvent("enter-full-screen");
       window_manager->last_state = STATE_FULLSCREEN_ENTERED;
-    } else if (window_manager->last_state == STATE_FULLSCREEN_ENTERED &&
-               wParam == SIZE_RESTORED) {
+    } else if (!window_manager->IsFullScreen() && wParam == SIZE_RESTORED &&
+               window_manager->last_state == STATE_FULLSCREEN_ENTERED) {
       window_manager->ForceChildRefresh();
       _EmitEvent("leave-full-screen");
       window_manager->last_state = STATE_NORMAL;
-    } else if (wParam == SIZE_MAXIMIZED) {
-      _EmitEvent("maximize");
-      window_manager->last_state = STATE_MAXIMIZED;
-    } else if (wParam == SIZE_MINIMIZED) {
-      _EmitEvent("minimize");
-      window_manager->last_state = STATE_MINIMIZED;
-      return 0;
-    } else if (wParam == SIZE_RESTORED) {
-      if (window_manager->last_state == STATE_MAXIMIZED) {
-        _EmitEvent("unmaximize");
-        window_manager->last_state = STATE_NORMAL;
-      } else if (window_manager->last_state == STATE_MINIMIZED) {
-        _EmitEvent("restore");
-        window_manager->last_state = STATE_NORMAL;
+    } else if (window_manager->last_state != STATE_FULLSCREEN_ENTERED) {
+      if (wParam == SIZE_MAXIMIZED) {
+        _EmitEvent("maximize");
+        window_manager->last_state = STATE_MAXIMIZED;
+      } else if (wParam == SIZE_MINIMIZED) {
+        _EmitEvent("minimize");
+        window_manager->last_state = STATE_MINIMIZED;
+        return 0;
+      } else if (wParam == SIZE_RESTORED) {
+        if (window_manager->last_state == STATE_MAXIMIZED) {
+          _EmitEvent("unmaximize");
+          window_manager->last_state = STATE_NORMAL;
+        } else if (window_manager->last_state == STATE_MINIMIZED) {
+          _EmitEvent("restore");
+          window_manager->last_state = STATE_NORMAL;
+        }
       }
     }
   } else if (message == WM_CLOSE) {
@@ -308,13 +325,13 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     }
   } else if (message == WM_WINDOWPOSCHANGED) {
     if (window_manager->IsAlwaysOnBottom()) {
-        const flutter::EncodableMap& args = {
-		  {flutter::EncodableValue("isAlwaysOnBottom"),
-            		   flutter::EncodableValue(true)}};
-	    window_manager->SetAlwaysOnBottom(args);
-	  }
+      const flutter::EncodableMap& args = {
+          {flutter::EncodableValue("isAlwaysOnBottom"),
+           flutter::EncodableValue(true)}};
+      window_manager->SetAlwaysOnBottom(args);
+    }
   }
-  
+
   return result;
 }
 
@@ -561,7 +578,7 @@ void WindowManagerPlugin::HandleMethodCall(
   } else {
     result->NotImplemented();
   }
- }
+}
 
 }  // namespace
 

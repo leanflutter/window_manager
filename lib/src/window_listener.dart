@@ -4,7 +4,7 @@ abstract class WindowListener {
 
   /// Emitted when the mouse exits the window.
   void onMouseExit() {}
-
+  
   /// Emitted when the window is going to be closed.
   void onWindowClose() {}
 

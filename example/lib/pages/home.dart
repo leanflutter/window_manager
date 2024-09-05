@@ -8,8 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:preference_list/preference_list.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
-
-import '../utilities/utilities.dart';
+import 'package:window_manager_example/utils/config.dart';
 
 const _kSizes = [
   Size(400, 400),
@@ -28,7 +27,7 @@ const _kMaxSizes = [
 ];
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -73,7 +72,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
     super.dispose();
   }
 
-  void _init() async {
+  Future<void> _init() async {
     await trayManager.setIcon(
       Platform.isWindows
           ? 'images/tray_icon_original.ico'
@@ -100,7 +99,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
     setState(() {});
   }
 
-  void _handleSetIcon(String iconType) async {
+  Future<void> _handleSetIcon(String iconType) async {
     _iconType = iconType;
     String iconPath =
         Platform.isWindows ? 'images/tray_icon.ico' : 'images/tray_icon.png';
@@ -134,6 +133,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                       ? Brightness.light
                       : Brightness.dark,
                 );
+                setState(() {});
               },
             ),
           ],
@@ -980,7 +980,8 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                             child: const Text('DragToResizeArea'),
                             onTap: () {
                               BotToast.showText(
-                                  text: 'DragToResizeArea example');
+                                text: 'DragToResizeArea example',
+                              );
                             },
                           ),
                         ),
@@ -1026,7 +1027,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
   }
 
   @override
-  void onTrayMenuItemClick(MenuItem menuItem) async {
+  Future<void> onTrayMenuItemClick(MenuItem menuItem) async {
     switch (menuItem.key) {
       case 'show_window':
         await windowManager.focus();

@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:bot_toast/bot_toast.dart';
+import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
-
-import './pages/home.dart';
-import 'themes/themes.dart';
-import 'utilities/utilities.dart';
+import 'package:window_manager_example/pages/home.dart';
+import 'package:window_manager_example/utils/config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +25,7 @@ void main() async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -60,8 +58,6 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: lightThemeData,
-      darkTheme: darkThemeData,
       themeMode: _themeMode,
       builder: (context, child) {
         child = virtualWindowFrameBuilder(context, child);

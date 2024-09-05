@@ -12,9 +12,9 @@ final _kIsWindows = !kIsWeb && Platform.isWindows;
 
 class VirtualWindowFrame extends StatefulWidget {
   const VirtualWindowFrame({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   /// The [child] contained by the VirtualWindowFrame.
   final Widget child;
@@ -42,7 +42,7 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
   }
 
   Widget _buildVirtualWindowFrame(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.transparent,
         border: Border.all(

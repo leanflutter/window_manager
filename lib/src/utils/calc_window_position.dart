@@ -79,6 +79,15 @@ Future<Offset> calcWindowPosition(
       visibleStartX + visibleWidth - windowSize.width,
       visibleStartY + (visibleHeight - windowSize.height),
     );
+  } else {
+    final left = (visibleWidth - windowSize.width) / 2 +
+        alignment.x * ((visibleWidth - windowSize.width) / 2);
+    final top = (visibleHeight - windowSize.height) / 2 +
+        alignment.y * ((visibleHeight - windowSize.height) / 2);
+    position = Offset(
+      visibleStartX + left,
+      visibleStartY + top,
+    );
   }
   return position;
 }
