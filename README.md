@@ -518,6 +518,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
 - [RustDesk](https://github.com/rustdesk/rustdesk) - Yet another remote desktop software, written in Rust. Works out of the box, no configuration required. 
 - [Ubuntu Desktop Installer](https://github.com/canonical/ubuntu-desktop-installer) - This project is a modern implementation of the Ubuntu Desktop installer.
 - [UniControlHub](https://github.com/rohitsangwan01/uni_control_hub) - Seamlessly bridge your Desktop and Mobile devices
+- [EyesCare](bixat.dev/products/EyesCare) - A light-weight application following 20 rule adherence for optimum eye health
 
 ## API
 
