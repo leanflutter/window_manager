@@ -138,6 +138,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
   if (message == WM_DPICHANGED) {
     window_manager->pixel_ratio_ =
         (float)LOWORD(wParam) / USER_DEFAULT_SCREEN_DPI;
+    window_manager->ForceChildRefresh();
   }
 
   if (wParam && message == WM_NCCALCSIZE) {
