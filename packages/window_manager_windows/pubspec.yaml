@@ -1,7 +1,7 @@
 name: window_manager_windows
-description: "A new Flutter plugin project."
+description: Windows implementation of the window_manager plugin.
 version: 0.0.1
-homepage:
+repository: https://github.com/leanflutter/window_manager/tree/main/packages/window_manager_windows
 
 environment:
   sdk: ^3.5.3

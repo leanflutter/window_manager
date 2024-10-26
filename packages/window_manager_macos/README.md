@@ -1,15 +1,12 @@
 # window_manager_macos
 
-A new Flutter plugin project.
+[![pub version][pub-image]][pub-url]
 
-## Getting Started
+[pub-image]: https://img.shields.io/pub/v/window_manager_macos.svg
+[pub-url]: https://pub.dev/packages/window_manager_macos
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+The Windows implementation of [window_manager](https://pub.dev/packages/window_manager).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## License
 
+[MIT](./LICENSE)
