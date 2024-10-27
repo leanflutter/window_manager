@@ -4,10 +4,10 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed
-set(PLUGIN_NAME "window_manager_plugin")
+set(PLUGIN_NAME "window_manager_linux_plugin")
 
 add_library(${PLUGIN_NAME} SHARED
-  "window_manager_plugin.cc"
+  "window_manager_linux_plugin.cc"
 )
 apply_standard_settings(${PLUGIN_NAME})
 set_target_properties(${PLUGIN_NAME} PROPERTIES
