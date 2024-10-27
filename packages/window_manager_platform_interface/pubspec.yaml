@@ -1,6 +1,6 @@
 name: window_manager_platform_interface
 description: A common platform interface for the window_manager plugin.
-version: 0.0.1
+version: 1.0.1
 homepage: https://github.com/leanflutter/window_manager/blob/main/packages/window_manager_platform_interface
 
 environment:
