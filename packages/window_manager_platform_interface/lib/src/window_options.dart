@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:window_manager/src/title_bar_style.dart';
+import 'package:window_manager_platform_interface/src/title_bar_style.dart';
 
 /// WindowOptions
 class WindowOptions {

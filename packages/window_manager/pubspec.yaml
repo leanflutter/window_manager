@@ -24,6 +24,10 @@ dependencies:
     sdk: flutter
   path: ^1.8.2
   screen_retriever: ^0.2.0
+  window_manager_linux: ^1.0.1
+  window_manager_macos: ^1.0.1
+  window_manager_platform_interface: ^1.0.1
+  window_manager_windows: ^1.0.1
 
 dev_dependencies:
   dependency_validator: ^3.0.0
@@ -35,8 +39,8 @@ flutter:
   plugin:
     platforms:
       linux:
-        pluginClass: WindowManagerPlugin
+        default_package: window_manager_linux
       macos:
-        pluginClass: WindowManagerPlugin
+        default_package: window_manager_macos
       windows:
-        pluginClass: WindowManagerPlugin
+        default_package: window_manager_windows

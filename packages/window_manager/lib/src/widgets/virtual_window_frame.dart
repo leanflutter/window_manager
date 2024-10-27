@@ -2,10 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:window_manager/src/resize_edge.dart';
 import 'package:window_manager/src/widgets/drag_to_resize_area.dart';
-import 'package:window_manager/src/window_listener.dart';
 import 'package:window_manager/src/window_manager.dart';
+import 'package:window_manager_platform_interface/window_manager_platform_interface.dart';
 
 final _kIsLinux = !kIsWeb && Platform.isLinux;
 final _kIsWindows = !kIsWeb && Platform.isWindows;

@@ -1,6 +1,6 @@
 import Cocoa
 import FlutterMacOS
-import window_manager
+import window_manager_macos
 
 class MainFlutterWindow: NSPanel {
     override func awakeFromNib() {

@@ -21,4 +21,5 @@ flutter:
   plugin:
     platforms:
       windows:
-        pluginClass: WindowManagerWindowsPlugin
+        pluginClass: WindowManagerPlugin
+        # pluginClass: WindowManagerWindowsPlugin

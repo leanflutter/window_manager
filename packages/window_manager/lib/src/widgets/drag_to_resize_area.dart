@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:window_manager/src/resize_edge.dart';
 import 'package:window_manager/src/window_manager.dart';
+import 'package:window_manager_platform_interface/window_manager_platform_interface.dart';
 
 /// A widget for drag to resize window.
 ///

@@ -21,4 +21,5 @@ flutter:
   plugin:
     platforms:
       macos:
-        pluginClass: WindowManagerMacosPlugin
+        pluginClass: WindowManagerPlugin
+        # pluginClass: WindowManagerMacosPlugin
