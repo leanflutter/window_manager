@@ -1,9 +1,6 @@
-.DS_Store
 .dart_tool/
 .idea/
-.packages
-.pub/
-.vscode/
-build/
-Generated*
-generated*
+
+*.iml
+pubspec_overrides.yaml
+pubspec.lock
