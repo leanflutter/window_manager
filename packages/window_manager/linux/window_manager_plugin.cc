@@ -1092,6 +1092,7 @@ void window_manager_plugin_register_with_registrar(
   plugin->window_geometry.min_height = -1;
   plugin->window_geometry.max_width = G_MAXINT;
   plugin->window_geometry.max_height = G_MAXINT;
+  plugin->window_hints = static_cast<GdkWindowHints>(0);
 
   // Disconnect all delete-event handlers first in flutter 3.10.1, which causes delete_event not working.
   // Issues from flutter/engine: https://github.com/flutter/engine/pull/40033 
