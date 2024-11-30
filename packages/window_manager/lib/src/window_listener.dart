@@ -42,6 +42,21 @@ abstract mixin class WindowListener {
   /// Emitted when the window leaves a full-screen state.
   void onWindowLeaveFullScreen() {}
 
+  /// Emitted when the taskbar created.
+  ///
+  /// @platforms windows
+  void onWindowTaskbarCreated() {}
+
+  /// Emitted when the device is going to shutdown.
+  ///
+  /// @platforms windows
+  void onWindowDeviceShutdown() {}
+
+  /// Emitted when the user is logoff.
+  ///
+  /// @platforms windows
+  void onWindowUserSessionDisconnect() {}
+
   /// Emitted when the window entered a docked state.
   ///
   /// @platforms windows
