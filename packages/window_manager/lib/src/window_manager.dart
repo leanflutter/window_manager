@@ -748,6 +748,16 @@ class WindowManager {
   Future<bool> ungrabKeyboard() async {
     return await _channel.invokeMethod('ungrabKeyboard');
   }
+
+  /// Sets the default size of the window at app start
+  /// @platforms linux
+  Future<bool> setDefaultSize(Size size) async {
+    final Map<String, dynamic> arguments = {
+      'width': size.width,
+      'height': size.height,
+    };
+    return await _channel.invokeMethod('setDefaultSize', arguments);
+  }
 }
 
 final windowManager = WindowManager.instance;

@@ -802,6 +802,19 @@ static FlMethodResponse* set_brightness(WindowManagerPlugin* self,
   return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
 }
 
+static FlMethodResponse* set_default_size(WindowManagerPlugin* self, FlValue* args) {
+  FlValue* width = fl_value_lookup_string(args, "width");
+  FlValue* height = fl_value_lookup_string(args, "height");
+  if (width != nullptr && height != nullptr) {
+    gtk_window_set_default_size(get_window(self),
+                      static_cast<gint>(fl_value_get_float(width)),
+                      static_cast<gint>(fl_value_get_float(height)));
+  }
+
+  g_autoptr(FlValue) result = fl_value_new_bool(true);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
 // Called when a method call is received from Flutter.
 static void window_manager_plugin_handle_method_call(
     WindowManagerPlugin* self,
@@ -929,6 +942,8 @@ static void window_manager_plugin_handle_method_call(
     response = ungrab_keyboard(self);
   } else if (g_strcmp0(method, "setBrightness") == 0) {
     response = set_brightness(self, args);
+  } else if (g_strcmp0(method, "setDefaultSize") == 0) {
+    response = set_default_size(self, args);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }
