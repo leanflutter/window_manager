@@ -13,7 +13,7 @@ A new flutter plugin project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'LiJianying' => 'lijy91@foxmail.com' }
   s.source           = { :path => '.' }
-  s.source_files     = 'Classes/**/*'
+  s.source_files     = 'window_manager/Sources/window_manager/**/*'
   s.dependency 'FlutterMacOS'
 
   s.platform = :osx, '10.11'
