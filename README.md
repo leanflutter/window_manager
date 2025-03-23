@@ -506,8 +506,8 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
 ## Articles
 
-- [Click the dock icon to restore after closing the window](https://leanflutter.dev/tips-and-tricks/002-click-dock-icon-to-restore-after-closing-the-window/)
-- [Making the app single-instanced](https://leanflutter.dev/tips-and-tricks/001-making-the-app-single-instanced/)
+- [Click the dock icon to restore after closing the window](https://leanflutter.dev/blog/click-dock-icon-to-restore-after-closing-the-window/)
+- [Making the app single-instanced](https://leanflutter.dev/blog/making-the-app-single-instanced/)
 
 ## Who's using it?
 

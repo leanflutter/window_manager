@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 A new flutter plugin project.
                        DESC
-  s.homepage         = 'https://leanflutter.org'
+  s.homepage         = 'https://leanflutter.dev'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'LiJianying' => 'lijy91@foxmail.com' }
   s.source           = { :path => '.' }
