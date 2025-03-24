@@ -263,11 +263,11 @@ class WindowManager {
     await _channel.invokeMethod('setFullScreen', arguments);
     // (Windows) Force refresh the app so it 's back to the correct size
     // (see GitHub issue #311)
-    if (Platform.isWindows) {
-      final size = await getSize();
-      setSize(size + const Offset(1, 1));
-      setSize(size);
-    }
+    // if (Platform.isWindows) {
+    //   final size = await getSize();
+    //   setSize(size + const Offset(1, 1));
+    //   setSize(size);
+    // }
   }
 
   /// Returns `bool` - Whether the window is dockable or not.
