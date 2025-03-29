@@ -2,6 +2,8 @@
 
 // This must be included before many other Windows headers.
 #include <windows.h>
+#include <WtsApi32.h>
+#pragma comment(lib,"WtsApi32.lib")
 
 #include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
@@ -50,6 +52,10 @@ class WindowManagerPlugin : public flutter::Plugin {
 
   // The ID of the WindowProc delegate registration.
   int window_proc_id = -1;
+  // session
+  bool session_notification_registered = false;
+  // taskbar create
+  UINT WM_TASKBARCREATED = 0;
 
   void WindowManagerPlugin::_EmitEvent(std::string eventName);
   // Called for top-level WindowProc delegation.
@@ -117,6 +123,7 @@ WindowManagerPlugin::WindowManagerPlugin(
       [this](HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
         return HandleWindowProc(hWnd, message, wParam, lParam);
       });
+  WM_TASKBARCREATED = RegisterWindowMessageA("TaskbarCreated");
 }
 
 WindowManagerPlugin::~WindowManagerPlugin() {
@@ -139,7 +146,11 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
                                                              WPARAM wParam,
                                                              LPARAM lParam) {
   std::optional<LRESULT> result = std::nullopt;
-
+  if(!session_notification_registered){
+    session_notification_registered = true;
+    WTSRegisterSessionNotification(hWnd, NOTIFY_FOR_THIS_SESSION);
+  }
+  
   if (message == WM_DPICHANGED) {
     window_manager->pixel_ratio_ =
         (float)LOWORD(wParam) / USER_DEFAULT_SCREEN_DPI;
@@ -336,6 +347,14 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
            flutter::EncodableValue(true)}};
       window_manager->SetAlwaysOnBottom(args);
     }
+  } else if(WM_TASKBARCREATED == message){
+     _EmitEvent("taskbar-created");
+  } else if (WM_QUERYENDSESSION == message){
+     _EmitEvent("device-shutdown");
+  } else if(WM_WTSSESSION_CHANGE == message){
+      if(WTS_CONSOLE_DISCONNECT == wParam) {
+        _EmitEvent("user-session-disconnect");
+      }
   }
 
   return result;
