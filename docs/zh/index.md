@@ -2,6 +2,21 @@
 
 `window_manager` 插件为 Flutter 桌面应用程序提供了全面的窗口管理功能，使开发者能够完全控制窗口大小、位置、外观、关闭行为，以及监听事件。
 
+<div style="display: flex; flex-direction: row; gap: 10px;">
+  <a href="https://github.com/leanflutter/window_manager">
+    <img
+      alt="window_manager on GitHub"
+      src="https://img.shields.io/github/stars/leanflutter/window_manager?style=for-the-badge&logo=GitHub"
+    />
+  </a>
+  <a href="https://pub.dev/packages/window_manager">
+    <img alt="Pub Likes" src="https://img.shields.io/pub/likes/window_manager?style=for-the-badge&logo=flutter&label=Pub%20Likes"/>
+  </a>
+  <a href="https://github.com/leanflutter/window_manager/graphs/contributors">
+    <img src="https://img.shields.io/github/all-contributors/leanflutter/window_manager?style=for-the-badge" />
+  </a>
+</div>
+
 ## 核心功能
 
 ### 窗口控制
