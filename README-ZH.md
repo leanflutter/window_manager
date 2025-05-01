@@ -14,6 +14,8 @@
 
 这个插件为 Flutter 桌面应用程序提供了全面的窗口管理功能，使开发者能够完全控制窗口大小、位置、外观、关闭行为，以及监听事件。
 
+> 注意：本插件计划迁移至 [nativeapi](https://github.com/leanflutter/nativeapi-flutter) 以提升可维护性和性能，但目前该方案仍处于实验阶段。
+
 ---
 
 [English](./README.md) | 简体中文

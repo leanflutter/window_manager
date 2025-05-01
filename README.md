@@ -14,6 +14,8 @@
 
 This plugin provides comprehensive window management capabilities for Flutter desktop applications, enabling full control over window size, position, appearance, close behavior, and listening to events.
 
+> Note: This plugin is planned to migrate to [nativeapi](https://github.com/leanflutter/nativeapi-flutter) to improve maintainability and performance, but the solution is still experimental at this stage.
+
 ---
 
 English | [简体中文](./README-ZH.md)
