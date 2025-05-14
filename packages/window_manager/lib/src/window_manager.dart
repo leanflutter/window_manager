@@ -104,6 +104,10 @@ class WindowManager {
     await _channel.invokeMethod('ensureInitialized');
   }
 
+  Future<int> getWindowHandle()async{
+    return await _channel.invokeMethod('getWindowHandle') as int;
+  }
+
   /// You can call this to remove the window frame (title bar, outline border, etc), which is basically everything except the Flutter view, also can call setTitleBarStyle(TitleBarStyle.normal) or setTitleBarStyle(TitleBarStyle.hidden) to restore it.
   Future<void> setAsFrameless() async {
     await _channel.invokeMethod('setAsFrameless');
