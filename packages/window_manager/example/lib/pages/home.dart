@@ -180,6 +180,14 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 print('isFocused: ${await windowManager.isFocused()}');
               },
             ),
+            if(Platform.isWindows)
+            PreferenceListItem(
+              title: const Text('getWindowHandle'),
+              onTap: () async {
+                final result = await windowManager.getWindowHandle();
+                print('HWND:$result');
+              },
+            ),
             PreferenceListItem(
               title: const Text('show / hide'),
               onTap: () async {

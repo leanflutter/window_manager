@@ -350,7 +350,11 @@ void WindowManagerPlugin::HandleMethodCall(
     window_manager->native_window =
         ::GetAncestor(registrar->GetView()->GetNativeWindow(), GA_ROOT);
     result->Success(flutter::EncodableValue(true));
-  } else if (method_name.compare("waitUntilReadyToShow") == 0) {
+  }
+  else if (method_name.compare("getWindowHandle") == 0) {
+    result->Success(flutter::EncodableValue(reinterpret_cast<__int64>(window_manager->GetMainWindow())));
+  }
+  else if (method_name.compare("waitUntilReadyToShow") == 0) {
     window_manager->WaitUntilReadyToShow();
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("setAsFrameless") == 0) {
