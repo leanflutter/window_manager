@@ -8,7 +8,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.4.2
+  window_manager: ^0.5.0
 ```
 
 或者

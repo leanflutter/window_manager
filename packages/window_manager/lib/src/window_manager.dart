@@ -328,10 +328,10 @@ class WindowManager {
   /// Sets the background color of the window.
   Future<void> setBackgroundColor(Color backgroundColor) async {
     final Map<String, dynamic> arguments = {
-      'backgroundColorA': backgroundColor.alpha,
-      'backgroundColorR': backgroundColor.red,
-      'backgroundColorG': backgroundColor.green,
-      'backgroundColorB': backgroundColor.blue,
+      'backgroundColorA': (backgroundColor.a * 255).round() & 0xff,
+      'backgroundColorR': (backgroundColor.r * 255).round() & 0xff,
+      'backgroundColorG': (backgroundColor.g * 255).round() & 0xff,
+      'backgroundColorB': (backgroundColor.b * 255).round() & 0xff,
     };
     await _channel.invokeMethod('setBackgroundColor', arguments);
   }

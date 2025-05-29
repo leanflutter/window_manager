@@ -23,11 +23,11 @@ scripts:
         - test
 
   format:
-    exec: dart format . --fix
+    exec: dart format .
     description: Run `dart format` for all packages.
 
   format-check:
-    exec: dart format . --fix --set-exit-if-changed
+    exec: dart format . --set-exit-if-changed
     description: Run `dart format` checks for all packages.
 
   fix:
