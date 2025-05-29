@@ -50,6 +50,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             windowManager.waitUntilReadyToShow()
             result(true)
             break
+        case "getId":
+            result(windowManager.getId())
+            break
         case "setAsFrameless":
             windowManager.setAsFrameless()
             result(true)

@@ -41,10 +41,9 @@ class WindowManagerPlugin : public flutter::Plugin {
 
  private:
   std::unique_ptr<
-    flutter::MethodChannel<flutter::EncodableValue>,
-    std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
+      flutter::MethodChannel<flutter::EncodableValue>,
+      std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
       channel = nullptr;
-
 
   WindowManager* window_manager;
   flutter::PluginRegistrarWindows* registrar;
@@ -69,8 +68,8 @@ class WindowManagerPlugin : public flutter::Plugin {
 
     // HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
     // Don't use `MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)` above.
-    // Because if the window is restored from minimized state, the window is not in the correct monitor.
-    // The monitor is always the left-most monitor.
+    // Because if the window is restored from minimized state, the window is not
+    // in the correct monitor. The monitor is always the left-most monitor.
     // https://github.com/leanflutter/window_manager/issues/489
     HMONITOR monitor = MonitorFromRect(&sz->rgrc[0], MONITOR_DEFAULTTONEAREST);
     if (monitor != NULL) {
@@ -113,10 +112,9 @@ WindowManagerPlugin::WindowManagerPlugin(
       registrar->messenger(), "window_manager",
       &flutter::StandardMethodCodec::GetInstance());
 
-  channel->SetMethodCallHandler(
-      [this](const auto& call, auto result) {
-        HandleMethodCall(call, std::move(result));
-      });
+  channel->SetMethodCallHandler([this](const auto& call, auto result) {
+    HandleMethodCall(call, std::move(result));
+  });
 }
 
 WindowManagerPlugin::~WindowManagerPlugin() {
@@ -350,13 +348,12 @@ void WindowManagerPlugin::HandleMethodCall(
     window_manager->native_window =
         ::GetAncestor(registrar->GetView()->GetNativeWindow(), GA_ROOT);
     result->Success(flutter::EncodableValue(true));
-  }
-  else if (method_name.compare("getWindowHandle") == 0) {
-    result->Success(flutter::EncodableValue(reinterpret_cast<__int64>(window_manager->GetMainWindow())));
-  }
-  else if (method_name.compare("waitUntilReadyToShow") == 0) {
+  } else if (method_name.compare("waitUntilReadyToShow") == 0) {
     window_manager->WaitUntilReadyToShow();
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("getId") == 0) {
+    result->Success(flutter::EncodableValue(
+        reinterpret_cast<__int64>(window_manager->GetMainWindow())));
   } else if (method_name.compare("setAsFrameless") == 0) {
     window_manager->SetAsFrameless();
     result->Success(flutter::EncodableValue(true));

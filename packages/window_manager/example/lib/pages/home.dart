@@ -141,6 +141,14 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
         PreferenceListSection(
           title: const Text('METHODS'),
           children: [
+            if (Platform.isWindows || Platform.isMacOS)
+              PreferenceListItem(
+                title: const Text('getId'),
+                onTap: () async {
+                  final result = await windowManager.getId();
+                  BotToast.showText(text: 'Window ID:$result');
+                },
+              ),
             PreferenceListItem(
               title: const Text('setAsFrameless'),
               onTap: () async {
@@ -178,14 +186,6 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                 await windowManager.focus();
                 await Future.delayed(const Duration(seconds: 2));
                 print('isFocused: ${await windowManager.isFocused()}');
-              },
-            ),
-            if(Platform.isWindows)
-            PreferenceListItem(
-              title: const Text('getWindowHandle'),
-              onTap: () async {
-                final result = await windowManager.getWindowHandle();
-                print('HWND:$result');
               },
             ),
             PreferenceListItem(

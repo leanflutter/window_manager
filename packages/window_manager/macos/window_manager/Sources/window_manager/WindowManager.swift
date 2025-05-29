@@ -76,6 +76,10 @@ public class WindowManager: NSObject, NSWindowDelegate {
     public func waitUntilReadyToShow() {
         // nothing
     }
+
+    public func getId() -> Int {
+        return mainWindow.windowNumber
+    }
     
     public func setAsFrameless() {
         mainWindow.styleMask.insert(.fullSizeContentView)
