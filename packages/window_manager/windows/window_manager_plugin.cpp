@@ -31,11 +31,6 @@ bool IsWindows11OrGreater() {
   return dwBuild < 22000;
 }
 
-std::unique_ptr<
-    flutter::MethodChannel<flutter::EncodableValue>,
-    std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
-    channel = nullptr;
-
 class WindowManagerPlugin : public flutter::Plugin {
  public:
   static void RegisterWithRegistrar(flutter::PluginRegistrarWindows* registrar);
@@ -45,6 +40,12 @@ class WindowManagerPlugin : public flutter::Plugin {
   virtual ~WindowManagerPlugin();
 
  private:
+  std::unique_ptr<
+    flutter::MethodChannel<flutter::EncodableValue>,
+    std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
+      channel = nullptr;
+
+
   WindowManager* window_manager;
   flutter::PluginRegistrarWindows* registrar;
 
@@ -95,16 +96,7 @@ class WindowManagerPlugin : public flutter::Plugin {
 // static
 void WindowManagerPlugin::RegisterWithRegistrar(
     flutter::PluginRegistrarWindows* registrar) {
-  channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
-      registrar->messenger(), "window_manager",
-      &flutter::StandardMethodCodec::GetInstance());
-
   auto plugin = std::make_unique<WindowManagerPlugin>(registrar);
-
-  channel->SetMethodCallHandler(
-      [plugin_pointer = plugin.get()](const auto& call, auto result) {
-        plugin_pointer->HandleMethodCall(call, std::move(result));
-      });
 
   registrar->AddPlugin(std::move(plugin));
 }
@@ -116,6 +108,14 @@ WindowManagerPlugin::WindowManagerPlugin(
   window_proc_id = registrar->RegisterTopLevelWindowProcDelegate(
       [this](HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
         return HandleWindowProc(hWnd, message, wParam, lParam);
+      });
+  channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      registrar->messenger(), "window_manager",
+      &flutter::StandardMethodCodec::GetInstance());
+
+  channel->SetMethodCallHandler(
+      [this](const auto& call, auto result) {
+        HandleMethodCall(call, std::move(result));
       });
 }
 
