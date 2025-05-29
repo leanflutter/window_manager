@@ -2,14 +2,14 @@
 
 # window_manager
 
-[![pub version][pub-image]][pub-url] [![][discord-image]][discord-url] [![All Contributors][all-contributors-image]](#contributors)
+[![pub version][pub-image]][pub-url] [![Pub Monthly Downloads][pub-dm-image]][pub-dm-url] [![][discord-image]][discord-url] [![All Contributors][all-contributors-image]](#contributors)
 
 [pub-image]: https://img.shields.io/pub/v/window_manager.svg
 [pub-url]: https://pub.dev/packages/window_manager
-
+[pub-dm-image]: https://img.shields.io/pub/dm/window_manager.svg
+[pub-dm-url]: https://pub.dev/packages/window_manager/score
 [discord-image]: https://img.shields.io/discord/884679008049037342.svg
 [discord-url]: https://discord.gg/zPa6EZ2jqb
-
 [all-contributors-image]: https://img.shields.io/github/all-contributors/leanflutter/window_manager?color=ee8449&style=flat-square
 
 这个插件为 Flutter 桌面应用程序提供了全面的窗口管理功能，使开发者能够完全控制窗口大小、位置、外观、关闭行为，以及监听事件。
@@ -41,7 +41,7 @@
 
 | Linux | macOS | Windows |
 | :---: | :---: | :-----: |
-|   ✔️   |   ✔️   |    ✔️    |
+|  ✔️   |  ✔️   |   ✔️    |
 
 ## 文档
 
@@ -57,7 +57,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.4.2
+  window_manager: ^0.5.0
 ```
 
 ### 用法
@@ -92,13 +92,13 @@ void main() async {
 
 ## 相关文章
 
-- [关闭窗口后点击Dock图标进行恢复](https://leanflutter.dev/zh/blog/click-dock-icon-to-restore-after-closing-the-window)
+- [关闭窗口后点击 Dock 图标进行恢复](https://leanflutter.dev/zh/blog/click-dock-icon-to-restore-after-closing-the-window)
 - [让应用成为单实例](https://leanflutter.dev/zh/blog/making-the-app-single-instanced)
 
 ## 谁在用使用它？
 
-- [Airclap](https://airclap.app/) - 任何文件，任意设备，随意发送。简单好用的跨平台高速文件传输APP。
-- [AuthPass](https://authpass.app/) - 基于Flutter的密码管理器，适用于所有平台。兼容Keepass 2.x（kdbx 3.x）。
+- [Airclap](https://airclap.app/) - 任何文件，任意设备，随意发送。简单好用的跨平台高速文件传输 APP。
+- [AuthPass](https://authpass.app/) - 基于 Flutter 的密码管理器，适用于所有平台。兼容 Keepass 2.x（kdbx 3.x）。
 - [Biyi (比译)](https://biyidev.com/) - 一个便捷的翻译和词典应用程序。
 - [BlueBubbles](https://github.com/BlueBubblesApp/bluebubbles-app) - BlueBubbles is an ecosystem of apps bringing iMessage to Android, Windows, and Linux
 - [LunaSea](https://github.com/CometTools/LunaSea) - A self-hosted controller for mobile and macOS built using the Flutter framework.
@@ -107,7 +107,6 @@ void main() async {
 - [Ubuntu Desktop Installer](https://github.com/canonical/ubuntu-desktop-installer) - This project is a modern implementation of the Ubuntu Desktop installer.
 - [UniControlHub](https://github.com/rohitsangwan01/uni_control_hub) - Seamlessly bridge your Desktop and Mobile devices
 - [EyesCare](https://bixat.dev/products/EyesCare) - A light-weight application following 20 rule adherence for optimum eye health
-
 
 ## 贡献者
 
