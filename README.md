@@ -57,7 +57,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.5.0
+  window_manager: ^0.5.1
 ```
 
 ### Usage

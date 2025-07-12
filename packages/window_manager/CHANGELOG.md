@@ -1,3 +1,7 @@
+## 0.5.1
+
+* fix: Fix PrivacyInfo.xcprivacy warning for macOS Desktop on Mac M1 macOS 15 (Sequoia) (#550)
+
 ### 0.5.0
 
 * feat: Add `getId` method for retrieving window ID on macOS and Windows
