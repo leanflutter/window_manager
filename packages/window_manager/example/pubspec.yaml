@@ -1,9 +1,10 @@
 name: window_manager_example
+resolution: workspace
 description: Demonstrates how to use the window_manager plugin.
 publish_to: "none"
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ^3.5.0
 
 dependencies:
   bot_toast: ^4.1.3
