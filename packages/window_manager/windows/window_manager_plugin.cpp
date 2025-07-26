@@ -289,7 +289,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       rect->bottom = bottom;
     }
   } else if (message == WM_SIZE) {
-    if (window_manager->IsFullScreen() && wParam == SIZE_MAXIMIZED &&
+    if (window_manager->IsFullScreen() &&
         window_manager->last_state != STATE_FULLSCREEN_ENTERED) {
       _EmitEvent("enter-full-screen");
       window_manager->last_state = STATE_FULLSCREEN_ENTERED;
