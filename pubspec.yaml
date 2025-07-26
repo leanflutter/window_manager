@@ -2,8 +2,45 @@ name: window_manager_workspace
 homepage: https://github.com/leanflutter/window_manager
 publish_to: none
 
+workspace:
+  - packages/window_manager
+  - packages/window_manager/example
+
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ^3.5.0
 
 dev_dependencies:
-  melos: ^6.2.0
+  melos: ^7.0.0-dev.9
+
+melos:
+  command:
+    bootstrap:
+      environment:
+        sdk: ^3.5.0
+        flutter: '>=3.3.0'
+      dev_dependencies:
+        mostly_reasonable_lints: ^0.1.2
+
+  scripts:
+    analyze:
+      exec: flutter analyze --fatal-infos
+      description: Run `flutter analyze` for all packages.
+
+    test:
+      exec: flutter test
+      description: Run `flutter test` for a specific package.
+      packageFilters:
+        dirExists:
+          - test
+
+    format:
+      exec: dart format .
+      description: Run `dart format` for all packages.
+
+    format-check:
+      exec: dart format . --set-exit-if-changed
+      description: Run `dart format` checks for all packages.
+
+    fix:
+      exec: dart fix . --apply
+      description: Run `dart fix` for all packages.
