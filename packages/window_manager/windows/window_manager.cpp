@@ -598,6 +598,7 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
       ::GetWindowPlacement(mainWindow, &placement);
       ::GetMonitorInfo(
           ::MonitorFromWindow(mainWindow, MONITOR_DEFAULTTONEAREST), &monitor);
+      // TODO: Check how frame can be restored after leaving fullscreen, when always enable frameless
       if (!g_maximized_before_fullscreen) {
         SetAsFrameless();
       }

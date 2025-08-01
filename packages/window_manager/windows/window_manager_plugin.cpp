@@ -293,7 +293,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
         window_manager->last_state != STATE_FULLSCREEN_ENTERED) {
       _EmitEvent("enter-full-screen");
       window_manager->last_state = STATE_FULLSCREEN_ENTERED;
-    } else if (!window_manager->IsFullScreen() && wParam == SIZE_RESTORED &&
+    } else if (!window_manager->IsFullScreen() &&
                window_manager->last_state == STATE_FULLSCREEN_ENTERED) {
       window_manager->ForceChildRefresh();
       _EmitEvent("leave-full-screen");
