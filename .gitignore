@@ -4,3 +4,6 @@
 *.iml
 pubspec_overrides.yaml
 pubspec.lock
+
+# FVM Version Cache
+.fvm/
