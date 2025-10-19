@@ -24,6 +24,7 @@ struct _WindowManagerPlugin {
   GdkEventButton _event_button;
   GdkDevice* grab_pointer;
   GtkCssProvider* css_provider;
+  gulong _button_press_emission_hook_id;
 };
 
 G_DEFINE_TYPE(WindowManagerPlugin, window_manager_plugin, g_object_get_type())
@@ -938,6 +939,8 @@ static void window_manager_plugin_handle_method_call(
 
 static void window_manager_plugin_dispose(GObject* object) {
   WindowManagerPlugin* self = WINDOW_MANAGER_PLUGIN(object);
+  g_signal_remove_emission_hook(g_signal_lookup("button-press-event", GTK_TYPE_WIDGET),
+                                self->_button_press_emission_hook_id);
   g_clear_object(&self->css_provider);
   g_free(self->title_bar_style_);
   G_OBJECT_CLASS(window_manager_plugin_parent_class)->dispose(object);
@@ -1121,7 +1124,7 @@ void window_manager_plugin_register_with_registrar(
                    G_CALLBACK(on_event_after), plugin);
   find_event_box(plugin, GTK_WIDGET(fl_plugin_registrar_get_view(registrar)));
 
-  g_signal_add_emission_hook(
+  plugin->_button_press_emission_hook_id = g_signal_add_emission_hook(
       g_signal_lookup("button-press-event", GTK_TYPE_WIDGET), 0, on_mouse_press,
       plugin, NULL);
 
