@@ -1,4 +1,6 @@
-> **🚀 Ship Your App Faster**: Try [Fastforge](https://fastforge.dev) - The simplest way to build, package and distribute your Flutter apps.
+> **⚠️ Migration Notice**: This plugin is being migrated to [libnativeapi/nativeapi-flutter](https://github.com/libnativeapi/nativeapi-flutter)
+>
+> The new version is based on a unified C++ core library ([libnativeapi/nativeapi](https://github.com/libnativeapi/nativeapi)), providing more complete and consistent cross-platform native API support.
 
 # window_manager
 
@@ -13,8 +15,6 @@
 [all-contributors-image]: https://img.shields.io/github/all-contributors/leanflutter/window_manager?color=ee8449&style=flat-square
 
 This plugin provides comprehensive window management capabilities for Flutter desktop applications, enabling full control over window size, position, appearance, close behavior, and listening to events.
-
-> Note: This plugin is planned to migrate to [nativeapi](https://github.com/leanflutter/nativeapi-flutter) to improve maintainability and performance, but the solution is still experimental at this stage.
 
 ---
 
