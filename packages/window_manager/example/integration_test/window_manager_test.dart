@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -19,110 +20,175 @@ Future<void> main() async {
     },
   );
 
-  testWidgets('getBounds', (tester) async {
-    expect(
-      await windowManager.getBounds(),
-      isA<Rect>().having((r) => r.size, 'size', const Size(640, 480)),
+  group('Getters', () {
+    testWidgets('getBounds', (tester) async {
+      expect(
+        await windowManager.getBounds(),
+        isA<Rect>().having((r) => r.size, 'size', const Size(640, 480)),
+      );
+    });
+
+    testWidgets(
+      'isAlwaysOnBottom',
+      (tester) async {
+        expect(await windowManager.isAlwaysOnBottom(), isFalse);
+      },
+      skip: Platform.isMacOS || Platform.isWindows,
     );
+
+    testWidgets('isAlwaysOnTop', (tester) async {
+      expect(await windowManager.isAlwaysOnTop(), isFalse);
+    });
+
+    testWidgets('isClosable', (tester) async {
+      expect(await windowManager.isClosable(), isTrue);
+    });
+
+    testWidgets('isFocused', (tester) async {
+      expect(await windowManager.isFocused(), isTrue);
+    });
+
+    testWidgets('isFullScreen', (tester) async {
+      expect(await windowManager.isFullScreen(), isFalse);
+    });
+
+    testWidgets(
+      'hasShadow',
+      (tester) async {
+        expect(await windowManager.hasShadow(), isTrue);
+      },
+      skip: Platform.isLinux,
+    );
+
+    testWidgets('isMaximizable', (tester) async {
+      expect(await windowManager.isMaximizable(), isTrue);
+    });
+
+    testWidgets('isMaximized', (tester) async {
+      expect(await windowManager.isMaximized(), isFalse);
+    });
+
+    testWidgets(
+      'isMinimizable',
+      (tester) async {
+        expect(await windowManager.isMinimizable(), isTrue);
+      },
+      skip: Platform.isMacOS,
+    );
+
+    testWidgets('isMinimized', (tester) async {
+      expect(await windowManager.isMinimized(), isFalse);
+    });
+
+    testWidgets(
+      'isMovable',
+      (tester) async {
+        expect(await windowManager.isMovable(), isTrue);
+      },
+      skip: Platform.isLinux || Platform.isWindows,
+    );
+
+    testWidgets('getOpacity', (tester) async {
+      expect(await windowManager.getOpacity(), 1.0);
+    });
+
+    testWidgets('getPosition', (tester) async {
+      expect(await windowManager.getPosition(), isA<Offset>());
+    });
+
+    testWidgets('isPreventClose', (tester) async {
+      expect(await windowManager.isPreventClose(), isFalse);
+    });
+
+    testWidgets('isResizable', (tester) async {
+      expect(await windowManager.isResizable(), isTrue);
+    });
+
+    testWidgets('getSize', (tester) async {
+      expect(await windowManager.getSize(), const Size(640, 480));
+    });
+
+    testWidgets(
+      'isSkipTaskbar',
+      (tester) async {
+        expect(await windowManager.isSkipTaskbar(), isFalse);
+      },
+      skip: Platform.isWindows,
+    );
+
+    testWidgets('getTitle', (tester) async {
+      expect(await windowManager.getTitle(), 'window_manager_test');
+    });
+
+    testWidgets('getTitleBarHeight', (tester) async {
+      expect(await windowManager.getTitleBarHeight(), isNonNegative);
+    });
+
+    testWidgets('isVisible', (tester) async {
+      expect(await windowManager.isVisible(), isTrue);
+    });
   });
 
-  testWidgets(
-    'isAlwaysOnBottom',
-    (tester) async {
-      expect(await windowManager.isAlwaysOnBottom(), isFalse);
-    },
-    skip: Platform.isMacOS || Platform.isWindows,
-  );
+  group('Setters and Listeners', () {
+    late StreamController<String> streamController;
+    late WindowListener windowListener;
 
-  testWidgets('isAlwaysOnTop', (tester) async {
-    expect(await windowManager.isAlwaysOnTop(), isFalse);
+    setUp(() async {
+      streamController = StreamController<String>();
+      windowListener = WindowListenerImpl(streamController: streamController);
+      windowManager.addListener(windowListener);
+    });
+
+    tearDown(() async {
+      windowManager.removeListener(windowListener);
+      await streamController.close();
+    });
+
+    testWidgets('minimize & restore', (tester) async {
+      await windowManager.minimize();
+      await windowManager.restore();
+      expect(
+        streamController.stream,
+        emitsInOrder([
+          emitsThrough('minimize'),
+          emitsThrough('restore'),
+        ]),
+      );
+    });
+
+    testWidgets('maximize & unmaximize', (tester) async {
+      await windowManager.maximize();
+      await windowManager.unmaximize();
+      expect(
+        streamController.stream,
+        emitsInOrder([
+          emitsThrough('maximize'),
+          emitsThrough('unmaximize'),
+        ]),
+      );
+    });
+
+    testWidgets('setFullscreen true & false', (tester) async {
+      await windowManager.setFullScreen(true);
+      await windowManager.setFullScreen(false);
+      expect(
+        streamController.stream,
+        emitsInOrder([
+          emitsThrough('enter-full-screen'),
+          emitsThrough('leave-full-screen'),
+        ]),
+      );
+    });
   });
+}
 
-  testWidgets('isClosable', (tester) async {
-    expect(await windowManager.isClosable(), isTrue);
-  });
+class WindowListenerImpl with WindowListener {
+  WindowListenerImpl({required this.streamController});
 
-  testWidgets('isFocused', (tester) async {
-    expect(await windowManager.isFocused(), isTrue);
-  });
+  final StreamController<String> streamController;
 
-  testWidgets('isFullScreen', (tester) async {
-    expect(await windowManager.isFullScreen(), isFalse);
-  });
-
-  testWidgets(
-    'hasShadow',
-    (tester) async {
-      expect(await windowManager.hasShadow(), isTrue);
-    },
-    skip: Platform.isLinux,
-  );
-
-  testWidgets('isMaximizable', (tester) async {
-    expect(await windowManager.isMaximizable(), isTrue);
-  });
-
-  testWidgets('isMaximized', (tester) async {
-    expect(await windowManager.isMaximized(), isFalse);
-  });
-
-  testWidgets(
-    'isMinimizable',
-    (tester) async {
-      expect(await windowManager.isMinimizable(), isTrue);
-    },
-    skip: Platform.isMacOS,
-  );
-
-  testWidgets('isMinimized', (tester) async {
-    expect(await windowManager.isMinimized(), isFalse);
-  });
-
-  testWidgets(
-    'isMovable',
-    (tester) async {
-      expect(await windowManager.isMovable(), isTrue);
-    },
-    skip: Platform.isLinux || Platform.isWindows,
-  );
-
-  testWidgets('getOpacity', (tester) async {
-    expect(await windowManager.getOpacity(), 1.0);
-  });
-
-  testWidgets('getPosition', (tester) async {
-    expect(await windowManager.getPosition(), isA<Offset>());
-  });
-
-  testWidgets('isPreventClose', (tester) async {
-    expect(await windowManager.isPreventClose(), isFalse);
-  });
-
-  testWidgets('isResizable', (tester) async {
-    expect(await windowManager.isResizable(), isTrue);
-  });
-
-  testWidgets('getSize', (tester) async {
-    expect(await windowManager.getSize(), const Size(640, 480));
-  });
-
-  testWidgets(
-    'isSkipTaskbar',
-    (tester) async {
-      expect(await windowManager.isSkipTaskbar(), isFalse);
-    },
-    skip: Platform.isWindows,
-  );
-
-  testWidgets('getTitle', (tester) async {
-    expect(await windowManager.getTitle(), 'window_manager_test');
-  });
-
-  testWidgets('getTitleBarHeight', (tester) async {
-    expect(await windowManager.getTitleBarHeight(), isNonNegative);
-  });
-
-  testWidgets('isVisible', (tester) async {
-    expect(await windowManager.isVisible(), isTrue);
-  });
+  @override
+  void onWindowEvent(String eventName) {
+    streamController.add(eventName);
+  }
 }
