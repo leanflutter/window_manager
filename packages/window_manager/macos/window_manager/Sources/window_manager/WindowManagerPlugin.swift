@@ -2,8 +2,6 @@ import Cocoa
 import FlutterMacOS
 
 public class WindowManagerPlugin: NSObject, FlutterPlugin {
-    public static var RegisterGeneratedPlugins:((FlutterPluginRegistry) -> Void)?
-    
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "window_manager", binaryMessenger: registrar.messenger)
         let instance = WindowManagerPlugin(registrar, channel)
@@ -51,6 +49,9 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
         case "waitUntilReadyToShow":
             windowManager.waitUntilReadyToShow()
             result(true)
+            break
+        case "getId":
+            result(windowManager.getId())
             break
         case "setAsFrameless":
             windowManager.setAsFrameless()

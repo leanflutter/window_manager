@@ -141,6 +141,14 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
         PreferenceListSection(
           title: const Text('METHODS'),
           children: [
+            if (Platform.isWindows || Platform.isMacOS)
+              PreferenceListItem(
+                title: const Text('getId'),
+                onTap: () async {
+                  final result = await windowManager.getId();
+                  BotToast.showText(text: 'Window ID:$result');
+                },
+              ),
             PreferenceListItem(
               title: const Text('setAsFrameless'),
               onTap: () async {
@@ -920,10 +928,10 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
           margin: const EdgeInsets.all(0),
           decoration: const BoxDecoration(
             color: Colors.white,
-            // border: Border.all(color: Colors.grey.withOpacity(0.4), width: 1),
+            // border: Border.all(color: Colors.grey.withValues(alpha: 0.4), width: 1),
             // boxShadow: <BoxShadow>[
             //   BoxShadow(
-            //     color: Colors.black.withOpacity(0.2),
+            //     color: Colors.black.withValues(alpha: 0.2),
             //     offset: Offset(1.0, 1.0),
             //     blurRadius: 6.0,
             //   ),
@@ -958,7 +966,7 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                     margin: const EdgeInsets.all(0),
                     width: double.infinity,
                     height: 54,
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                     child: const Center(
                       child: Text('DragToMoveArea'),
                     ),
@@ -970,11 +978,11 @@ class _HomePageState extends State<HomePage> with TrayListener, WindowListener {
                     margin: const EdgeInsets.all(20),
                     child: DragToResizeArea(
                       resizeEdgeSize: 6,
-                      resizeEdgeColor: Colors.red.withOpacity(0.2),
+                      resizeEdgeColor: Colors.red.withValues(alpha: 0.2),
                       child: Container(
                         width: double.infinity,
                         height: double.infinity,
-                        color: Colors.grey.withOpacity(0.3),
+                        color: Colors.grey.withValues(alpha: 0.3),
                         child: Center(
                           child: GestureDetector(
                             child: const Text('DragToResizeArea'),

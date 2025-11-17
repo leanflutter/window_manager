@@ -31,11 +31,6 @@ bool IsWindows11OrGreater() {
   return dwBuild < 22000;
 }
 
-std::unique_ptr<
-    flutter::MethodChannel<flutter::EncodableValue>,
-    std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
-    channel = nullptr;
-
 class WindowManagerPlugin : public flutter::Plugin {
  public:
   static void RegisterWithRegistrar(flutter::PluginRegistrarWindows* registrar);
@@ -45,6 +40,11 @@ class WindowManagerPlugin : public flutter::Plugin {
   virtual ~WindowManagerPlugin();
 
  private:
+  std::unique_ptr<
+      flutter::MethodChannel<flutter::EncodableValue>,
+      std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
+      channel = nullptr;
+
   WindowManager* window_manager;
   flutter::PluginRegistrarWindows* registrar;
 
@@ -68,8 +68,8 @@ class WindowManagerPlugin : public flutter::Plugin {
 
     // HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
     // Don't use `MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)` above.
-    // Because if the window is restored from minimized state, the window is not in the correct monitor.
-    // The monitor is always the left-most monitor.
+    // Because if the window is restored from minimized state, the window is not
+    // in the correct monitor. The monitor is always the left-most monitor.
     // https://github.com/leanflutter/window_manager/issues/489
     HMONITOR monitor = MonitorFromRect(&sz->rgrc[0], MONITOR_DEFAULTTONEAREST);
     if (monitor != NULL) {
@@ -95,16 +95,7 @@ class WindowManagerPlugin : public flutter::Plugin {
 // static
 void WindowManagerPlugin::RegisterWithRegistrar(
     flutter::PluginRegistrarWindows* registrar) {
-  channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
-      registrar->messenger(), "window_manager",
-      &flutter::StandardMethodCodec::GetInstance());
-
   auto plugin = std::make_unique<WindowManagerPlugin>(registrar);
-
-  channel->SetMethodCallHandler(
-      [plugin_pointer = plugin.get()](const auto& call, auto result) {
-        plugin_pointer->HandleMethodCall(call, std::move(result));
-      });
 
   registrar->AddPlugin(std::move(plugin));
 }
@@ -117,6 +108,13 @@ WindowManagerPlugin::WindowManagerPlugin(
       [this](HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
         return HandleWindowProc(hWnd, message, wParam, lParam);
       });
+  channel = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      registrar->messenger(), "window_manager",
+      &flutter::StandardMethodCodec::GetInstance());
+
+  channel->SetMethodCallHandler([this](const auto& call, auto result) {
+    HandleMethodCall(call, std::move(result));
+  });
 }
 
 WindowManagerPlugin::~WindowManagerPlugin() {
@@ -353,6 +351,9 @@ void WindowManagerPlugin::HandleMethodCall(
   } else if (method_name.compare("waitUntilReadyToShow") == 0) {
     window_manager->WaitUntilReadyToShow();
     result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("getId") == 0) {
+    result->Success(flutter::EncodableValue(
+        reinterpret_cast<__int64>(window_manager->GetMainWindow())));
   } else if (method_name.compare("setAsFrameless") == 0) {
     window_manager->SetAsFrameless();
     result->Success(flutter::EncodableValue(true));

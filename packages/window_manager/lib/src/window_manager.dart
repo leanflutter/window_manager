@@ -104,6 +104,16 @@ class WindowManager {
     await _channel.invokeMethod('ensureInitialized');
   }
 
+  /// Returns `int` - The ID of the window.
+  ///
+  /// For macOS, the ID is the window number.
+  /// For Windows, the ID is the window handle.
+  ///
+  /// @platforms macos,windows
+  Future<int> getId() async {
+    return await _channel.invokeMethod('getId') as int;
+  }
+
   /// You can call this to remove the window frame (title bar, outline border, etc), which is basically everything except the Flutter view, also can call setTitleBarStyle(TitleBarStyle.normal) or setTitleBarStyle(TitleBarStyle.hidden) to restore it.
   Future<void> setAsFrameless() async {
     await _channel.invokeMethod('setAsFrameless');
@@ -263,11 +273,11 @@ class WindowManager {
     await _channel.invokeMethod('setFullScreen', arguments);
     // (Windows) Force refresh the app so it 's back to the correct size
     // (see GitHub issue #311)
-    if (Platform.isWindows) {
-      final size = await getSize();
-      setSize(size + const Offset(1, 1));
-      setSize(size);
-    }
+    // if (Platform.isWindows) {
+    //   final size = await getSize();
+    //   setSize(size + const Offset(1, 1));
+    //   setSize(size);
+    // }
   }
 
   /// Returns `bool` - Whether the window is dockable or not.
@@ -318,10 +328,10 @@ class WindowManager {
   /// Sets the background color of the window.
   Future<void> setBackgroundColor(Color backgroundColor) async {
     final Map<String, dynamic> arguments = {
-      'backgroundColorA': backgroundColor.alpha,
-      'backgroundColorR': backgroundColor.red,
-      'backgroundColorG': backgroundColor.green,
-      'backgroundColorB': backgroundColor.blue,
+      'backgroundColorA': (backgroundColor.a * 255).round() & 0xff,
+      'backgroundColorR': (backgroundColor.r * 255).round() & 0xff,
+      'backgroundColorG': (backgroundColor.g * 255).round() & 0xff,
+      'backgroundColorB': (backgroundColor.b * 255).round() & 0xff,
     };
     await _channel.invokeMethod('setBackgroundColor', arguments);
   }

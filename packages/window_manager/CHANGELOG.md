@@ -1,3 +1,16 @@
+## 0.5.1
+
+* fix: Fix PrivacyInfo.xcprivacy warning for macOS Desktop on Mac M1 macOS 15 (Sequoia) (#550)
+
+### 0.5.0
+
+* feat: Add `getId` method for retrieving window ID on macOS and Windows
+* feat: Add `getWindowHandle` method (#548)
+* feat: Add Swift Package Manager support
+* fix: Crash when using window_manager by multi engine on Windows platform (#546)
+* fix: [Windows] Use frameless window to implement fullscreen (#531)
+* fix: Initialize window_hints to fix minimum size setting in release mode (#510)
+
 ### 0.4.3
 
 * [windows] fix: scale ratio on dpi change (#496)

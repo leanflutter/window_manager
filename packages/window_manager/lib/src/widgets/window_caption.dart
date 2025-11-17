@@ -74,7 +74,7 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
                       child: DefaultTextStyle(
                         style: TextStyle(
                           color: widget.brightness == Brightness.light
-                              ? Colors.black.withOpacity(0.8956)
+                              ? Colors.black.withValues(alpha: 0.8956)
                               : Colors.white,
                           fontSize: 14,
                         ),
