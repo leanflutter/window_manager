@@ -773,6 +773,12 @@ void WindowManager::SetBounds(const flutter::EncodableMap& args) {
   }
 
   SetWindowPos(hwnd, HWND_TOP, x, y, width, height, uFlags);
+
+  // Force Flutter view to sync its render surface with the new window size.
+  // Without this, the Flutter render surface may not update correctly when
+  // the window is resized, causing visual artifacts like black areas or
+  // misaligned UI elements.
+  ForceChildRefresh();
 }
 
 void WindowManager::SetMinimumSize(const flutter::EncodableMap& args) {
