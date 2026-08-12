@@ -12,7 +12,6 @@
 #include <flutter/standard_method_codec.h>
 
 #include <dwmapi.h>
-#include <codecvt>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -899,16 +898,35 @@ std::string WindowManager::GetTitle() {
   std::wstring title(bufferSize, L'\0');
   GetWindowText(GetMainWindow(), &title[0], bufferSize);
 
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  return (converter.to_bytes(title)).c_str();
+  if (title.empty() || title[0] == L'\0') {
+    return "";
+  }
+
+  int size_needed =
+      WideCharToMultiByte(CP_UTF8, 0, title.c_str(), -1, NULL, 0, NULL, NULL);
+  if (size_needed <= 0) return "";
+
+  std::string result(size_needed - 1, 0);
+  WideCharToMultiByte(CP_UTF8, 0, title.c_str(), -1, &result[0], size_needed,
+                      NULL, NULL);
+  return result;
 }
 
 void WindowManager::SetTitle(const flutter::EncodableMap& args) {
   std::string title =
       std::get<std::string>(args.at(flutter::EncodableValue("title")));
 
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  SetWindowText(GetMainWindow(), converter.from_bytes(title).c_str());
+  if (title.empty()) {
+    SetWindowText(GetMainWindow(), L"");
+    return;
+  }
+
+  int size_needed = MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, NULL, 0);
+  if (size_needed <= 0) return;
+
+  std::wstring wtitle(size_needed - 1, 0);
+  MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, &wtitle[0], size_needed);
+  SetWindowText(GetMainWindow(), wtitle.c_str());
 }
 
 void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args) {
@@ -990,15 +1008,22 @@ void WindowManager::SetIcon(const flutter::EncodableMap& args) {
   std::string iconPath =
       std::get<std::string>(args.at(flutter::EncodableValue("iconPath")));
 
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  std::wstring wIconPath;
+  if (!iconPath.empty()) {
+    int size_needed =
+        MultiByteToWideChar(CP_UTF8, 0, iconPath.c_str(), -1, NULL, 0);
+    if (size_needed > 0) {
+      wIconPath.resize(size_needed - 1);
+      MultiByteToWideChar(CP_UTF8, 0, iconPath.c_str(), -1, &wIconPath[0],
+                          size_needed);
+    }
+  }
 
-  HICON hIconSmall =
-      (HICON)(LoadImage(NULL, (LPCWSTR)(converter.from_bytes(iconPath).c_str()),
-                        IMAGE_ICON, 16, 16, LR_LOADFROMFILE));
+  HICON hIconSmall = (HICON)(LoadImage(NULL, wIconPath.c_str(), IMAGE_ICON, 16,
+                                       16, LR_LOADFROMFILE));
 
-  HICON hIconLarge =
-      (HICON)(LoadImage(NULL, (LPCWSTR)(converter.from_bytes(iconPath).c_str()),
-                        IMAGE_ICON, 32, 32, LR_LOADFROMFILE));
+  HICON hIconLarge = (HICON)(LoadImage(NULL, wIconPath.c_str(), IMAGE_ICON, 32,
+                                       32, LR_LOADFROMFILE));
 
   HWND hWnd = GetMainWindow();
 
