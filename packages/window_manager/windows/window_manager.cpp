@@ -230,7 +230,9 @@ void WindowManager::WaitUntilReadyToShow() {
 }
 
 void WindowManager::Destroy() {
-  PostQuitMessage(0);
+  HWND hWnd = GetMainWindow();
+  is_prevent_close_ = false;
+  DestroyWindow(hWnd);
 }
 
 void WindowManager::Close() {
