@@ -317,8 +317,8 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       }
     }
   } else if (message == WM_CLOSE) {
+    _EmitEvent("close");
     if (window_manager->IsPreventClose()) {
-      _EmitEvent("close");
       return -1;
     }
   } else if (message == WM_SHOWWINDOW) {
