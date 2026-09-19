@@ -1,4 +1,4 @@
-abstract class WindowListener {
+abstract mixin class WindowListener {
   /// Emitted when the window is going to be closed.
   void onWindowClose() {}
 
