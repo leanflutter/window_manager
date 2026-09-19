@@ -619,23 +619,16 @@ class WindowManager {
   Future<void> popUpWindowMenu() async {}
 
   /// Starts a window drag based on the specified mouse-down event.
-  /// On Windows, this is disabled during full screen mode.
   Future<void> startDragging() async {
-    final window = _target;
-    if (window == null) return;
-    if (Platform.isWindows && window.isFullScreen) return;
-    window.startDragging();
+    _target?.startDragging();
   }
 
   /// Starts a window resize based on the specified mouse-down & mouse-move
-  /// event. On Windows, this is disabled during full screen mode.
+  /// event.
   ///
   /// @platforms linux,windows
   Future<void> startResizing(nativeapi.ResizeEdge resizeEdge) async {
-    final window = _target;
-    if (window == null) return;
-    if (Platform.isWindows && window.isFullScreen) return;
-    window.startResizing(resizeEdge);
+    _target?.startResizing(resizeEdge);
   }
 
   /// Grabs the keyboard.

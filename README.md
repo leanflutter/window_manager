@@ -178,6 +178,9 @@ What differs from 0.5.x:
 - `WindowCaption`'s close button quits the application, for the same reason `close()`
   does. Pass `onClose:` to do something else — `onClose: windowManager.close` keeps the
   0.5.x behaviour, `setPreventClose` included.
+- `startDragging()` and `startResizing()` are no longer skipped on Windows while the
+  window is in full screen: the compatibility layer keeps no `Platform` branch of its
+  own, the core library decides.
 - `screen_retriever` and `path` are no longer dependencies.
 - New example on `package:flutter/widgets.dart` alone; the full one is nativeapi's
   [window_example](https://github.com/libnativeapi/nativeapi-flutter/tree/main/examples/window_example).

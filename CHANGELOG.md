@@ -30,6 +30,9 @@ per-platform plugin code is gone, and one C++ core drives macOS, Windows and Lin
   answer instead of throwing. So do the arguments nothing acts on any more —
   `maximize(vertically:)`, `animate:` of `setPosition` and `setBounds`, `forward:` of
   `setIgnoreMouseEvents`, `visibleOnFullScreen:` of `setVisibleOnAllWorkspaces`.
+* `startDragging()` and `startResizing()` are no longer skipped on Windows while the
+  window is in full screen: the compatibility layer keeps no `Platform` branch of its
+  own, the core library decides.
 * `getId()` answers nativeapi's window id, `setAsFrameless()` hides the title bar without
   removing the border, and `setAlignment` handles any `Alignment` instead of only the
   nine constants.

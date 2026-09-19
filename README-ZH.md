@@ -171,6 +171,8 @@ await windowManager.waitUntilReadyToShow(
 - `setAlignment` 支持任意 `Alignment`，不再只认那九个常量。
 - `WindowCaption` 的关闭按钮会退出应用，原因和 `close()` 一样。传 `onClose:` 可以换成别的：
   `onClose: windowManager.close` 就是 0.5.x 的行为，包括 `setPreventClose`。
+- 全屏时 Windows 上的 `startDragging()`、`startResizing()` 不再被跳过：兼容层不保留自己的
+  `Platform` 分支，交给核心库决定。
 - `screen_retriever` 和 `path` 不再是依赖。
 - 新示例只用 `package:flutter/widgets.dart`；完整示例是 nativeapi 的
   [window_example](https://github.com/libnativeapi/nativeapi-flutter/tree/main/examples/window_example)。
