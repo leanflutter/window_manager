@@ -2,58 +2,100 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:window_manager/src/resize_edge.dart';
-import 'package:window_manager/src/widgets/drag_to_resize_area.dart';
-import 'package:window_manager/src/window_listener.dart';
-import 'package:window_manager/src/window_manager.dart';
+import 'package:nativeapi/nativeapi.dart' as nativeapi;
+import 'package:window_manager/src/native_guard.dart';
 
 final _kIsLinux = !kIsWeb && Platform.isLinux;
 final _kIsWindows = !kIsWeb && Platform.isWindows;
 
+/// Draws the border and shadow of a frameless window, and puts native resize
+/// handles along its edges.
 class VirtualWindowFrame extends StatefulWidget {
-  const VirtualWindowFrame({
-    super.key,
-    required this.child,
-  });
+  const VirtualWindowFrame({super.key, required this.child, this.window});
 
   /// The [child] contained by the VirtualWindowFrame.
   final Widget child;
+
+  /// The window the resize handles act on. When omitted, resolves the current
+  /// window on interaction.
+  final nativeapi.Window? window;
 
   @override
   State<StatefulWidget> createState() => _VirtualWindowFrameState();
 }
 
-class _VirtualWindowFrameState extends State<VirtualWindowFrame>
-    with WindowListener {
+class _VirtualWindowFrameState extends State<VirtualWindowFrame> {
+  nativeapi.ListenerId? _listenerId;
   bool _isFocused = true;
   bool _isMaximized = false;
   bool _isFullScreen = false;
 
   @override
   void initState() {
-    windowManager.addListener(this);
     super.initState();
+    _readState();
+    _listenerId = tryNative(
+      () => nativeapi.WindowManager.instance.addListener((event) {
+        switch (event) {
+          case nativeapi.WindowFocusedEvent():
+          case nativeapi.WindowBlurredEvent():
+          case nativeapi.WindowMaximizedEvent():
+          case nativeapi.WindowRestoredEvent():
+          case nativeapi.WindowResizedEvent():
+            _readState();
+          default:
+            break;
+        }
+      }),
+    );
   }
 
   @override
   void dispose() {
-    windowManager.removeListener(this);
+    final listenerId = _listenerId;
+    if (listenerId != null) {
+      nativeapi.WindowManager.instance.removeListener(listenerId);
+    }
     super.dispose();
   }
 
+  nativeapi.Window? get _window =>
+      widget.window ??
+      tryNative<nativeapi.Window?>(
+        () => nativeapi.WindowManager.instance.getCurrent(),
+      );
+
+  void _readState() {
+    final window = _window;
+    if (window == null) return;
+    final isFocused = window.isFocused;
+    final isMaximized = window.isMaximized;
+    final isFullScreen = window.isFullScreen;
+    if (isFocused == _isFocused &&
+        isMaximized == _isMaximized &&
+        isFullScreen == _isFullScreen) {
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _isFocused = isFocused;
+      _isMaximized = isMaximized;
+      _isFullScreen = isFullScreen;
+    });
+  }
+
   Widget _buildVirtualWindowFrame(BuildContext context) {
-    return DecoratedBox(
+    final isFilling = _isMaximized || _isFullScreen;
+    return Container(
       decoration: BoxDecoration(
         color: Colors.transparent,
         border: Border.all(
           color: Theme.of(context).dividerColor,
-          width: (_isMaximized || _isFullScreen) ? 0 : 1,
+          width: isFilling ? 0 : 1,
         ),
-        borderRadius: BorderRadius.circular(
-          (_isMaximized || _isFullScreen) ? 0 : 6,
-        ),
+        borderRadius: BorderRadius.circular(isFilling ? 0 : 6),
         boxShadow: <BoxShadow>[
-          if (!_isMaximized && !_isFullScreen)
+          if (!isFilling)
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
               offset: Offset(0.0, _isFocused ? 4 : 2),
@@ -62,9 +104,7 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(
-          (_isMaximized || _isFullScreen) ? 0 : 6,
-        ),
+        borderRadius: BorderRadius.circular(isFilling ? 0 : 6),
         child: widget.child,
       ),
     );
@@ -72,19 +112,22 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
 
   @override
   Widget build(BuildContext context) {
+    final isFilling = _isMaximized || _isFullScreen;
     if (_kIsLinux) {
-      return DragToResizeArea(
-        enableResizeEdges: (_isMaximized || _isFullScreen) ? [] : null,
+      return nativeapi.DragToResizeArea(
+        window: widget.window,
+        enableResizeEdges: isFilling ? [] : null,
         child: _buildVirtualWindowFrame(context),
       );
     } else if (_kIsWindows) {
-      return DragToResizeArea(
-        enableResizeEdges: (_isMaximized || _isFullScreen)
+      return nativeapi.DragToResizeArea(
+        window: widget.window,
+        enableResizeEdges: isFilling
             ? []
             : [
-                ResizeEdge.topLeft,
-                ResizeEdge.top,
-                ResizeEdge.topRight,
+                nativeapi.ResizeEdge.topLeft,
+                nativeapi.ResizeEdge.top,
+                nativeapi.ResizeEdge.topRight,
               ],
         child: widget.child,
       );
@@ -92,55 +135,11 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame>
 
     return widget.child;
   }
-
-  @override
-  void onWindowFocus() {
-    setState(() {
-      _isFocused = true;
-    });
-  }
-
-  @override
-  void onWindowBlur() {
-    setState(() {
-      _isFocused = false;
-    });
-  }
-
-  @override
-  void onWindowMaximize() {
-    setState(() {
-      _isMaximized = true;
-    });
-  }
-
-  @override
-  void onWindowUnmaximize() {
-    setState(() {
-      _isMaximized = false;
-    });
-  }
-
-  @override
-  void onWindowEnterFullScreen() {
-    setState(() {
-      _isFullScreen = true;
-    });
-  }
-
-  @override
-  void onWindowLeaveFullScreen() {
-    setState(() {
-      _isFullScreen = false;
-    });
-  }
 }
 
 // ignore: non_constant_identifier_names
 TransitionBuilder VirtualWindowFrameInit() {
   return (_, Widget? child) {
-    return VirtualWindowFrame(
-      child: child!,
-    );
+    return VirtualWindowFrame(child: child!);
   };
 }

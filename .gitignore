@@ -1,9 +1,9 @@
-.DS_Store
 .dart_tool/
 .idea/
-.packages
-.pub/
-.vscode/
+.flutter-plugins
+.flutter-plugins-dependencies
 build/
-Generated*
-generated*
+
+*.iml
+pubspec_overrides.yaml
+pubspec.lock

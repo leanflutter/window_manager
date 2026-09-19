@@ -1,16 +1,25 @@
 # window_manager_example
 
-Demonstrates how to use the window_manager plugin.
+`window_manager` through its 0.5.x compatible API
+(`package:window_manager/legacy.dart`): one window driven by the classic
+`windowManager` calls and a `WindowListener`.
 
-## Getting Started
+That API is deprecated and will be removed in a later release; it is shown here for apps
+that are still on their way to the native API.
 
-This project is a starting point for a Flutter application.
+- `lib/window_controller.dart` — every `windowManager` call and the listener
+- `lib/main.dart`, `lib/widgets/` — the window: one row of choices per group of calls,
+  the geometry read back from the system, and a log of the listener callbacks. Built on
+  `package:flutter/widgets.dart` alone.
 
-A few resources to get you started if this is your first Flutter project:
+```sh
+flutter run -d macos
+flutter run -d linux
+flutter run -d windows
+```
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+## Looking for the full example?
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This one is deliberately small. Several windows at once, parent and child windows and
+every native property with read-back are in nativeapi's
+[window_example](https://github.com/libnativeapi/nativeapi-flutter/tree/main/examples/window_example).

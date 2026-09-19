@@ -267,10 +267,7 @@ class WindowCaptionButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: createPainter(color),
-      size: const Size(16, 16),
-    );
+    return CustomPaint(painter: createPainter(color), size: const Size(16, 16));
   }
 }
 
@@ -310,29 +307,29 @@ class WindowCaptionButton extends StatefulWidget {
     this.brightness,
     this.icon,
     this.onPressed,
-  })  : iconName = _kIconChromeClose,
-        _lightButtonBgColorScheme = _ButtonBgColorScheme(
-          normal: Colors.transparent,
-          hovered: const Color(0xffC42B1C),
-          pressed: const Color(0xffC42B1C).withValues(alpha: 0.9),
-        ),
-        _lightButtonIconColorScheme = _ButtonIconColorScheme(
-          normal: Colors.black.withValues(alpha: 0.8956),
-          hovered: Colors.white,
-          pressed: Colors.white.withValues(alpha: 0.7),
-          disabled: Colors.black.withValues(alpha: 0.3614),
-        ),
-        _darkButtonBgColorScheme = _ButtonBgColorScheme(
-          normal: Colors.transparent,
-          hovered: const Color(0xffC42B1C),
-          pressed: const Color(0xffC42B1C).withValues(alpha: 0.9),
-        ),
-        _darkButtonIconColorScheme = _ButtonIconColorScheme(
-          normal: Colors.white,
-          hovered: Colors.white,
-          pressed: Colors.white.withValues(alpha: 0.786),
-          disabled: Colors.black.withValues(alpha: 0.3628),
-        );
+  }) : iconName = _kIconChromeClose,
+       _lightButtonBgColorScheme = _ButtonBgColorScheme(
+         normal: Colors.transparent,
+         hovered: const Color(0xffC42B1C),
+         pressed: const Color(0xffC42B1C).withValues(alpha: 0.9),
+       ),
+       _lightButtonIconColorScheme = _ButtonIconColorScheme(
+         normal: Colors.black.withValues(alpha: 0.8956),
+         hovered: Colors.white,
+         pressed: Colors.white.withValues(alpha: 0.7),
+         disabled: Colors.black.withValues(alpha: 0.3614),
+       ),
+       _darkButtonBgColorScheme = _ButtonBgColorScheme(
+         normal: Colors.transparent,
+         hovered: const Color(0xffC42B1C),
+         pressed: const Color(0xffC42B1C).withValues(alpha: 0.9),
+       ),
+       _darkButtonIconColorScheme = _ButtonIconColorScheme(
+         normal: Colors.white,
+         hovered: Colors.white,
+         pressed: Colors.white.withValues(alpha: 0.786),
+         disabled: Colors.black.withValues(alpha: 0.3628),
+       );
 
   final Brightness? brightness;
   final Widget? icon;
@@ -368,8 +365,8 @@ class WindowCaptionButton extends StatefulWidget {
 
   _ButtonIconColorScheme get buttonIconColorScheme =>
       brightness != Brightness.dark
-          ? _lightButtonIconColorScheme
-          : _darkButtonIconColorScheme;
+      ? _lightButtonIconColorScheme
+      : _darkButtonIconColorScheme;
 
   @override
   State<WindowCaptionButton> createState() => _WindowCaptionButtonState();
@@ -412,9 +409,7 @@ class _WindowCaptionButtonState extends State<WindowCaptionButton> {
         onTap: widget.onPressed,
         child: Container(
           constraints: const BoxConstraints(minWidth: 46, minHeight: 32),
-          decoration: BoxDecoration(
-            color: bgColor,
-          ),
+          decoration: BoxDecoration(color: bgColor),
           child: Center(
             child: WindowCaptionButtonIcon(
               color: iconColor,

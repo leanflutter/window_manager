@@ -1,3 +1,87 @@
+## 0.6.0
+
+window_manager is now built on [nativeapi](https://pub.dev/packages/nativeapi): the
+per-platform plugin code is gone, and one C++ core drives macOS, Windows and Linux.
+
+* **Breaking:** `package:window_manager/window_manager.dart` exports the native API —
+  `Window`, `WindowManager`, `TitleBarStyle`, `ResizeEdge`, `VisualEffect`, the window
+  events, and `DragToMoveArea` / `DragToResizeArea` — next to this package's own
+  `WindowCaption`, `WindowCaptionButton` and `VirtualWindowFrame`. Several windows at
+  once, content bounds, title bar colours, visual effects and focusability come with it.
+* The 0.5.x API moved to `package:window_manager/legacy.dart`: `windowManager`,
+  `WindowListener`, `WindowOptions`, `DockSide` and `calcWindowPosition`. Existing apps
+  change one import. It is a bridge: everything in it is `@Deprecated` and will be
+  removed in a later release. The README lists the behaviour differences and maps each
+  old call to the native API.
+* **Breaking:** requires Flutter 3.47 / Dart 3.13 and macOS 10.15, and depends on
+  nativeapi ^0.3.0. CI builds and the publish workflow pin Flutter 3.47.5.
+* **No setup of its own on any platform.** The plugin classes, and with them the changes
+  `MainFlutterWindow.swift`, `my_application.cc` and the Windows runner used to need, are
+  gone.
+* **Known gap: closing.** The core library has no per-window close, so `destroy()` and an
+  unprevented `close()` quit the application, and the system's own close button cannot be
+  intercepted. `setPreventClose(true)` still turns `close()` into an `onWindowClose`
+  report. `WindowCaption`'s close button quits too; pass `onClose:` to change that.
+* Events: `onWindowResized` / `onWindowMoved` arrive together with `onWindowResize` /
+  `onWindowMove`; the full-screen pair is derived from the window's state after a resize;
+  `onWindowDocked` / `onWindowUndocked` never fire.
+* Gone with the platform plugins, but still callable: aero-snap docking (`isDockable`,
+  `isDocked`, `dock`, `undock`), `grabKeyboard` / `ungrabKeyboard` and `popUpWindowMenu`
+  answer instead of throwing. So do the arguments nothing acts on any more —
+  `maximize(vertically:)`, `animate:` of `setPosition` and `setBounds`, `forward:` of
+  `setIgnoreMouseEvents`, `visibleOnFullScreen:` of `setVisibleOnAllWorkspaces`.
+* `getId()` answers nativeapi's window id, `setAsFrameless()` hides the title bar without
+  removing the border, and `setAlignment` handles any `Alignment` instead of only the
+  nine constants.
+* `screen_retriever` and `path` are no longer dependencies.
+* New example on `package:flutter/widgets.dart` alone; the full one is nativeapi's
+  [window_example](https://github.com/libnativeapi/nativeapi-flutter/tree/main/examples/window_example).
+
+## 0.5.2
+
+* Upgrade `screen_retriever` to `0.2.2` for full Swift Package Manager support.
+
+## 0.5.1
+
+* fix: Fix PrivacyInfo.xcprivacy warning for macOS Desktop on Mac M1 macOS 15 (Sequoia) (#550)
+
+### 0.5.0
+
+* feat: Add `getId` method for retrieving window ID on macOS and Windows
+* feat: Add `getWindowHandle` method (#548)
+* feat: Add Swift Package Manager support
+* fix: Crash when using window_manager by multi engine on Windows platform (#546)
+* fix: [Windows] Use frameless window to implement fullscreen (#531)
+* fix: Initialize window_hints to fix minimum size setting in release mode (#510)
+
+### 0.4.3
+
+* [windows] fix: scale ratio on dpi change (#496)
+* [windows] fix: get window monitor from minimized state (#495)
+
+### 0.4.2
+
+* [windows] Update window_manager_plugin.cpp for fix #439 issue #486
+* [windows] fix: win, adjustNCCALCSIZE with monitor coords #482
+
+### 0.4.0
+
+* chore: Use custom paint icons to replace png icons (#467)
+* chore: Remove the deprecated isBezeled property (#468)
+* fix: windows, window size, fullscree & maximized (#477)
+
+### 0.3.9
+
+* fix(windows): fix TitleBar buttons does not display correctly #415
+* fix(windows): crash after deconstruction #423
+* fix(windows): WindowManager.IsFocused() method (#461)
+
+### 0.3.8
+
+* Updates minimum supported SDK version to Flutter 3.3/Dart 3.0.
+* [windows] fix #396 fullscreen/unfullscreen events, disable minimize on fullscreen #409
+* setAlignment support custom Alignment #424
+
 ### 0.3.7
 
 * [windows] Wrong window position in fullscreen mode with external monitor #405

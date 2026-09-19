@@ -1,0 +1,151 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev, next]
+  pull_request:
+    branches: [main, next]
+
+jobs:
+  lint:
+    name: Lint & Analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.5'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check code formatting
+        run: dart format --set-exit-if-changed .
+
+      - name: Analyze package
+        run: flutter analyze
+
+      - name: Analyze example
+        run: flutter analyze
+        working-directory: example
+
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.5'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        shell: bash
+        run: |
+          if [ -d test ]; then
+            flutter test
+          else
+            echo "No package tests to run."
+          fi
+
+      - name: Run example tests
+        shell: bash
+        run: |
+          if [ -d test ]; then
+            flutter test
+          else
+            echo "No example tests to run."
+          fi
+        working-directory: example
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    needs: [lint]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.5'
+          channel: stable
+          cache: true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libblkid-dev \
+            liblzma-dev \
+            pkg-config \
+            cmake \
+            ninja-build \
+            clang \
+            libx11-dev \
+            libxi-dev
+
+      - name: Build example Linux
+        run: flutter build linux --release
+        working-directory: example
+
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    needs: [lint]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.5'
+          channel: stable
+          cache: true
+
+      - name: Build example macOS
+        run: flutter build macos --release
+        working-directory: example
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    needs: [lint]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.5'
+          channel: stable
+          cache: true
+
+      - name: Build example Windows
+        run: flutter build windows --release
+        working-directory: example

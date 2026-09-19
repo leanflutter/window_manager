@@ -11,4 +11,4 @@ PRODUCT_NAME = window_manager_example
 PRODUCT_BUNDLE_IDENTIFIER = org.leanflutter.plugins.windowManagerExample
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2021 org.leanflutter.plugins. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 org.leanflutter.plugins. All rights reserved.

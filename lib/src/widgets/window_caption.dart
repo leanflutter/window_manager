@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
-import 'package:window_manager/src/widgets/drag_to_move_area.dart';
+import 'package:nativeapi/nativeapi.dart' as nativeapi;
+import 'package:window_manager/src/native_guard.dart';
 import 'package:window_manager/src/widgets/window_caption_button.dart';
-import 'package:window_manager/src/window_listener.dart';
-import 'package:window_manager/src/window_manager.dart';
 
 const double kWindowCaptionHeight = 32;
 
@@ -29,34 +27,71 @@ class WindowCaption extends StatefulWidget {
     this.title,
     this.backgroundColor,
     this.brightness,
+    this.window,
+    this.onClose,
   });
 
   final Widget? title;
   final Color? backgroundColor;
   final Brightness? brightness;
 
+  /// The window the buttons act on. When omitted, resolves the current window
+  /// on interaction.
+  final nativeapi.Window? window;
+
+  /// What the close button does. Quits the application by default, because the
+  /// core library has no per-window close yet.
+  final VoidCallback? onClose;
+
   @override
   State<WindowCaption> createState() => _WindowCaptionState();
 }
 
-class _WindowCaptionState extends State<WindowCaption> with WindowListener {
+class _WindowCaptionState extends State<WindowCaption> {
+  nativeapi.ListenerId? _listenerId;
+  bool _isMaximized = false;
+
   @override
   void initState() {
-    windowManager.addListener(this);
     super.initState();
+    _isMaximized = _window?.isMaximized ?? false;
+    _listenerId = tryNative(
+      () => nativeapi.WindowManager.instance.addListener((event) {
+        switch (event) {
+          case nativeapi.WindowMaximizedEvent():
+          case nativeapi.WindowRestoredEvent():
+            final isMaximized = _window?.isMaximized ?? false;
+            if (isMaximized != _isMaximized && mounted) {
+              setState(() => _isMaximized = isMaximized);
+            }
+          default:
+            break;
+        }
+      }),
+    );
   }
 
   @override
   void dispose() {
-    windowManager.removeListener(this);
+    final listenerId = _listenerId;
+    if (listenerId != null) {
+      nativeapi.WindowManager.instance.removeListener(listenerId);
+    }
     super.dispose();
   }
+
+  nativeapi.Window? get _window =>
+      widget.window ??
+      tryNative<nativeapi.Window?>(
+        () => nativeapi.WindowManager.instance.getCurrent(),
+      );
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: widget.backgroundColor ??
+        color:
+            widget.backgroundColor ??
             (widget.brightness == Brightness.dark
                 ? const Color(0xff1C1C1C)
                 : Colors.transparent),
@@ -64,7 +99,8 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
       child: Row(
         children: [
           Expanded(
-            child: DragToMoveArea(
+            child: nativeapi.DragToMoveArea(
+              window: widget.window,
               child: SizedBox(
                 height: double.infinity,
                 child: Row(
@@ -88,52 +124,33 @@ class _WindowCaptionState extends State<WindowCaption> with WindowListener {
           ),
           WindowCaptionButton.minimize(
             brightness: widget.brightness,
-            onPressed: () async {
-              bool isMinimized = await windowManager.isMinimized();
-              if (isMinimized) {
-                windowManager.restore();
+            onPressed: () {
+              final window = _window;
+              if (window == null) return;
+              if (window.isMinimized) {
+                window.restore();
               } else {
-                windowManager.minimize();
+                window.minimize();
               }
             },
           ),
-          FutureBuilder<bool>(
-            future: windowManager.isMaximized(),
-            builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-              if (snapshot.data == true) {
-                return WindowCaptionButton.unmaximize(
-                  brightness: widget.brightness,
-                  onPressed: () {
-                    windowManager.unmaximize();
-                  },
-                );
-              }
-              return WindowCaptionButton.maximize(
-                brightness: widget.brightness,
-                onPressed: () {
-                  windowManager.maximize();
-                },
-              );
-            },
-          ),
+          if (_isMaximized)
+            WindowCaptionButton.unmaximize(
+              brightness: widget.brightness,
+              onPressed: () => _window?.unmaximize(),
+            )
+          else
+            WindowCaptionButton.maximize(
+              brightness: widget.brightness,
+              onPressed: () => _window?.maximize(),
+            ),
           WindowCaptionButton.close(
             brightness: widget.brightness,
-            onPressed: () {
-              windowManager.close();
-            },
+            onPressed:
+                widget.onClose ?? () => nativeapi.Application.instance.quit(0),
           ),
         ],
       ),
     );
-  }
-
-  @override
-  void onWindowMaximize() {
-    setState(() {});
-  }
-
-  @override
-  void onWindowUnmaximize() {
-    setState(() {});
   }
 }

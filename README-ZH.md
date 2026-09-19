@@ -1,18 +1,18 @@
+> **window_manager 现在构建在 [nativeapi](https://github.com/libnativeapi/nativeapi-flutter) 之上**，
+> 它是 C++ 核心库 [libnativeapi/nativeapi](https://github.com/libnativeapi/nativeapi) 的 Flutter 绑定，
+> macOS、Windows、Linux 共用同一份实现。从 0.5.x 升级？请看[从 0.5.x 升级](#从-05x-升级)。
+
 # window_manager
 
 [![pub version][pub-image]][pub-url] [![][discord-image]][discord-url] [![All Contributors][all-contributors-image]](#contributors)
 
 [pub-image]: https://img.shields.io/pub/v/window_manager.svg
 [pub-url]: https://pub.dev/packages/window_manager
-
 [discord-image]: https://img.shields.io/discord/884679008049037342.svg
 [discord-url]: https://discord.gg/zPa6EZ2jqb
-
 [all-contributors-image]: https://img.shields.io/github/all-contributors/leanflutter/window_manager?color=ee8449&style=flat-square
 
-这个插件允许 Flutter 桌面应用调整窗口的大小和位置。
-
----
+这个插件让 Flutter 桌面应用可以调整、移动、显示、隐藏和装饰自己的窗口。
 
 [English](./README.md) | 简体中文
 
@@ -21,113 +21,19 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [平台支持](#%E5%B9%B3%E5%8F%B0%E6%94%AF%E6%8C%81)
-- [快速开始](#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B)
-  - [安装](#%E5%AE%89%E8%A3%85)
-  - [用法](#%E7%94%A8%E6%B3%95)
-    - [监听事件](#%E7%9B%91%E5%90%AC%E4%BA%8B%E4%BB%B6)
-    - [关闭时退出](#%E5%85%B3%E9%97%AD%E6%97%B6%E9%80%80%E5%87%BA)
-      - [macOS](#macos)
-    - [关闭前确认](#%E5%85%B3%E9%97%AD%E5%89%8D%E7%A1%AE%E8%AE%A4)
-    - [在启动时隐藏](#%E5%9C%A8%E5%90%AF%E5%8A%A8%E6%97%B6%E9%9A%90%E8%97%8F)
-      - [Linux](#linux)
-      - [macOS](#macos-1)
-      - [Windows](#windows)
-- [文章](#%E6%96%87%E7%AB%A0)
-- [谁在用使用它？](#%E8%B0%81%E5%9C%A8%E7%94%A8%E4%BD%BF%E7%94%A8%E5%AE%83)
+- [平台支持](#平台支持)
+- [快速开始](#快速开始)
+  - [安装](#安装)
+    - [环境要求](#环境要求)
+  - [用法](#用法)
+    - [从 0.5.x 升级](#从-05x-升级)
+    - [迁移到原生 API](#迁移到原生-api)
+- [文章](#文章)
+- [谁在使用](#谁在使用)
 - [API](#api)
-  - [WindowManager](#windowmanager)
-    - [Methods](#methods)
-      - [waitUntilReadyToShow](#waituntilreadytoshow)
-      - [destroy](#destroy)
-      - [close](#close)
-      - [isPreventClose](#ispreventclose)
-      - [setPreventClose](#setpreventclose)
-      - [focus](#focus)
-      - [blur  `macos`  `windows`](#blur--macos--windows)
-      - [isFocused  `macos`  `windows`](#isfocused--macos--windows)
-      - [show](#show)
-      - [hide](#hide)
-      - [isVisible](#isvisible)
-      - [isMaximized](#ismaximized)
-      - [maximize](#maximize)
-      - [unmaximize](#unmaximize)
-      - [isMinimized](#isminimized)
-      - [minimize](#minimize)
-      - [restore](#restore)
-      - [isFullScreen](#isfullscreen)
-      - [setFullScreen](#setfullscreen)
-      - [isDockable  `windows`](#isdockable--windows)
-      - [isDocked  `windows`](#isdocked--windows)
-      - [dock  `windows`](#dock--windows)
-      - [undock  `windows`](#undock--windows)
-      - [setAspectRatio](#setaspectratio)
-      - [setBackgroundColor](#setbackgroundcolor)
-      - [setAlignment](#setalignment)
-      - [center](#center)
-      - [getBounds](#getbounds)
-      - [setBounds](#setbounds)
-      - [getSize](#getsize)
-      - [setSize](#setsize)
-      - [getPosition](#getposition)
-      - [setPosition](#setposition)
-      - [setMinimumSize](#setminimumsize)
-      - [setMaximumSize](#setmaximumsize)
-      - [isResizable](#isresizable)
-      - [setResizable](#setresizable)
-      - [isMovable  `macos`](#ismovable--macos)
-      - [setMovable  `macos`](#setmovable--macos)
-      - [isMinimizable  `macos`  `windows`](#isminimizable--macos--windows)
-      - [setMinimizable  `macos`  `windows`](#setminimizable--macos--windows)
-      - [isClosable  `windows`](#isclosable--windows)
-      - [isMaximizable  `macos`  `windows`](#ismaximizable--macos--windows)
-      - [setMaximizable](#setmaximizable)
-      - [setClosable  `macos`  `windows`](#setclosable--macos--windows)
-      - [isAlwaysOnTop](#isalwaysontop)
-      - [setAlwaysOnTop](#setalwaysontop)
-      - [isAlwaysOnBottom](#isalwaysonbottom)
-      - [setAlwaysOnBottom  `linux`  `windows`](#setalwaysonbottom--linux--windows)
-      - [getTitle](#gettitle)
-      - [setTitle](#settitle)
-      - [setTitleBarStyle](#settitlebarstyle)
-      - [getTitleBarHeight](#gettitlebarheight)
-      - [isSkipTaskbar](#isskiptaskbar)
-      - [setSkipTaskbar](#setskiptaskbar)
-      - [setProgressBar  `macos`  `windows`](#setprogressbar--macos--windows)
-      - [setIcon  `windows`](#seticon--windows)
-      - [isVisibleOnAllWorkspaces  `macos`](#isvisibleonallworkspaces--macos)
-      - [setVisibleOnAllWorkspaces  `macos`](#setvisibleonallworkspaces--macos)
-      - [setBadgeLabel  `macos`](#setbadgelabel--macos)
-      - [hasShadow  `macos`  `windows`](#hasshadow--macos--windows)
-      - [setHasShadow  `macos`  `windows`](#sethasshadow--macos--windows)
-      - [getOpacity](#getopacity)
-      - [setOpacity](#setopacity)
-      - [setBrightness](#setbrightness)
-      - [setIgnoreMouseEvents](#setignoremouseevents)
-      - [startDragging](#startdragging)
-      - [startResizing  `linux`  `windows`](#startresizing--linux--windows)
-      - [grabKeyboard  `linux`](#grabkeyboard--linux)
-      - [ungrabKeyboard  `linux`](#ungrabkeyboard--linux)
-  - [WindowListener](#windowlistener)
-    - [Methods](#methods-1)
-      - [onWindowClose](#onwindowclose)
-      - [onWindowFocus](#onwindowfocus)
-      - [onWindowBlur](#onwindowblur)
-      - [onWindowMaximize](#onwindowmaximize)
-      - [onWindowUnmaximize](#onwindowunmaximize)
-      - [onWindowMinimize](#onwindowminimize)
-      - [onWindowRestore](#onwindowrestore)
-      - [onWindowResize](#onwindowresize)
-      - [onWindowResized  `macos`  `windows`](#onwindowresized--macos--windows)
-      - [onWindowMove](#onwindowmove)
-      - [onWindowMoved  `macos`  `windows`](#onwindowmoved--macos--windows)
-      - [onWindowEnterFullScreen](#onwindowenterfullscreen)
-      - [onWindowLeaveFullScreen](#onwindowleavefullscreen)
-      - [onWindowDocked  `windows`](#onwindowdocked--windows)
-      - [onWindowUndocked  `windows`](#onwindowundocked--windows)
-      - [onWindowEvent](#onwindowevent)
-- [贡献者](#%E8%B4%A1%E7%8C%AE%E8%80%85)
-- [许可证](#%E8%AE%B8%E5%8F%AF%E8%AF%81)
+  - [原生 API](#原生-api)
+- [Contributors](#contributors)
+- [许可证](#许可证)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -135,20 +41,20 @@
 
 | Linux | macOS | Windows |
 | :---: | :---: | :-----: |
-|   ✔️   |   ✔️   |    ✔️    |
+|  ✔️   |  ✔️   |   ✔️    |
 
 ## 快速开始
 
 ### 安装
 
-将此添加到你的软件包的 `pubspec.yaml` 文件：
+把它加到你的 pubspec.yaml 里：
 
 ```yaml
 dependencies:
-  window_manager: ^0.3.7
+  window_manager: ^0.6.0
 ```
 
-或
+或者
 
 ```yaml
 dependencies:
@@ -158,765 +64,172 @@ dependencies:
       ref: main
 ```
 
+#### 环境要求
+
+- Flutter 3.47 / Dart 3.13 及以上，macOS 10.15 及以上。
+- Linux 构建机需要 GTK 3、X11 和 Xi 的开发文件：
+
+```
+sudo apt-get install libgtk-3-dev libx11-dev libxi-dev
+```
+
 ### 用法
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // 必须加上这一行。
-  await windowManager.ensureInitialized();
+final window = WindowManager.instance.getCurrent()!;
 
-  WindowOptions windowOptions = WindowOptions(
-    size: Size(800, 600),
-    center: true,
-    backgroundColor: Colors.transparent,
-    skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.hidden,
-  );
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
+window.title = 'window_manager';
+window.setSize(const Size(1000, 700), false);
+window.minimumSize = const Size(640, 480);
+window.center();
+window.show();
+
+// 本应用所有窗口的所有窗口事件。
+WindowManager.instance.addListener((event) {
+  switch (event) {
+    case WindowFocusedEvent():
+      debugPrint('window ${event.windowId} focused');
+    case WindowResizedEvent():
+      debugPrint('window ${event.windowId} is now ${event.newSize}');
+    default:
+      break;
+  }
+});
+```
+
+隐藏系统标题栏，改由 widget 来拖动和缩放：
+
+```dart
+final window = WindowManager.instance.getCurrent()!;
+window.titleBarStyle = TitleBarStyle.hidden;
+
+// 在应用里：
+DragToResizeArea(
+  child: Column(
+    children: [
+      WindowCaption(
+        brightness: Theme.of(context).brightness,
+        title: const Text('window_manager'),
+      ),
+      Expanded(child: body),
+    ],
+  ),
+)
+```
+
+> 本插件的[示例应用](./example)演示的是 0.5.x 兼容 API。完整示例——同时管理多个窗口、
+> 父子窗口、每一个原生属性——在 nativeapi 的
+> [window_example](https://github.com/libnativeapi/nativeapi-flutter/tree/main/examples/window_example)。
+
+#### 从 0.5.x 升级
+
+为 `window_manager` 0.5.x 写的代码，只要把导入从
+`package:window_manager/window_manager.dart` 换成
+`package:window_manager/legacy.dart` 就能继续工作：老的 `windowManager`、
+`WindowListener`、`WindowOptions` 和 `calcWindowPosition` 都在那里，底层换成了原生 API。
+
+导入路径特意要改：`legacy.dart` 是一座桥，不是这个包的未来。里面的类都标了
+`@Deprecated`，**会在之后的版本里删掉**——能迁就迁到上面的原生 API。
+
+```dart
+import 'package:window_manager/legacy.dart';
+
+await windowManager.ensureInitialized();
+await windowManager.waitUntilReadyToShow(
+  const WindowOptions(size: Size(1000, 700), center: true),
+  () async {
     await windowManager.show();
     await windowManager.focus();
-  });
-
-  runApp(MyApp());
-}
-
+  },
+);
 ```
 
-> 请看这个插件的示例应用，以了解完整的例子。
-
-#### 监听事件
-
-```dart
-import 'package:flutter/cupertino.dart';
-import 'package:window_manager/window_manager.dart';
-
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> with WindowListener {
-  @override
-  void initState() {
-    super.initState();
-    windowManager.addListener(this);
-  }
-
-  @override
-  void dispose() {
-    windowManager.removeListener(this);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // ...
-  }
-
-  @override
-  void onWindowEvent(String eventName) {
-    print('[WindowManager] onWindowEvent: $eventName');
-  }
-
-  @override
-  void onWindowClose() {
-    // do something
-  }
-
-  @override
-  void onWindowFocus() {
-    // do something
-  }
-
-  @override
-  void onWindowBlur() {
-    // do something
-  }
-
-  @override
-  void onWindowMaximize() {
-    // do something
-  }
-
-  @override
-  void onWindowUnmaximize() {
-    // do something
-  }
-
-  @override
-  void onWindowMinimize() {
-    // do something
-  }
-
-  @override
-  void onWindowRestore() {
-    // do something
-  }
-
-  @override
-  void onWindowResize() {
-    // do something
-  }
-
-  @override
-  void onWindowMove() {
-    // do something
-  }
-
-  @override
-  void onWindowEnterFullScreen() {
-    // do something
-  }
-
-  @override
-  void onWindowLeaveFullScreen() {
-    // do something
-  }
-}
-```
-
-#### 关闭时退出
-
-如果你需要使用 `hide` 方法，你需要禁用 `QuitOnClose`。
-
-##### macOS
-
-更改文件 `macos/Runner/AppDelegate.swift` 如下：
-
-```diff
-import Cocoa
-import FlutterMacOS
-
-@NSApplicationMain
-class AppDelegate: FlutterAppDelegate {
-  override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
--    return true
-+    return false
-  }
-}
-```
-
-#### 关闭前确认
-
-```dart
-import 'package:flutter/cupertino.dart';
-import 'package:window_manager/window_manager.dart';
-
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> with WindowListener {
-  @override
-  void initState() {
-    super.initState();
-    windowManager.addListener(this);
-    _init();
-  }
-
-  @override
-  void dispose() {
-    windowManager.removeListener(this);
-    super.dispose();
-  }
-
-  void _init() async {
-    // 添加此行以覆盖默认关闭处理程序
-    await windowManager.setPreventClose(true);
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // ...
-  }
-
-  @override
-  void onWindowClose() async {
-    bool _isPreventClose = await windowManager.isPreventClose();
-    if (_isPreventClose) {
-      showDialog(
-        context: context,
-        builder: (_) {
-          return AlertDialog(
-            title: Text('Are you sure you want to close this window?'),
-            actions: [
-              TextButton(
-                child: Text('No'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: Text('Yes'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  await windowManager.destroy();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-}
-```
-
-#### 在启动时隐藏
-
-##### Linux
-
-更改文件 `linux/my_application.cc` 如下：
-
-```diff
-
-...
-
-// Implements GApplication::activate.
-static void my_application_activate(GApplication* application) {
-  
-  ...
-
-  gtk_window_set_default_size(window, 1280, 720);
--  gtk_widget_show(GTK_WIDGET(window));
-+  gtk_widget_realize(GTK_WIDGET(window));
-
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
-
-  FlView* view = fl_view_new(project);
-  gtk_widget_show(GTK_WIDGET(view));
-  gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
-
-  fl_register_plugins(FL_PLUGIN_REGISTRY(view));
-
-  gtk_widget_grab_focus(GTK_WIDGET(view));
-}
-
-...
-
-```
-
-##### macOS
-
-更改文件 `macos/Runner/MainFlutterWindow.swift` 如下：
-
-```diff
-import Cocoa
-import FlutterMacOS
-+import window_manager
-
-class MainFlutterWindow: NSWindow {
-    override func awakeFromNib() {
-        let flutterViewController = FlutterViewController.init()
-        let windowFrame = self.frame
-        self.contentViewController = flutterViewController
-        self.setFrame(windowFrame, display: true)
-
-        RegisterGeneratedPlugins(registry: flutterViewController)
-
-        super.awakeFromNib()
-    }
-
-+    override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
-+        super.order(place, relativeTo: otherWin)
-+        hiddenWindowAtLaunch()
-+    }
-}
-
-```
-
-##### Windows
-
-更改文件 `windows/runner/win32_window.cpp` 如下：
-
-```diff
-bool Win32Window::CreateAndShow(const std::wstring& title,
-                                const Point& origin,
-                                const Size& size) {
-  ...                              
-  HWND window = CreateWindow(
--      window_class, title.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-+      window_class, title.c_str(),
-+      WS_OVERLAPPEDWINDOW, // do not add WS_VISIBLE since the window will be shown later
-      Scale(origin.x, scale_factor), Scale(origin.y, scale_factor),
-      Scale(size.width, scale_factor), Scale(size.height, scale_factor),
-      nullptr, nullptr, GetModuleHandle(nullptr), this);
-```
-
-使用 flutter 3.7 创建的 Windows 项目
-更改 `windows/runner/flutter_window.cpp` 如下:
-
-```diff
-bool FlutterWindow::OnCreate() {
-  ...
-  flutter_controller_->engine()->SetNextFrameCallback([&]() {
--   this->Show();
-+   "" //删除 this->Show()
-  });
-```
-
-确保在 `onWindowFocus` 事件中调用一次 `setState`。
-
-```dart
-import 'package:flutter/cupertino.dart';
-import 'package:window_manager/window_manager.dart';
-
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> with WindowListener {
-  @override
-  void initState() {
-    super.initState();
-    windowManager.addListener(this);
-  }
-
-  @override
-  void dispose() {
-    windowManager.removeListener(this);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // ...
-  }
-
-  @override
-  void onWindowFocus() {
-    // Make sure to call once.
-    setState(() {});
-    // do something
-  }
-}
-
-```
+和 0.5.x 的差别：
+
+- 需要 Flutter 3.47 / Dart 3.13 和 macOS 10.15（0.5.x 是 Flutter 3.3、macOS 10.11），
+  但不再需要在 `MainFlutterWindow.swift`、`my_application.cc` 或 Windows runner 里做插件
+  自己的接入——已经没有任何平台插件代码了。
+- **`close()`、`destroy()`、`setPreventClose()` 还不能只关掉一个窗口**：核心库没有按窗口
+  关闭的能力。`destroy()` 和没有被拦截的 `close()` 会退出应用；设了
+  `setPreventClose(true)` 之后，`close()` 会像以前一样报告 `onWindowClose` 而不动窗口。
+  系统标题栏上的关闭按钮**拦不住**，所以"确定要退出吗"这类对话框，在核心库支持可取消的
+  close 事件之前，还得应用自己在它自己的关闭按钮上处理。
+- `onWindowResized`、`onWindowMoved` 和 `onWindowResize`、`onWindowMove` 一起到达：
+  nativeapi 每次变化只报一个事件，没有"过程中"和"结束时"之分。
+- `onWindowEnterFullScreen`、`onWindowLeaveFullScreen` 是从 resize 之后的窗口状态推出来的，
+  所以一次不改变尺寸的全屏切换不会被报告。
+- Aero-snap 贴边没有了：`isDockable()` 返回 false，`isDocked()` 返回 null，`dock()` 什么
+  都不做，`undock()` 返回 false，`onWindowDocked` / `onWindowUndocked` 不会触发。
+  `grabKeyboard()` / `ungrabKeyboard()`（Linux）和 `popUpWindowMenu()` 同理。
+- 核心库用不上的参数会被接受但忽略：`maximize` 的 `vertically`、`setPosition` 和
+  `setBounds` 的 `animate`、`setIgnoreMouseEvents` 的 `forward`、
+  `setVisibleOnAllWorkspaces` 的 `visibleOnFullScreen`。
+- `getId()` 返回的是 nativeapi 自己的窗口 id，不再是 `NSWindow` number 或 `HWND`。
+- `setAsFrameless()` 只隐藏标题栏和它的按钮，不再去掉窗口边框。
+- `setAlignment` 支持任意 `Alignment`，不再只认那九个常量。
+- `WindowCaption` 的关闭按钮会退出应用，原因和 `close()` 一样。传 `onClose:` 可以换成别的：
+  `onClose: windowManager.close` 就是 0.5.x 的行为，包括 `setPreventClose`。
+- `screen_retriever` 和 `path` 不再是依赖。
+- 新示例只用 `package:flutter/widgets.dart`；完整示例是 nativeapi 的
+  [window_example](https://github.com/libnativeapi/nativeapi-flutter/tree/main/examples/window_example)。
+
+#### 迁移到原生 API
+
+| 0.5.x（`legacy.dart`） | 原生 API（`window_manager.dart`） |
+| --- | --- |
+| `windowManager`（应用的那一个窗口） | `WindowManager.instance.getCurrent()`——还有 `get(id)`、`getAll()`、`getWindowAtPoint()`；每个窗口都是独立的 `Window` |
+| `await windowManager.getSize()`、`setSize(size)` | `window.size`、`window.setSize(size, animate)`——同步，不需要 `await` |
+| `getBounds()` / `setBounds(rect)` | `window.bounds`；不含装饰的区域用 `window.contentBounds` |
+| `getPosition()` / `setPosition(offset)` | `window.position` |
+| `setMinimumSize` / `setMaximumSize` / `setAspectRatio` | `window.minimumSize`、`window.maximumSize`、`window.aspectRatio` |
+| `show()` / `show(inactive: true)` / `hide()` | `window.show()` / `window.showInactive()` / `window.hide()` |
+| `focus()`、`blur()`、`isFocused()` | `window.focus()`、`window.blur()`、`window.isFocused` |
+| `maximize()`、`unmaximize()`、`minimize()`、`restore()` | `window` 上的同名方法，不需要 `await` |
+| `setFullScreen(bool)` / `isFullScreen()` | `window.isFullScreen` |
+| `setResizable`、`setMovable`、`setMinimizable`、`setMaximizable`、`setClosable` | `window.isResizable`、`isMovable`、`isMinimizable`、`isMaximizable`、`isClosable`——还有 `isFullScreenable` |
+| `setAlwaysOnTop` / `setAlwaysOnBottom` | `window.isAlwaysOnTop` / `window.isAlwaysOnBottom` |
+| `setSkipTaskbar(true)` | `window.isVisibleInTaskbar = false` |
+| `setTitle` / `getTitle` | `window.title` |
+| `setTitleBarStyle(style, windowButtonVisibility:)` | `window.titleBarStyle`、`window.isWindowControlButtonsVisible`——还有 `setTitleBarColors()` |
+| `setHasShadow`、`setOpacity`、`setBackgroundColor` | `window.hasShadow`、`window.opacity`、`window.backgroundColor`——还有 `window.visualEffect` |
+| `setIgnoreMouseEvents(bool)` | `window.isIgnoreMouseEvents` |
+| `setVisibleOnAllWorkspaces(bool)` | `window.isVisibleOnAllWorkspaces` |
+| `startDragging()` / `startResizing(edge)` | `window` 上的同名方法；`DragToMoveArea`、`DragToResizeArea` 已经替你调用了 |
+| `setProgressBar`、`setBadgeLabel`、`setIcon`、`setBrightness` | `Application.instance`——它们属于应用，不属于某一个窗口 |
+| `WindowListener` | `WindowManager.instance.addListener((event) { switch (event) { case WindowFocusedEvent(): … } })`——还有 `WindowBlurredEvent`、`WindowMinimizedEvent`、`WindowMaximizedEvent`、`WindowRestoredEvent`、`WindowMovedEvent`、`WindowResizedEvent`、`WindowCreatedEvent`、`WindowClosedEvent` |
+| `calcWindowPosition(size, alignment)` | `DisplayManager.instance`——`getAll()`、`getPrimary()`、`getCursorPosition()`，以及每个 `Display` 的 `workArea` |
+
+`waitUntilReadyToShow`、`ensureInitialized`、`setAsFrameless`、`getDevicePixelRatio`
+没有对应的原生 API：直接设好需要的属性，准备好了再调 `window.show()`。
 
 ## 文章
 
-- [关闭窗口后点击Dock图标进行恢复](https://leanflutter.org/zh/blog/click-dock-icon-to-restore-after-closing-the-window)
-- [让应用成为单实例](https://leanflutter.org/zh/blog/making-the-app-single-instanced)
+- [点击 Dock 图标在关闭窗口后恢复](https://leanflutter.org/blog/click-dock-icon-to-restore-after-closing-the-window)
+- [让应用只运行一个实例](https://leanflutter.org/blog/making-the-app-single-instanced)
 
-## 谁在用使用它？
+## 谁在使用
 
-- [AuthPass](https://authpass.app/) - 基于Flutter的密码管理器，适用于所有平台。兼容Keepass 2.x（kdbx 3.x）。
-- [Biyi (比译)](https://biyidev.com/) - 一个便捷的翻译和词典应用程序。
+- [AuthPass](https://authpass.app/) - Password Manager based on Flutter for all platforms. Keepass 2.x (kdbx 3.x) compatible.
+- [Biyi (比译)](https://biyidev.com/) - A convenient translation and dictionary app written in dart / Flutter.
 - [BlueBubbles](https://github.com/BlueBubblesApp/bluebubbles-app) - BlueBubbles is an ecosystem of apps bringing iMessage to Android, Windows, and Linux
 - [LunaSea](https://github.com/CometTools/LunaSea) - A self-hosted controller for mobile and macOS built using the Flutter framework.
-- [Linwood Butterfly](https://github.com/LinwoodCloud/Butterfly) - 用 Flutter 编写的开源笔记应用
-- [RustDesk](https://github.com/rustdesk/rustdesk) - 远程桌面软件，开箱即用，无需任何配置。您完全掌控数据，不用担心安全问题。
+- [Linwood Butterfly](https://github.com/LinwoodCloud/Butterfly) - Open source note taking app written in Flutter
+- [RustDesk](https://github.com/rustdesk/rustdesk) - Yet another remote desktop software, written in Rust. Works out of the box, no configuration required.
 - [Ubuntu Desktop Installer](https://github.com/canonical/ubuntu-desktop-installer) - This project is a modern implementation of the Ubuntu Desktop installer.
 
 ## API
 
-<!-- README_DOC_GEN -->
-### WindowManager
-
-#### Methods
-
-##### waitUntilReadyToShow
-
-Wait until ready to show.
-
-##### destroy
-
-Force closing the window.
-
-##### close
-
-Try to close the window.
-
-##### isPreventClose
-
-Check if is intercepting the native close signal.
-
-##### setPreventClose
-
-Set if intercept the native close signal. May useful when combine with the onclose event listener.
-This will also prevent the manually triggered close event.
-
-##### focus
-
-Focuses on the window.
-
-##### blur  `macos`  `windows`
-
-Removes focus from the window.
-
-
-##### isFocused  `macos`  `windows`
-
-Returns `bool` - Whether window is focused.
-
-
-##### show
-
-Shows and gives focus to the window.
-
-##### hide
-
-Hides the window.
-
-##### isVisible
-
-Returns `bool` - Whether the window is visible to the user.
-
-##### isMaximized
-
-Returns `bool` - Whether the window is maximized.
-
-##### maximize
-
-Maximizes the window. `vertically` simulates aero snap, only works on Windows
-
-##### unmaximize
-
-Unmaximizes the window.
-
-##### isMinimized
-
-Returns `bool` - Whether the window is minimized.
-
-##### minimize
-
-Minimizes the window. On some platforms the minimized window will be shown in the Dock.
-
-##### restore
-
-Restores the window from minimized state to its previous state.
-
-##### isFullScreen
-
-Returns `bool` - Whether the window is in fullscreen mode.
-
-##### setFullScreen
-
-Sets whether the window should be in fullscreen mode.
-
-##### isDockable  `windows`
-
-Returns `bool` - Whether the window is dockable or not.
-
-
-##### isDocked  `windows`
-
-Returns `bool` - Whether the window is docked.
-
-
-##### dock  `windows`
-
-Docks the window. only works on Windows
-
-
-##### undock  `windows`
-
-Undocks the window. only works on Windows
-
-
-##### setAspectRatio
-
-This will make a window maintain an aspect ratio.
-
-##### setBackgroundColor
-
-Sets the background color of the window.
-
-##### setAlignment
-
-Move the window to a position aligned with the screen.
-
-##### center
-
-Moves window to the center of the screen.
-
-##### getBounds
-
-Returns `Rect` - The bounds of the window as Object.
-
-##### setBounds
-
-Resizes and moves the window to the supplied bounds.
-
-##### getSize
-
-Returns `Size` - Contains the window's width and height.
-
-##### setSize
-
-Resizes the window to `width` and `height`.
-
-##### getPosition
-
-Returns `Offset` - Contains the window's current position.
-
-##### setPosition
-
-Moves window to position.
-
-##### setMinimumSize
-
-Sets the minimum size of window to `width` and `height`.
-
-##### setMaximumSize
-
-Sets the maximum size of window to `width` and `height`.
-
-##### isResizable
-
-Returns `bool` - Whether the window can be manually resized by the user.
-
-##### setResizable
-
-Sets whether the window can be manually resized by the user.
-
-##### isMovable  `macos`
-
-Returns `bool` - Whether the window can be moved by user.
-
-
-##### setMovable  `macos`
-
-Sets whether the window can be moved by user.
-
-
-##### isMinimizable  `macos`  `windows`
-
-Returns `bool` - Whether the window can be manually minimized by the user.
-
-
-##### setMinimizable  `macos`  `windows`
-
-Sets whether the window can be manually minimized by user.
-
-
-##### isClosable  `windows`
-
-Returns `bool` - Whether the window can be manually closed by user.
-
-
-##### isMaximizable  `macos`  `windows`
-
-Returns `bool` - Whether the window can be manually maximized by the user.
-
-
-##### setMaximizable
-
-Sets whether the window can be manually maximized by the user.
-
-##### setClosable  `macos`  `windows`
-
-Sets whether the window can be manually closed by user.
-
-
-##### isAlwaysOnTop
-
-Returns `bool` - Whether the window is always on top of other windows.
-
-##### setAlwaysOnTop
-
-Sets whether the window should show always on top of other windows.
-
-##### isAlwaysOnBottom
-
-Returns `bool` - Whether the window is always below other windows.
-
-##### setAlwaysOnBottom  `linux`  `windows`
-
-Sets whether the window should show always below other windows.
-
-
-##### getTitle
-
-Returns `String` - The title of the native window.
-
-##### setTitle
-
-Changes the title of native window to title.
-
-##### setTitleBarStyle
-
-Changes the title bar style of native window.
-
-##### getTitleBarHeight
-
-Returns `int` - The title bar height of the native window.
-
-##### isSkipTaskbar
-
-Returns `bool` - Whether skipping taskbar is enabled.
-
-##### setSkipTaskbar
-
-Makes the window not show in the taskbar / dock.
-
-##### setProgressBar  `macos`  `windows`
-
-Sets progress value in progress bar. Valid range is [0, 1.0].
-
-
-##### setIcon  `windows`
-
-Sets window/taskbar icon.
-
-
-##### isVisibleOnAllWorkspaces  `macos`
-
-Returns `bool` - Whether the window is visible on all workspaces.
-
-
-##### setVisibleOnAllWorkspaces  `macos`
-
-Sets whether the window should be visible on all workspaces.
-
-Note: If you need to support dragging a window on top of a fullscreen
-window on another screen, you need to modify MainFlutterWindow
-to inherit from NSPanel
-
-```swift
-class MainFlutterWindow: NSPanel {
-// ...
-}
-```
-
-
-##### setBadgeLabel  `macos`
-
-Set/unset label on taskbar(dock) app icon
-
-Note that it's required to request access at your AppDelegate.swift like this:
-UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge])
-
-
-##### hasShadow  `macos`  `windows`
-
-Returns `bool` - Whether the window has a shadow. On Windows, always returns true unless window is frameless.
-
-
-##### setHasShadow  `macos`  `windows`
-
-Sets whether the window should have a shadow. On Windows, doesn't do anything unless window is frameless.
-
-
-##### getOpacity
-
-Returns `double` - between 0.0 (fully transparent) and 1.0 (fully opaque).
-
-##### setOpacity
-
-Sets the opacity of the window.
-
-##### setBrightness
-
-Sets the brightness of the window.
-
-##### setIgnoreMouseEvents
-
-Makes the window ignore all mouse events.
-
-All mouse events happened in this window will be passed to the window below this window, but if this window has focus, it will still receive keyboard events.
-
-##### startDragging
-
-Starts a window drag based on the specified mouse-down event.
-
-##### startResizing  `linux`  `windows`
-
-Starts a window resize based on the specified mouse-down & mouse-move event.
-
-
-##### grabKeyboard  `linux`
-
-Grabs the keyboard.
-
-##### ungrabKeyboard  `linux`
-
-Ungrabs the keyboard.
-
-### WindowListener
-
-#### Methods
-
-##### onWindowClose
-
-Emitted when the window is going to be closed.
-
-##### onWindowFocus
-
-Emitted when the window gains focus.
-
-##### onWindowBlur
-
-Emitted when the window loses focus.
-
-##### onWindowMaximize
-
-Emitted when window is maximized.
-
-##### onWindowUnmaximize
-
-Emitted when the window exits from a maximized state.
-
-##### onWindowMinimize
-
-Emitted when the window is minimized.
-
-##### onWindowRestore
-
-Emitted when the window is restored from a minimized state.
-
-##### onWindowResize
-
-Emitted after the window has been resized.
-
-##### onWindowResized  `macos`  `windows`
-
-Emitted once when the window has finished being resized.
-
-
-##### onWindowMove
-
-Emitted when the window is being moved to a new position.
-
-##### onWindowMoved  `macos`  `windows`
-
-Emitted once when the window is moved to a new position.
-
-
-##### onWindowEnterFullScreen
-
-Emitted when the window enters a full-screen state.
-
-##### onWindowLeaveFullScreen
-
-Emitted when the window leaves a full-screen state.
-
-##### onWindowDocked  `windows`
-
-Emitted when the window entered a docked state.
-
-
-##### onWindowUndocked  `windows`
-
-Emitted when the window leaves a docked state.
-
-
-##### onWindowEvent
-
-Emitted all events.
-
-
-<!-- README_DOC_GEN -->
-
-## 贡献者
+### 原生 API
+
+`window_manager` 现在直接重新导出 `nativeapi` 的窗口 API——`Window`、`WindowManager`、
+`TitleBarStyle`、`ResizeEdge`、`VisualEffect`、各种窗口事件，以及 `DragToMoveArea` /
+`DragToResizeArea` 两个 widget——再加上它自己的 `WindowCaption`、`WindowCaptionButton`
+和 `VirtualWindowFrame`。只有还在用 0.5.x API 的代码才需要导入
+`package:window_manager/legacy.dart`。
+
+## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
