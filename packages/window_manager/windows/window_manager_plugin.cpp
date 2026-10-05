@@ -103,7 +103,7 @@ void WindowManagerPlugin::RegisterWithRegistrar(
 WindowManagerPlugin::WindowManagerPlugin(
     flutter::PluginRegistrarWindows* registrar)
     : registrar(registrar) {
-  window_manager = new WindowManager();
+  window_manager = std::make_unique<WindowManager>(registrar);
   window_proc_id = registrar->RegisterTopLevelWindowProcDelegate(
       [this](HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
         return HandleWindowProc(hWnd, message, wParam, lParam);

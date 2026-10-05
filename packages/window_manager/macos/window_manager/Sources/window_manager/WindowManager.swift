@@ -53,11 +53,16 @@ extension NSRect {
 
 public class WindowManager: NSObject, NSWindowDelegate {
     public var onEvent:((String) -> Void)?
+
+    private var registrar: FlutterPluginRegistrar?
     
     private var _mainWindow: NSWindow?
     public var mainWindow: NSWindow {
         get {
-            return _mainWindow!
+            if let window = _mainWindow {
+                return window
+            }
+            return (registrar?.view?.window)!
         }
         set {
             _mainWindow = newValue
@@ -68,8 +73,9 @@ public class WindowManager: NSObject, NSWindowDelegate {
     private var _isPreventClose: Bool = false
     private var _isMaximized: Bool = false
     private var _isMaximizable: Bool = true
-    
-    override public init() {
+
+    public init(_ registrar: FlutterPluginRegistrar) {
+        self.registrar = registrar
         super.init()
     }
     

@@ -63,12 +63,12 @@ const flutter::EncodableValue* ValueOrNull(const flutter::EncodableMap& map,
 }
 
 class WindowManager {
- public:
-  WindowManager();
+public:
+  WindowManager(flutter::PluginRegistrarWindows* registrar);
 
   virtual ~WindowManager();
 
-  HWND native_window;
+  flutter::PluginRegistrarWindows* registrar_;
 
   int last_state = STATE_NORMAL;
 
@@ -171,16 +171,21 @@ class WindowManager {
   void WindowManager::DockAccessBar(HWND hwnd, UINT edge, UINT windowWidth);
 };
 
-WindowManager::WindowManager() {}
+WindowManager::WindowManager(flutter::PluginRegistrarWindows* registrar)
+        : registrar_(registrar) {}
 
 WindowManager::~WindowManager() {}
 
 HWND WindowManager::GetMainWindow() {
-  return native_window;
+  if (registrar_ && registrar_->GetView()) {
+    return registrar_->GetView()->GetNativeWindow();
+  }
+  return nullptr;
 }
 
 void WindowManager::ForceRefresh() {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
 
   RECT rect;
 
@@ -197,6 +202,7 @@ void WindowManager::ForceRefresh() {
 
 void WindowManager::ForceChildRefresh() {
   HWND hWnd = GetWindow(GetMainWindow(), GW_CHILD);
+  if (!hWnd) return;
 
   RECT rect;
 
@@ -214,6 +220,7 @@ void WindowManager::ForceChildRefresh() {
 void WindowManager::SetAsFrameless() {
   is_frameless_ = true;
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
 
   RECT rect;
 
@@ -235,6 +242,7 @@ void WindowManager::Destroy() {
 
 void WindowManager::Close() {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   PostMessage(hWnd, WM_SYSCOMMAND, SC_CLOSE, 0);
 }
 
@@ -249,6 +257,7 @@ bool WindowManager::IsPreventClose() {
 
 void WindowManager::Focus() {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   if (IsMinimized()) {
     Restore();
   }
@@ -259,6 +268,7 @@ void WindowManager::Focus() {
 
 void WindowManager::Blur() {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   HWND next_hwnd = ::GetNextWindow(hWnd, GW_HWNDNEXT);
   while (next_hwnd) {
     if (::IsWindowVisible(next_hwnd)) {
@@ -270,11 +280,13 @@ void WindowManager::Blur() {
 }
 
 bool WindowManager::IsFocused() {
-  return GetMainWindow() == GetForegroundWindow();
+  HWND mainWindow = GetMainWindow();
+  return mainWindow && (mainWindow == GetForegroundWindow());
 }
 
 void WindowManager::Show() {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
   gwlStyle = gwlStyle | WS_VISIBLE;
   if ((gwlStyle & WS_VISIBLE) == 0) {
@@ -282,21 +294,23 @@ void WindowManager::Show() {
     ::SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
   }
 
-  ShowWindowAsync(GetMainWindow(), SW_SHOW);
-  SetForegroundWindow(GetMainWindow());
+  ShowWindowAsync(hWnd, SW_SHOW);
+  SetForegroundWindow(hWnd);
 }
 
 void WindowManager::Hide() {
-  ShowWindow(GetMainWindow(), SW_HIDE);
+  HWND hWnd = GetMainWindow();
+  if (hWnd) ShowWindow(hWnd, SW_HIDE);
 }
 
 bool WindowManager::IsVisible() {
-  bool isVisible = IsWindowVisible(GetMainWindow());
-  return isVisible;
+  HWND hWnd = GetMainWindow();
+  return hWnd && IsWindowVisible(hWnd);
 }
 
 bool WindowManager::IsMaximized() {
   HWND mainWindow = GetMainWindow();
+  if (!mainWindow) return false;
   WINDOWPLACEMENT windowPlacement;
   GetWindowPlacement(mainWindow, &windowPlacement);
 
@@ -308,6 +322,7 @@ void WindowManager::Maximize(const flutter::EncodableMap& args) {
       std::get<bool>(args.at(flutter::EncodableValue("vertically")));
 
   HWND hwnd = GetMainWindow();
+  if (!hwnd) return;
   WINDOWPLACEMENT windowPlacement;
   GetWindowPlacement(hwnd, &windowPlacement);
 
@@ -325,6 +340,7 @@ void WindowManager::Maximize(const flutter::EncodableMap& args) {
 
 void WindowManager::Unmaximize() {
   HWND mainWindow = GetMainWindow();
+  if (!mainWindow) return;
   WINDOWPLACEMENT windowPlacement;
   GetWindowPlacement(mainWindow, &windowPlacement);
 
@@ -335,6 +351,7 @@ void WindowManager::Unmaximize() {
 
 bool WindowManager::IsMinimized() {
   HWND mainWindow = GetMainWindow();
+  if (!mainWindow) return false;
   WINDOWPLACEMENT windowPlacement;
   GetWindowPlacement(mainWindow, &windowPlacement);
 
@@ -342,11 +359,11 @@ bool WindowManager::IsMinimized() {
 }
 
 void WindowManager::Minimize() {
-  if (IsFullScreen()) {  // Like chromium, we don't want to minimize fullscreen
-                         // windows
+  if (IsFullScreen()) {
     return;
   }
   HWND mainWindow = GetMainWindow();
+  if (!mainWindow) return;
   WINDOWPLACEMENT windowPlacement;
   GetWindowPlacement(mainWindow, &windowPlacement);
 
@@ -357,6 +374,7 @@ void WindowManager::Minimize() {
 
 void WindowManager::Restore() {
   HWND mainWindow = GetMainWindow();
+  if (!mainWindow) return;
   WINDOWPLACEMENT windowPlacement;
   GetWindowPlacement(mainWindow, &windowPlacement);
 
@@ -404,6 +422,7 @@ double WindowManager::GetDpiForHwnd(HWND hWnd) {
 
 void WindowManager::Dock(const flutter::EncodableMap& args) {
   HWND mainWindow = GetMainWindow();
+  if (!mainWindow) return;
 
   double dpi = GetDpiForHwnd(mainWindow);
   double scalingFactor = dpi / 96.0;
@@ -429,6 +448,7 @@ void WindowManager::Dock(const flutter::EncodableMap& args) {
 
 bool WindowManager::Undock() {
   HWND mainWindow = GetMainWindow();
+  if (!mainWindow) return false;
   bool result = RegisterAccessBar(mainWindow, false);
   is_docked_ = 0;
   return result;
@@ -570,6 +590,7 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
       std::get<bool>(args.at(flutter::EncodableValue("isFullScreen")));
 
   HWND mainWindow = GetMainWindow();
+  if (!mainWindow) return;
 
   // Previously inspired by how Chromium does this
   // https://src.chromium.org/viewvc/chrome/trunk/src/ui/views/win/fullscreen_handler.cc?revision=247204&view=markup
@@ -627,9 +648,11 @@ void WindowManager::SetFullScreen(const flutter::EncodableMap& args) {
       ::GetClientRect(mainWindow, &rect);
       auto flutter_view = ::FindWindowEx(mainWindow, nullptr,
                                          kFlutterViewWindowClassName, nullptr);
-      ::SetWindowPos(flutter_view, nullptr, rect.left, rect.top,
-                     rect.right - rect.left, rect.bottom - rect.top,
-                     SWP_NOACTIVATE | SWP_NOZORDER);
+      if (flutter_view) {
+        ::SetWindowPos(flutter_view, nullptr, rect.left, rect.top,
+                       rect.right - rect.left, rect.bottom - rect.top,
+                       SWP_NOACTIVATE | SWP_NOZORDER);
+      }
       if (g_maximized_before_fullscreen)
         PostMessage(mainWindow, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
     } else {
@@ -673,6 +696,7 @@ void WindowManager::SetBackgroundColor(const flutter::EncodableMap& args) {
                        backgroundColorG == 0 && backgroundColorB == 0;
 
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   const HINSTANCE hModule = LoadLibrary(TEXT("user32.dll"));
   if (hModule) {
     typedef enum _ACCENT_STATE {
@@ -718,10 +742,12 @@ void WindowManager::SetBackgroundColor(const flutter::EncodableMap& args) {
 flutter::EncodableMap WindowManager::GetBounds(
     const flutter::EncodableMap& args) {
   HWND hwnd = GetMainWindow();
+  flutter::EncodableMap resultMap = flutter::EncodableMap();
+  if (!hwnd) return resultMap;
+
   double devicePixelRatio =
       std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
 
-  flutter::EncodableMap resultMap = flutter::EncodableMap();
   RECT rect;
   if (GetWindowRect(hwnd, &rect)) {
     double x = rect.left / devicePixelRatio * 1.0f;
@@ -741,6 +767,7 @@ flutter::EncodableMap WindowManager::GetBounds(
 
 void WindowManager::SetBounds(const flutter::EncodableMap& args) {
   HWND hwnd = GetMainWindow();
+  if (!hwnd) return;
 
   double devicePixelRatio =
       std::get<double>(args.at(flutter::EncodableValue("devicePixelRatio")));
@@ -811,6 +838,7 @@ bool WindowManager::IsResizable() {
 
 void WindowManager::SetResizable(const flutter::EncodableMap& args) {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   is_resizable_ =
       std::get<bool>(args.at(flutter::EncodableValue("isResizable")));
   DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
@@ -824,12 +852,14 @@ void WindowManager::SetResizable(const flutter::EncodableMap& args) {
 
 bool WindowManager::IsMinimizable() {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return false;
   DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
   return (gwlStyle & WS_MINIMIZEBOX) != 0;
 }
 
 void WindowManager::SetMinimizable(const flutter::EncodableMap& args) {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   bool isMinimizable =
       std::get<bool>(args.at(flutter::EncodableValue("isMinimizable")));
   DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
@@ -840,12 +870,14 @@ void WindowManager::SetMinimizable(const flutter::EncodableMap& args) {
 
 bool WindowManager::IsMaximizable() {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return false;
   DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
   return (gwlStyle & WS_MAXIMIZEBOX) != 0;
 }
 
 void WindowManager::SetMaximizable(const flutter::EncodableMap& args) {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   bool isMaximizable =
       std::get<bool>(args.at(flutter::EncodableValue("isMaximizable")));
   DWORD gwlStyle = GetWindowLong(hWnd, GWL_STYLE);
@@ -856,12 +888,14 @@ void WindowManager::SetMaximizable(const flutter::EncodableMap& args) {
 
 bool WindowManager::IsClosable() {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return true;
   DWORD gclStyle = GetClassLong(hWnd, GCL_STYLE);
   return !((gclStyle & CS_NOCLOSE) != 0);
 }
 
 void WindowManager::SetClosable(const flutter::EncodableMap& args) {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   bool isClosable =
       std::get<bool>(args.at(flutter::EncodableValue("isClosable")));
   DWORD gclStyle = GetClassLong(hWnd, GCL_STYLE);
@@ -870,14 +904,18 @@ void WindowManager::SetClosable(const flutter::EncodableMap& args) {
 }
 
 bool WindowManager::IsAlwaysOnTop() {
-  DWORD dwExStyle = GetWindowLong(GetMainWindow(), GWL_EXSTYLE);
+  HWND hWnd = GetMainWindow();
+  if (!hWnd) return false;
+  DWORD dwExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
   return (dwExStyle & WS_EX_TOPMOST) != 0;
 }
 
 void WindowManager::SetAlwaysOnTop(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   bool isAlwaysOnTop =
       std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnTop")));
-  SetWindowPos(GetMainWindow(), isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST,
+  SetWindowPos(hWnd, isAlwaysOnTop ? HWND_TOPMOST : HWND_NOTOPMOST,
                0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 }
 
@@ -886,32 +924,40 @@ bool WindowManager::IsAlwaysOnBottom() {
 }
 
 void WindowManager::SetAlwaysOnBottom(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   is_always_on_bottom_ =
       std::get<bool>(args.at(flutter::EncodableValue("isAlwaysOnBottom")));
 
-  SetWindowPos(GetMainWindow(),
+  SetWindowPos(hWnd,
                is_always_on_bottom_ ? HWND_BOTTOM : HWND_NOTOPMOST, 0, 0, 0, 0,
                SWP_NOMOVE | SWP_NOSIZE);
 }
 
 std::string WindowManager::GetTitle() {
-  int const bufferSize = 1 + GetWindowTextLength(GetMainWindow());
+  HWND hWnd = GetMainWindow();
+  if (!hWnd) return "";
+  int const bufferSize = 1 + GetWindowTextLength(hWnd);
   std::wstring title(bufferSize, L'\0');
-  GetWindowText(GetMainWindow(), &title[0], bufferSize);
+  GetWindowText(hWnd, &title[0], bufferSize);
 
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   return (converter.to_bytes(title)).c_str();
 }
 
 void WindowManager::SetTitle(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   std::string title =
       std::get<std::string>(args.at(flutter::EncodableValue("title")));
 
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  SetWindowText(GetMainWindow(), converter.from_bytes(title).c_str());
+  SetWindowText(hWnd, converter.from_bytes(title).c_str());
 }
 
 void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   title_bar_style_ =
       std::get<std::string>(args.at(flutter::EncodableValue("titleBarStyle")));
   // Enables the ability to go from setAsFrameless() to
@@ -919,7 +965,6 @@ void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args) {
   is_frameless_ = false;
 
   MARGINS margins = {0, 0, 0, 0};
-  HWND hWnd = GetMainWindow();
   RECT rect;
   GetWindowRect(hWnd, &rect);
   DwmExtendFrameIntoClientArea(hWnd, &margins);
@@ -930,6 +975,7 @@ void WindowManager::SetTitleBarStyle(const flutter::EncodableMap& args) {
 
 int WindowManager::GetTitleBarHeight() {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return 0;
 
   TITLEBARINFOEX* ptinfo = (TITLEBARINFOEX*)malloc(sizeof(TITLEBARINFOEX));
   ptinfo->cbSize = sizeof(TITLEBARINFOEX);
@@ -951,6 +997,7 @@ void WindowManager::SetSkipTaskbar(const flutter::EncodableMap& args) {
       std::get<bool>(args.at(flutter::EncodableValue("isSkipTaskbar")));
 
   HWND hWnd = GetMainWindow();
+  if (!hWnd || !taskbar_) return;
 
   LPVOID lp = NULL;
   CoInitialize(lp);
@@ -963,10 +1010,12 @@ void WindowManager::SetSkipTaskbar(const flutter::EncodableMap& args) {
 }
 
 void WindowManager::SetProgressBar(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
+  if (!hWnd || !taskbar_) return;
+
   double progress =
       std::get<double>(args.at(flutter::EncodableValue("progress")));
 
-  HWND hWnd = GetMainWindow();
   taskbar_->SetProgressState(hWnd, TBPF_INDETERMINATE);
   taskbar_->SetProgressValue(hWnd, static_cast<int32_t>(progress * 100),
                              static_cast<int32_t>(100));
@@ -987,6 +1036,9 @@ void WindowManager::SetProgressBar(const flutter::EncodableMap& args) {
 }
 
 void WindowManager::SetIcon(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
+
   std::string iconPath =
       std::get<std::string>(args.at(flutter::EncodableValue("iconPath")));
 
@@ -999,8 +1051,6 @@ void WindowManager::SetIcon(const flutter::EncodableMap& args) {
   HICON hIconLarge =
       (HICON)(LoadImage(NULL, (LPCWSTR)(converter.from_bytes(iconPath).c_str()),
                         IMAGE_ICON, 32, 32, LR_LOADFROMFILE));
-
-  HWND hWnd = GetMainWindow();
 
   SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
   SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIconLarge);
@@ -1017,6 +1067,7 @@ void WindowManager::SetHasShadow(const flutter::EncodableMap& args) {
     has_shadow_ = std::get<bool>(args.at(flutter::EncodableValue("hasShadow")));
 
     HWND hWnd = GetMainWindow();
+    if (!hWnd) return;
 
     MARGINS margins[2]{{0, 0, 0, 0}, {0, 0, 1, 0}};
 
@@ -1031,6 +1082,7 @@ double WindowManager::GetOpacity() {
 void WindowManager::SetOpacity(const flutter::EncodableMap& args) {
   opacity_ = std::get<double>(args.at(flutter::EncodableValue("opacity")));
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   long gwlExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
   SetWindowLong(hWnd, GWL_EXSTYLE, gwlExStyle | WS_EX_LAYERED);
   SetLayeredWindowAttributes(hWnd, 0, static_cast<int8_t>(255 * opacity_),
@@ -1038,6 +1090,9 @@ void WindowManager::SetOpacity(const flutter::EncodableMap& args) {
 }
 
 void WindowManager::SetBrightness(const flutter::EncodableMap& args) {
+  HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
+
   DWORD light_mode;
   DWORD light_mode_size = sizeof(light_mode);
   LSTATUS result =
@@ -1048,7 +1103,6 @@ void WindowManager::SetBrightness(const flutter::EncodableMap& args) {
   if (result == ERROR_SUCCESS) {
     std::string brightness =
         std::get<std::string>(args.at(flutter::EncodableValue("brightness")));
-    HWND hWnd = GetMainWindow();
     BOOL enable_dark_mode = light_mode == 0 && brightness == "dark";
     DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
                           &enable_dark_mode, sizeof(enable_dark_mode));
@@ -1059,6 +1113,7 @@ void WindowManager::SetIgnoreMouseEvents(const flutter::EncodableMap& args) {
   bool ignore = std::get<bool>(args.at(flutter::EncodableValue("ignore")));
 
   HWND hwnd = GetMainWindow();
+  if (!hwnd) return;
   LONG ex_style = ::GetWindowLong(hwnd, GWL_EXSTYLE);
   if (ignore)
     ex_style |= (WS_EX_TRANSPARENT | WS_EX_LAYERED);
@@ -1070,6 +1125,7 @@ void WindowManager::SetIgnoreMouseEvents(const flutter::EncodableMap& args) {
 
 void WindowManager::PopUpWindowMenu(const flutter::EncodableMap& args) {
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   HMENU hMenu = GetSystemMenu(hWnd, false);
 
   double x, y;
@@ -1089,9 +1145,11 @@ void WindowManager::PopUpWindowMenu(const flutter::EncodableMap& args) {
 }
 
 void WindowManager::StartDragging() {
+  HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   ReleaseCapture();
   Undock();
-  SendMessage(GetMainWindow(), WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
+  SendMessage(hWnd, WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
 }
 
 void WindowManager::StartResizing(const flutter::EncodableMap& args) {
@@ -1101,6 +1159,7 @@ void WindowManager::StartResizing(const flutter::EncodableMap& args) {
   bool right = std::get<bool>(args.at(flutter::EncodableValue("right")));
 
   HWND hWnd = GetMainWindow();
+  if (!hWnd) return;
   Undock();
   ReleaseCapture();
   LONG command;
