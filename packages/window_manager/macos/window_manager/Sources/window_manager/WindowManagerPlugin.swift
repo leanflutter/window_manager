@@ -16,25 +16,21 @@ public class WindowManagerPlugin: NSObject, FlutterPlugin {
             return (self.registrar.view?.window)!;
         }
     }
-    
-    private var _inited: Bool = false
-    private var windowManager: WindowManager = WindowManager()
+
+    private var windowManager: WindowManager
     
     public init(_ registrar: FlutterPluginRegistrar, _ channel: FlutterMethodChannel) {
         super.init()
         self.registrar = registrar
         self.channel = channel
+        self.windowManager = WindowManager(registrar)
+        self.windowManager.onEvent = {
+            (eventName: String) in
+            self._emitEvent(eventName)
+        }
     }
     
     private func ensureInitialized() {
-        if (!_inited) {
-            windowManager.mainWindow = mainWindow
-            windowManager.onEvent = {
-                (eventName: String) in
-                self._emitEvent(eventName)
-            }
-            _inited = true
-        }
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
