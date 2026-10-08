@@ -1,22 +1,19 @@
-> **⚠️ Migration Notice**: This plugin is being migrated to [libnativeapi/nativeapi-flutter](https://github.com/libnativeapi/nativeapi-flutter)
->
-> The new version is based on a unified C++ core library ([libnativeapi/nativeapi](https://github.com/libnativeapi/nativeapi)), providing more complete and consistent cross-platform native API support.
+> **window_manager is built on [nativeapi](https://github.com/libnativeapi/nativeapi)**, a
+> Flutter binding of one C++ core library ([libnativeapi/nativeapi](https://github.com/libnativeapi/nativeapi))
+> shared by macOS, Windows and Linux. Coming from 0.5.x? See [Upgrading from 0.5.x](#upgrading-from-05x).
 
 # window_manager
 
-[![pub version][pub-image]][pub-url] [![Pub Monthly Downloads][pub-dm-image]][pub-dm-url] [![][discord-image]][discord-url] [![All Contributors][all-contributors-image]](#contributors)
+[![pub version][pub-image]][pub-url] [![][discord-image]][discord-url] [![All Contributors][all-contributors-image]](#contributors)
 
 [pub-image]: https://img.shields.io/pub/v/window_manager.svg
 [pub-url]: https://pub.dev/packages/window_manager
-[pub-dm-image]: https://img.shields.io/pub/dm/window_manager.svg
-[pub-dm-url]: https://pub.dev/packages/window_manager/score
 [discord-image]: https://img.shields.io/discord/884679008049037342.svg
 [discord-url]: https://discord.gg/zPa6EZ2jqb
 [all-contributors-image]: https://img.shields.io/github/all-contributors/leanflutter/window_manager?color=ee8449&style=flat-square
 
-This plugin provides comprehensive window management capabilities for Flutter desktop applications, enabling full control over window size, position, appearance, close behavior, and listening to events.
-
----
+This package lets Flutter desktop apps size, move, show, hide and decorate their own
+window.
 
 English | [简体中文](./README-ZH.md)
 
@@ -26,12 +23,16 @@ English | [简体中文](./README-ZH.md)
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Platform Support](#platform-support)
-- [Documentation](#documentation)
 - [Quick Start](#quick-start)
   - [Installation](#installation)
+    - [Requirements](#requirements)
   - [Usage](#usage)
-- [Related Articles](#related-articles)
+    - [Upgrading from 0.5.x](#upgrading-from-05x)
+    - [Moving to the native API](#moving-to-the-native-api)
+- [Articles](#articles)
 - [Who's using it?](#whos-using-it)
+- [API](#api)
+  - [Native API](#native-api)
 - [Contributors](#contributors)
 - [License](#license)
 
@@ -43,70 +44,226 @@ English | [简体中文](./README-ZH.md)
 | :---: | :---: | :-----: |
 |  ✔️   |  ✔️   |   ✔️    |
 
-## Documentation
-
-- [Quick Start](https://leanflutter.dev/documentation/window_manager/quick-start)
-- [API Reference](https://pub.dev/documentation/window_manager/latest/window_manager/)
-- [Changelog](https://pub.dev/packages/window_manager/changelog)
-
 ## Quick Start
 
 ### Installation
 
-Add this to your package's `pubspec.yaml` file:
+Add this to your package's pubspec.yaml file:
 
 ```yaml
 dependencies:
-  window_manager: ^0.5.1
+  window_manager: ^0.6.0
+```
+
+Or
+
+```yaml
+dependencies:
+  window_manager:
+    git:
+      url: https://github.com/leanflutter/window_manager.git
+      ref: main
+```
+
+#### Requirements
+
+- Flutter 3.47 / Dart 3.13 or later, macOS 10.15 or later.
+- Linux build machines need GTK 3, X11 and Xi development files:
+
+```
+sudo apt-get install libgtk-3-dev libx11-dev libxi-dev
 ```
 
 ### Usage
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // Must add this line.
-  await windowManager.ensureInitialized();
+final window = WindowManager.instance.getCurrent()!;
 
-  WindowOptions windowOptions = WindowOptions(
-    size: Size(800, 600),
-    center: true,
-    backgroundColor: Colors.transparent,
-    skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.hidden,
-  );
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
+window.title = 'window_manager';
+window.setSize(const Size(1000, 700).toNative(), false);
+window.minimumSize = const Size(640, 480).toNative();
+window.center();
+window.show();
 
-  runApp(MyApp());
-}
+// Every window event of every window of this app.
+WindowManager.instance.addListener((event) {
+  switch (event) {
+    case WindowFocusedEvent():
+      debugPrint('window ${event.windowId} focused');
+    case WindowResizedEvent():
+      debugPrint('window ${event.windowId} is now ${event.newSize.toSize()}');
+    default:
+      break;
+  }
+});
 
+// Ask before this window closes, however the user closes it. Close requests
+// reach only the window's own listeners.
+window.addListener((event) async {
+  if (event is WindowCloseRequestedEvent && !await confirmClose()) {
+    event.request.cancel();
+  }
+});
 ```
 
-> Please see the example app of this plugin for a full example.
+`Window` takes and returns nativeapi's `Size`, `Point`, `Rectangle` and `Color`, which are
+not exported because Flutter has its own: `toNative()` turns Flutter's into them, and
+`toSize()`, `toOffset()`, `toRect()` and `toColor()` turn them back.
 
-## Related Articles
+With Flutter's multi-window API, `package:window_manager/windowing.dart` answers the
+`Window` behind each of Flutter's window controllers:
 
-- [Click the dock icon to restore after closing the window](https://leanflutter.dev/blog/click-dock-icon-to-restore-after-closing-the-window/)
-- [Making the app single-instanced](https://leanflutter.dev/blog/making-the-app-single-instanced/)
+```dart
+import 'package:window_manager/windowing.dart';
+
+final window = controller.nativeWindow; // or nativeWindowOf(controller)
+window?.title = 'Inspector';
+```
+
+A window with no title bar of its own, dragged and resized by widgets:
+
+```dart
+final window = WindowManager.instance.getCurrent()!;
+window.titleBarStyle = TitleBarStyle.hidden;
+
+// In the app:
+DragToResizeArea(
+  child: Column(
+    children: [
+      WindowCaption(
+        brightness: Theme.of(context).brightness,
+        title: const Text('window_manager'),
+      ),
+      Expanded(child: body),
+    ],
+  ),
+)
+```
+
+> The [example app](./example) of this plugin covers the 0.5.x compatible API. For the
+> full example — several windows at once, parent and child windows, every native
+> property — see nativeapi's
+> [window_example](https://github.com/libnativeapi/nativeapi/tree/main/examples/flutter_window_example).
+
+#### Upgrading from 0.5.x
+
+Code written for `window_manager` 0.5.x keeps working by importing
+`package:window_manager/legacy.dart` instead of
+`package:window_manager/window_manager.dart`. It provides the old `windowManager`,
+`WindowListener`, `WindowOptions` and `calcWindowPosition` on top of the native API.
+
+The import has to change on purpose: `legacy.dart` is a bridge, not the future of this
+package. Its classes are marked `@Deprecated` and **will be removed in a later
+release** — move to the native API above when you can.
+
+```dart
+import 'package:window_manager/legacy.dart';
+
+await windowManager.ensureInitialized();
+await windowManager.waitUntilReadyToShow(
+  const WindowOptions(size: Size(1000, 700), center: true),
+  () async {
+    await windowManager.show();
+    await windowManager.focus();
+  },
+);
+```
+
+What differs from 0.5.x:
+
+- Builds need Flutter 3.47 / Dart 3.13 and macOS 10.15 (0.5.x: Flutter 3.3, macOS 10.11),
+  and no longer need the plugin's own setup in `MainFlutterWindow.swift`, `my_application.cc`
+  or the Windows runner — there is no platform plugin code left.
+- `close()`, `destroy()` and `setPreventClose()` behave as before: with
+  `setPreventClose(true)` the title bar's close button and `close()` report
+  `onWindowClose` and leave the window open, and `destroy()` closes it anyway. Closing
+  the last window ends the app, as the platform's runner decides.
+- `onWindowResized` and `onWindowMoved` arrive together with `onWindowResize` and
+  `onWindowMove`: nativeapi reports one event per change, not a stream and a final one.
+- Aero-snap docking is gone: `isDockable()` answers false, `isDocked()` null, `dock()`
+  does nothing, `undock()` answers false, and `onWindowDocked` / `onWindowUndocked` never
+  fire. `grabKeyboard()` / `ungrabKeyboard()` (Linux) are gone the same way.
+- `popUpWindowMenu()` opens the system menu at the cursor on Windows and on Linux window
+  managers that have one, and does nothing on macOS.
+- `forward` of `setIgnoreMouseEvents` keeps hover events where the platform can (macOS,
+  Windows and X11); elsewhere the window ignores the mouse without them.
+- Arguments the core library has no use for are accepted and ignored: `vertically` of
+  `maximize`, `animate` of `setPosition` and `setBounds`, `visibleOnFullScreen` of
+  `setVisibleOnAllWorkspaces`.
+- `getId()` answers nativeapi's own window id, not the `NSWindow` number or the `HWND`.
+- `setAsFrameless()` hides the title bar and its buttons; it no longer removes the
+  window's border.
+- `setAlignment` handles any `Alignment`, not only the nine constants.
+- `WindowCaption`'s close button closes the window, through its close listeners, so
+  `setPreventClose` holds for it too. On Windows 11 its maximize button opens the snap
+  layouts.
+- `startDragging()` and `startResizing()` are no longer skipped on Windows while the
+  window is in full screen: the compatibility layer keeps no `Platform` branch of its
+  own, the core library decides.
+- `screen_retriever` and `path` are no longer dependencies.
+- New example on `package:flutter/widgets.dart` alone; the full one is nativeapi's
+  [window_example](https://github.com/libnativeapi/nativeapi/tree/main/examples/flutter_window_example).
+
+#### Moving to the native API
+
+| 0.5.x (`legacy.dart`) | Native API (`window_manager.dart`) |
+| --- | --- |
+| `windowManager` (the app's one window) | `WindowManager.instance.getCurrent()` — or `get(id)`, `getAll()`, `getWindowAtPoint()`; every window is a `Window` of its own |
+| `await windowManager.getSize()`, `setSize(size)` | `window.size.toSize()`, `window.setSize(size.toNative(), animate)` — synchronous, no `await` |
+| `getBounds()` / `setBounds(rect)` | `window.bounds.toRect()`, `window.bounds = rect.toNative()`; `window.contentBounds` for the area without decorations |
+| `getPosition()` / `setPosition(offset)` | `window.position.toOffset()`, `window.position = offset.toNative()` |
+| `setMinimumSize` / `setMaximumSize` / `setAspectRatio` | `window.minimumSize`, `window.maximumSize`, `window.aspectRatio` |
+| `show()` / `show(inactive: true)` / `hide()` | `window.show()` / `window.showInactive()` / `window.hide()` |
+| `focus()`, `blur()`, `isFocused()` | `window.focus()`, `window.blur()`, `window.isFocused` |
+| `maximize()`, `unmaximize()`, `minimize()`, `restore()` | the same names on `window`, without `await` |
+| `setFullScreen(bool)` / `isFullScreen()` | `window.isFullScreen` |
+| `setResizable`, `setMovable`, `setMinimizable`, `setMaximizable`, `setClosable` | `window.isResizable`, `isMovable`, `isMinimizable`, `isMaximizable`, `isClosable` — also `isFullScreenable` |
+| `setAlwaysOnTop` / `setAlwaysOnBottom` | `window.isAlwaysOnTop` / `window.isAlwaysOnBottom` |
+| `setSkipTaskbar(true)` | `window.isVisibleInTaskbar = false` |
+| `setTitle` / `getTitle` | `window.title` |
+| `setTitleBarStyle(style, windowButtonVisibility:)` | `window.titleBarStyle`, `window.isWindowControlButtonsVisible` — also `setTitleBarColors()` |
+| `setHasShadow`, `setOpacity`, `setBackgroundColor` | `window.hasShadow`, `window.opacity`, `window.backgroundColor` — also `window.visualEffect` |
+| `setIgnoreMouseEvents(ignore, forward:)` | `window.setIgnoreMouseEvents(ignore, forward)` |
+| `close()` / `destroy()` | `window.close()`, which asks the window's close listeners first |
+| `setPreventClose(true)` with `onWindowClose` | `window.addListener((event) { if (event is WindowCloseRequestedEvent) event.request.cancel(); })` |
+| `popUpWindowMenu()` | `window.showSystemMenu(position)` — `Window.isSystemMenuSupported()` says where it works |
+| `setVisibleOnAllWorkspaces(bool)` | `window.isVisibleOnAllWorkspaces` |
+| `startDragging()` / `startResizing(edge)` | the same names on `window`; `DragToMoveArea` and `DragToResizeArea` call them for you |
+| `setProgressBar`, `setBadgeLabel`, `setIcon`, `setBrightness` | `Application.instance` — they belong to the app, not to one window |
+| `WindowListener` | `window.addListener((event) { switch (event) { case WindowFocusedEvent(): … } })` for one window, `WindowManager.instance.addListener` for all — also `WindowBlurredEvent`, `WindowMinimizedEvent`, `WindowMaximizedEvent`, `WindowRestoredEvent`, `WindowMovedEvent`, `WindowResizedEvent`, `WindowEnteredFullScreenEvent`, `WindowExitedFullScreenEvent`, `WindowCreatedEvent`, `WindowClosedEvent` |
+| `calcWindowPosition(size, alignment)` | `DisplayManager.instance` — `getAll()`, `getPrimary()`, `getCursorPosition()`, and each `Display`'s `workArea` |
+
+`waitUntilReadyToShow`, `ensureInitialized`, `setAsFrameless` and `getDevicePixelRatio`
+have no native counterpart: set the properties you want and call `window.show()` when
+you are ready.
+
+## Articles
+
+- [Click the dock icon to restore after closing the window](https://leanflutter.org/blog/click-dock-icon-to-restore-after-closing-the-window)
+- [Making the app single-instanced](https://leanflutter.org/blog/making-the-app-single-instanced)
 
 ## Who's using it?
 
-- [Airclap](https://airclap.app/) - Send any file to any device. cross platform, ultra fast and easy to use.
 - [AuthPass](https://authpass.app/) - Password Manager based on Flutter for all platforms. Keepass 2.x (kdbx 3.x) compatible.
 - [Biyi (比译)](https://biyidev.com/) - A convenient translation and dictionary app written in dart / Flutter.
 - [BlueBubbles](https://github.com/BlueBubblesApp/bluebubbles-app) - BlueBubbles is an ecosystem of apps bringing iMessage to Android, Windows, and Linux
 - [LunaSea](https://github.com/CometTools/LunaSea) - A self-hosted controller for mobile and macOS built using the Flutter framework.
 - [Linwood Butterfly](https://github.com/LinwoodCloud/Butterfly) - Open source note taking app written in Flutter
-- [RustDesk](https://github.com/rustdesk/rustdesk) - Yet another remote desktop software, written in Rust. Works out of the box, no configuration required.
+- [RustDesk](https://github.com/rustdesk/rustdesk) - Yet another remote desktop software, written in Rust. Works out of the box, no configuration required. 
 - [Ubuntu Desktop Installer](https://github.com/canonical/ubuntu-desktop-installer) - This project is a modern implementation of the Ubuntu Desktop installer.
-- [UniControlHub](https://github.com/rohitsangwan01/uni_control_hub) - Seamlessly bridge your Desktop and Mobile devices
-- [EyesCare](https://bixat.dev/products/EyesCare) - A light-weight application following 20 rule adherence for optimum eye health
+
+## API
+
+### Native API
+
+`window_manager` now re-exports the windowing APIs of `nativeapi` — `Window`,
+`WindowManager`, `TitleBarStyle`, `ResizeEdge`, `VisualEffect`, the window events with
+`EventRequest` for answering a close, and from `nativeapi_flutter` the `DragToMoveArea`,
+`DragToResizeArea` and `MaximizeButtonArea` widgets and the type conversions —
+alongside its own `WindowCaption`, `WindowCaptionButton` and `VirtualWindowFrame`. Import
+`package:window_manager/legacy.dart` only for code that still uses the 0.5.x API.
 
 ## Contributors
 

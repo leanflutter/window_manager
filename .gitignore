@@ -1,5 +1,8 @@
 .dart_tool/
 .idea/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
 
 *.iml
 pubspec_overrides.yaml
