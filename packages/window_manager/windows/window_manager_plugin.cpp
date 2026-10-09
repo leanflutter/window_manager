@@ -45,7 +45,7 @@ class WindowManagerPlugin : public flutter::Plugin {
       std::default_delete<flutter::MethodChannel<flutter::EncodableValue>>>
       channel = nullptr;
 
-  WindowManager* window_manager;
+  std::unique_ptr<WindowManager> window_manager;
   flutter::PluginRegistrarWindows* registrar;
 
   // The ID of the WindowProc delegate registration.
