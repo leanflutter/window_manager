@@ -345,8 +345,8 @@ void WindowManagerPlugin::HandleMethodCall(
   std::string method_name = method_call.method_name();
 
   if (method_name.compare("ensureInitialized") == 0) {
-    window_manager->native_window =
-        ::GetAncestor(registrar->GetView()->GetNativeWindow(), GA_ROOT);
+    // window_manager->native_window =
+    //     ::GetAncestor(registrar->GetView()->GetNativeWindow(), GA_ROOT);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("waitUntilReadyToShow") == 0) {
     window_manager->WaitUntilReadyToShow();
