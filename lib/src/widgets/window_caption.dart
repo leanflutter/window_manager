@@ -74,6 +74,14 @@ class _WindowCaptionState extends State<WindowCaption> {
   }
 
   @override
+  void didUpdateWidget(covariant WindowCaption oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.window != widget.window) {
+      _isMaximized = _window?.isMaximized ?? false;
+    }
+  }
+
+  @override
   void dispose() {
     final listenerId = _listenerId;
     if (listenerId != null) {

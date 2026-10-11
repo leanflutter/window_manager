@@ -168,18 +168,24 @@ Future<void> _surface() async {
     Alignment.topLeft,
   );
 
-  const Widget move = DragToMoveArea(child: SizedBox());
-  const Widget resize = DragToResizeArea(
+  // Constructor signature probes: non-const calls also compile when Flutter
+  // instruments widgets in local path dependencies for creation tracking.
+  // ignore: prefer_const_constructors
+  final Widget move = DragToMoveArea(child: const SizedBox());
+  // ignore: prefer_const_constructors
+  final Widget resize = DragToResizeArea(
     resizeEdgeSize: 6,
     resizeEdgeColor: Color(0x00000000),
     resizeEdgeMargin: EdgeInsets.zero,
-    enableResizeEdges: [ResizeEdge.top],
-    child: SizedBox(),
+    enableResizeEdges: const [ResizeEdge.top],
+    child: const SizedBox(),
   );
-  const Widget frame = VirtualWindowFrame(child: SizedBox());
+  // ignore: prefer_const_constructors
+  final Widget frame = VirtualWindowFrame(child: const SizedBox());
   final TransitionBuilder builder = VirtualWindowFrameInit();
-  const Widget caption = WindowCaption(
-    title: Text('window_manager'),
+  // ignore: prefer_const_constructors
+  final Widget caption = WindowCaption(
+    title: const Text('window_manager'),
     backgroundColor: Color(0x00000000),
     brightness: Brightness.dark,
   );

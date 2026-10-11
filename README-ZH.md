@@ -175,6 +175,8 @@ await windowManager.waitUntilReadyToShow(
 - `close()`、`destroy()`、`setPreventClose()` 的行为和以前一样：设了
   `setPreventClose(true)` 之后，标题栏的关闭按钮和 `close()` 都会报告 `onWindowClose`
   而不关闭窗口，`destroy()` 仍然会关掉它。关闭最后一个窗口时是否退出应用，由平台的 runner 决定。
+  未开启 `preventClose` 时也会报告 `onWindowClose`。`destroy()` 跳过兼容层的回调和否决，
+  其他原生监听器仍可取消关闭请求。
 - `onWindowResized`、`onWindowMoved` 和 `onWindowResize`、`onWindowMove` 一起到达：
   nativeapi 每次变化只报一个事件，没有"过程中"和"结束时"之分。
 - Aero-snap 贴边没有了：`isDockable()` 返回 false，`isDocked()` 返回 null，`dock()` 什么

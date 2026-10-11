@@ -24,6 +24,12 @@ per-platform plugin code is gone, and one C++ core drives macOS, Windows and Lin
   close button and `close()` report `onWindowClose` and leave the window open, and
   `destroy()` closes it anyway. `WindowCaption`'s close button goes through the same
   close listeners, and its maximize button opens the snap layouts on Windows 11.
+* `onWindowClose` also reports ordinary close requests when prevent-close is off.
+  A `destroy()` vetoed by another native listener does not disable prevent-close for
+  subsequent requests. Reattaching a legacy listener reads the current window state,
+  so unmaximize and leaving full screen are reported correctly.
+* `WindowCaption` and `VirtualWindowFrame` refresh their state when their target
+  `window` changes.
 * Events: `onWindowResized` / `onWindowMoved` arrive together with `onWindowResize` /
   `onWindowMove`; the full-screen pair comes from the window's own full-screen events;
   `onWindowDocked` / `onWindowUndocked` never fire. The legacy events are those of the

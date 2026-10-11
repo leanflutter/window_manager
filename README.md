@@ -180,6 +180,9 @@ What differs from 0.5.x:
   `setPreventClose(true)` the title bar's close button and `close()` report
   `onWindowClose` and leave the window open, and `destroy()` closes it anyway. Closing
   the last window ends the app, as the platform's runner decides.
+  `onWindowClose` also reports close requests when prevent-close is off. `destroy()`
+  bypasses the compatibility layer's callback and veto; other native listeners may
+  still cancel the request.
 - `onWindowResized` and `onWindowMoved` arrive together with `onWindowResize` and
   `onWindowMove`: nativeapi reports one event per change, not a stream and a final one.
 - Aero-snap docking is gone: `isDockable()` answers false, `isDocked()` null, `dock()`

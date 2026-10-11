@@ -8,8 +8,9 @@
 abstract mixin class WindowListener {
   /// Emitted when the window is going to be closed.
   ///
-  /// Only a `windowManager.close()` call with `setPreventClose(true)` reports
-  /// this; the core library cannot intercept the system's own close yet.
+  /// Reported for both `windowManager.close()` and the native close button.
+  /// With `setPreventClose(true)` the request is cancelled before this callback.
+  /// `destroy()` bypasses this callback and the compatibility layer's veto.
   void onWindowClose() {}
 
   /// Emitted when the window gains focus.
@@ -50,14 +51,12 @@ abstract mixin class WindowListener {
 
   /// Emitted when the window enters a full-screen state.
   ///
-  /// Derived from the window's state after a resize, so a full-screen change
-  /// that resizes nothing goes unreported.
+  /// Forwarded from the native window's full-screen event.
   void onWindowEnterFullScreen() {}
 
   /// Emitted when the window leaves a full-screen state.
   ///
-  /// Derived from the window's state after a resize, so a full-screen change
-  /// that resizes nothing goes unreported.
+  /// Forwarded from the native window's full-screen event.
   void onWindowLeaveFullScreen() {}
 
   /// Emitted when the window entered a docked state.

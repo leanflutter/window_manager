@@ -105,8 +105,10 @@ class WindowManager {
     return views.isEmpty ? 1.0 : views.first.devicePixelRatio;
   }
 
-  /// Kept for source compatibility; nativeapi needs no initialization.
-  Future<void> ensureInitialized() async {}
+  /// Connects listeners registered before the native window was available.
+  Future<void> ensureInitialized() async {
+    if (_listeners.isNotEmpty || _isPreventClose) _wireNativeEvents();
+  }
 
   /// Returns `int` - The ID of the window.
   ///
@@ -193,9 +195,11 @@ class WindowManager {
     if (!closing) {
       // Without a native close, as on a platform the core cannot close a
       // window on, prevent-close still reports and otherwise the app quits.
-      if (_isPreventClose && !_isDestroying) {
+      final destroying = _isDestroying;
+      _isDestroying = false;
+      if (!destroying) {
         _emit(kWindowEventClose);
-        return;
+        if (_isPreventClose) return;
       }
       tryNative(() => nativeapi.Application.instance.quit(0));
     }
@@ -705,6 +709,12 @@ class WindowManager {
     if (_nativeListenerId != null) return;
     final window = _target;
     if (window == null) return;
+    // State may have changed while there were no listeners, or before the
+    // first listener was added. A restored event alone cannot tell us whether
+    // the window was minimized or maximized.
+    _isMaximized = window.isMaximized;
+    _isMinimized = window.isMinimized;
+    _isFullScreen = window.isFullScreen;
     _nativeListenerId = tryNative(() => window.addListener(_onNativeEvent));
   }
 
@@ -720,10 +730,11 @@ class WindowManager {
   void _onNativeEvent(nativeapi.WindowEvent event) {
     switch (event) {
       case nativeapi.WindowCloseRequestedEvent(:final request):
-        if (_isPreventClose && !_isDestroying) {
-          request.cancel();
-          _emit(kWindowEventClose);
-        }
+        final destroying = _isDestroying;
+        _isDestroying = false;
+        if (destroying) break;
+        if (_isPreventClose) request.cancel();
+        _emit(kWindowEventClose);
       case nativeapi.WindowEnteredFullScreenEvent():
         _setFullScreenState(true);
       case nativeapi.WindowExitedFullScreenEvent():

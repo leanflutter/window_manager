@@ -54,6 +54,12 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame> {
   }
 
   @override
+  void didUpdateWidget(covariant VirtualWindowFrame oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.window != widget.window) _readState();
+  }
+
+  @override
   void dispose() {
     final listenerId = _listenerId;
     if (listenerId != null) {
