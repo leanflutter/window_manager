@@ -35,6 +35,7 @@ export 'package:nativeapi/nativeapi.dart'
         WindowMaximizedEvent,
         WindowMinimizedEvent,
         WindowMovedEvent,
+        WindowNumber,
         WindowOcclusionChangedEvent,
         WindowOcclusionState,
         WindowProperty,

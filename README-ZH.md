@@ -195,13 +195,16 @@ await windowManager.waitUntilReadyToShow(
   保留各按钮的独立策略。Windows 上 `setClosable(false)` 只禁用关闭命令，保留其他按钮；
   Linux 服务端装饰是否响应取决于窗口管理器。
 - Linux 保留首次显示前的全屏、最小化请求，并支持取消；退出启动全屏后恢复请求的普通窗口宽度。
-- `getId()` 返回的是 nativeapi 自己的窗口 id，不再是 `NSWindow` number 或 `HWND`。
-- `setAsFrameless()` 只隐藏标题栏和它的按钮，不再去掉窗口边框。
+- `getId()` 保持 macOS 窗口服务器编号和 Windows `HWND` 的旧语义。原生 API 的查询和事件
+  使用 `window.id`；平台互操作使用 macOS 的 `window.nativeNumber` 或 Windows 的 `window.nativeObject`。
+- `setAsFrameless()` 通过 `window.setFrameless(true)` 去除边框。显式设置任一标题栏样式都会恢复边框。
+  macOS 兼容层保留旧版的透明背景和阴影默认值；原生无边框策略独立保留阴影偏好。
+- macOS 的 `setMaximizable(false)` 拒绝原生 zoom，不再连带禁用边缘缩放。
 - `setAlignment` 支持任意 `Alignment`，不再只认那九个常量。
 - `WindowCaption` 的关闭按钮会关闭窗口，并先经过窗口的关闭监听器，所以 `setPreventClose`
   对它同样有效。在 Windows 11 上，它的最大化按钮会弹出贴靠布局。
-- 全屏时 Windows 上的 `startDragging()`、`startResizing()` 不再被跳过：兼容层不保留自己的
-  `Platform` 分支，交给核心库决定。
+- Windows 全屏时仍忽略 `startDragging()`、`startResizing()`，保持 0.5.x 行为；此限制和
+  原生窗口所属线程上的派发由 core 处理。
 - `screen_retriever` 和 `path` 不再是依赖。
 - 新示例只用 `package:flutter/widgets.dart`；完整示例是 nativeapi 的
   [window_example](https://github.com/libnativeapi/nativeapi/tree/main/examples/flutter_window_example)。
@@ -223,6 +226,8 @@ await windowManager.waitUntilReadyToShow(
 | `setAlwaysOnTop` / `setAlwaysOnBottom` | `window.isAlwaysOnTop` / `window.isAlwaysOnBottom` |
 | `setSkipTaskbar(true)` | `window.isVisibleInTaskbar = false` |
 | `setTitle` / `getTitle` | `window.title` |
+| `setAsFrameless()` | `window.setFrameless(true)`，同时隐藏标题栏和原生按钮 |
+| `getId()` | macOS 的 `window.nativeNumber`；Windows 的 `window.nativeObject.address` |
 | `setTitleBarStyle(style, windowButtonVisibility:)` | `window.titleBarStyle`、`window.isWindowControlButtonsVisible`——还有 `setTitleBarColors()` |
 | `setHasShadow`、`setOpacity`、`setBackgroundColor` | `window.hasShadow`、`window.opacity`、`window.backgroundColor`——还有 `window.visualEffect` |
 | `setIgnoreMouseEvents(ignore, forward:)` | `window.setIgnoreMouseEvents(ignore, forward)` |
@@ -240,7 +245,7 @@ await windowManager.waitUntilReadyToShow(
 | `WindowListener` | 单个窗口用 `window.addListener((event) { switch (event) { case WindowFocusedEvent(): … } })`，所有窗口用 `WindowManager.instance.addListener`——还有 `WindowBlurredEvent`、`WindowMinimizedEvent`、`WindowMaximizedEvent`、`WindowRestoredEvent`、`WindowMovedEvent`、`WindowResizedEvent`、`WindowEnteredFullScreenEvent`、`WindowExitedFullScreenEvent`、`WindowCreatedEvent`、`WindowClosedEvent` |
 | `calcWindowPosition(size, alignment)` | `DisplayManager.instance`——`getAll()`、`getPrimary()`、`getCursorPosition()`，以及每个 `Display` 的 `workArea` |
 
-`waitUntilReadyToShow`、`ensureInitialized`、`setAsFrameless`、`getDevicePixelRatio`
+`waitUntilReadyToShow`、`ensureInitialized`、`getDevicePixelRatio`
 没有对应的原生 API：直接设好需要的属性，准备好了再调 `window.show()`。
 
 ## 文章

@@ -205,16 +205,19 @@ What differs from 0.5.x:
   Linux server-side decorations depend on the window manager.
 - Linux keeps fullscreen/minimize requests made before first show and allows cancelling
   them; leaving initial fullscreen restores the requested normal width.
-- `getId()` answers nativeapi's own window id, not the `NSWindow` number or the `HWND`.
-- `setAsFrameless()` hides the title bar and its buttons; it no longer removes the
-  window's border.
+- `getId()` preserves the macOS window-server number and the Windows `HWND`.
+  Native API lookups and events use `window.id`; native interoperability uses
+  `window.nativeNumber` (macOS) or `window.nativeObject` (Windows).
+- `setAsFrameless()` removes the frame through `window.setFrameless(true)`. Changing either
+  title-bar style restores the frame. macOS retains the legacy transparent background
+  and shadow defaults; the native frameless policy keeps shadow preferences independent.
+- On macOS `setMaximizable(false)` rejects native zoom without disabling edge resizing.
 - `setAlignment` handles any `Alignment`, not only the nine constants.
 - `WindowCaption`'s close button closes the window, through its close listeners, so
   `setPreventClose` holds for it too. On Windows 11 its maximize button opens the snap
   layouts.
-- `startDragging()` and `startResizing()` are no longer skipped on Windows while the
-  window is in full screen: the compatibility layer keeps no `Platform` branch of its
-  own, the core library decides.
+- Windows ignores `startDragging()` and `startResizing()` in fullscreen, as in 0.5.x;
+  this guard and native owner-thread dispatch now live in core.
 - `screen_retriever` and `path` are no longer dependencies.
 - New example on `package:flutter/widgets.dart` alone; the full one is nativeapi's
   [window_example](https://github.com/libnativeapi/nativeapi/tree/main/examples/flutter_window_example).
@@ -236,6 +239,8 @@ What differs from 0.5.x:
 | `setAlwaysOnTop` / `setAlwaysOnBottom` | `window.isAlwaysOnTop` / `window.isAlwaysOnBottom` |
 | `setSkipTaskbar(true)` | `window.isVisibleInTaskbar = false` |
 | `setTitle` / `getTitle` | `window.title` |
+| `setAsFrameless()` | `window.setFrameless(true)` (also hides the title bar and native buttons) |
+| `getId()` | `window.nativeNumber` on macOS; `window.nativeObject.address` on Windows |
 | `setTitleBarStyle(style, windowButtonVisibility:)` | `window.titleBarStyle`, `window.isWindowControlButtonsVisible` — also `setTitleBarColors()` |
 | `setHasShadow`, `setOpacity`, `setBackgroundColor` | `window.hasShadow`, `window.opacity`, `window.backgroundColor` — also `window.visualEffect` |
 | `setIgnoreMouseEvents(ignore, forward:)` | `window.setIgnoreMouseEvents(ignore, forward)` |
@@ -253,7 +258,7 @@ What differs from 0.5.x:
 | `WindowListener` | `window.addListener((event) { switch (event) { case WindowFocusedEvent(): … } })` for one window, `WindowManager.instance.addListener` for all — also `WindowBlurredEvent`, `WindowMinimizedEvent`, `WindowMaximizedEvent`, `WindowRestoredEvent`, `WindowMovedEvent`, `WindowResizedEvent`, `WindowEnteredFullScreenEvent`, `WindowExitedFullScreenEvent`, `WindowCreatedEvent`, `WindowClosedEvent` |
 | `calcWindowPosition(size, alignment)` | `DisplayManager.instance` — `getAll()`, `getPrimary()`, `getCursorPosition()`, and each `Display`'s `workArea` |
 
-`waitUntilReadyToShow`, `ensureInitialized`, `setAsFrameless` and `getDevicePixelRatio`
+`waitUntilReadyToShow`, `ensureInitialized` and `getDevicePixelRatio`
 have no native counterpart: set the properties you want and call `window.show()` when
 you are ready.
 

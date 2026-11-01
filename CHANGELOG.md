@@ -1,3 +1,8 @@
+## 0.6.1
+
+* Restore frameless client areas, native macOS/Windows `getId()` results, independent macOS zoom policy and Windows fullscreen drag/resize restrictions through core.
+* Require nativeapi and nativeapi_flutter ^0.5.5.
+
 ## 0.6.0
 
 * Complete Windows/Linux native caption-group visibility, independent close-button policies and Linux pre-show fullscreen/minimize compatibility through nativeapi.

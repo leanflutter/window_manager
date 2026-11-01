@@ -112,10 +112,14 @@ class WindowManager {
 
   /// Returns `int` - The ID of the window.
   ///
-  /// This is nativeapi's own window id, not the `NSWindow` number or the
-  /// `HWND` that 0.5.x returned.
+  /// On macOS this is the window-server number; on Windows it is the HWND,
+  /// matching 0.5.x. Other platforms return nativeapi's window id.
   Future<int> getId() async {
-    return _target?.id ?? 0;
+    final window = _target;
+    if (window == null) return 0;
+    if (Platform.isWindows) return window.nativeObject.address;
+    if (Platform.isMacOS) return window.nativeNumber;
+    return window.id;
   }
 
   /// You can call this to remove the window frame (title bar, outline border,
@@ -124,8 +128,11 @@ class WindowManager {
   Future<void> setAsFrameless() async {
     final window = _target;
     if (window == null) return;
-    window.titleBarStyle = nativeapi.TitleBarStyle.hidden;
-    window.isWindowControlButtonsVisible = false;
+    window.setFrameless(true);
+    if (Platform.isMacOS) {
+      window.hasShadow = false;
+      window.backgroundColor = const Color(0x00000000).toNative();
+    }
   }
 
   /// Wait until ready to show.
@@ -537,8 +544,10 @@ class WindowManager {
   }) async {
     final window = _target;
     if (window == null) return;
+    final wasFrameless = window.isFrameless;
     window.titleBarStyle = titleBarStyle;
     window.isWindowControlButtonsVisible = windowButtonVisibility;
+    if (Platform.isMacOS && wasFrameless) window.hasShadow = true;
   }
 
   /// Returns `int` - The title bar height of the native window.

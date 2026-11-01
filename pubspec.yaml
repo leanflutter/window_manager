@@ -1,6 +1,6 @@
 name: window_manager
 description: This plugin allows Flutter desktop apps to resizing and repositioning the window.
-version: 0.6.0
+version: 0.6.1
 homepage: https://leanflutter.dev
 repository: https://github.com/leanflutter/window_manager
 issue_tracker: https://github.com/leanflutter/window_manager/issues
@@ -28,8 +28,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  nativeapi: ^0.5.4
-  nativeapi_flutter: ^0.5.4
+  nativeapi: ^0.5.5
+  nativeapi_flutter: ^0.5.5
 
 dev_dependencies:
   flutter_lints: ^6.0.0
