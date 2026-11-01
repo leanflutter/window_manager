@@ -185,16 +185,20 @@ What differs from 0.5.x:
   still cancel the request.
 - `onWindowResized` and `onWindowMoved` arrive together with `onWindowResize` and
   `onWindowMove`: nativeapi reports one event per change, not a stream and a final one.
-- Aero-snap docking is gone: `isDockable()` answers false, `isDocked()` null, `dock()`
-  does nothing, `undock()` answers false, and `onWindowDocked` / `onWindowUndocked` never
-  fire. `grabKeyboard()` / `ungrabKeyboard()` (Linux) are gone the same way.
+- Windows desktop-toolbar docking (`isDockable`, `isDocked`, `dock`, `undock`)
+  reserves monitor work area and emits `onWindowDocked` / `onWindowUndocked`.
+  Undocking restores the original bounds; native destruction releases the reservation.
+  This uses the shell's appbar feature, independently of Snap Layouts.
+- `grabKeyboard()` / `ungrabKeyboard()` work on Linux X11. Wayland and other platforms
+  answer false. Hiding or destroying the window releases its grab.
 - `popUpWindowMenu()` opens the system menu at the cursor on Windows and on Linux window
   managers that have one, and does nothing on macOS.
 - `forward` of `setIgnoreMouseEvents` keeps hover events where the platform can (macOS,
   Windows and X11); elsewhere the window ignores the mouse without them.
-- Arguments the core library has no use for are accepted and ignored: `vertically` of
-  `maximize`, `animate` of `setPosition` and `setBounds`, `visibleOnFullScreen` of
-  `setVisibleOnAllWorkspaces`.
+- Windows honours `maximize(vertically: true)`, and double-clicking the top/bottom
+  resize handles toggles vertical maximization. macOS honours `animate` for
+  `setPosition` / `setBounds` and `visibleOnFullScreen` for `setVisibleOnAllWorkspaces`.
+  Geometry changes on platforms without native frame animation are immediate.
 - `getId()` answers nativeapi's own window id, not the `NSWindow` number or the `HWND`.
 - `setAsFrameless()` hides the title bar and its buttons; it no longer removes the
   window's border.
@@ -233,6 +237,11 @@ What differs from 0.5.x:
 | `setPreventClose(true)` with `onWindowClose` | `window.addListener((event) { if (event is WindowCloseRequestedEvent) event.request.cancel(); })` |
 | `popUpWindowMenu()` | `window.showSystemMenu(position)` — `Window.isSystemMenuSupported()` says where it works |
 | `setVisibleOnAllWorkspaces(bool)` | `window.isVisibleOnAllWorkspaces` |
+| `visibleOnFullScreen:` | `window.setVisibleOnFullScreen(bool)`, `window.isVisibleOnFullScreen` |
+| `setBounds(rect, animate: true)` | `window.animateBounds(rect.toNative())`; fall back to `window.bounds` if false |
+| `maximize(vertically: true)` | `window.setMaximizedVertically(true)` / `false`, `window.isMaximizedVertically` |
+| `dock(side:, width:)`, `undock()`, `isDocked()` | `window.dock(WindowDockSide.left, width)`, `window.undock()`, `window.dockSide` |
+| `grabKeyboard()`, `ungrabKeyboard()` | the same names on `window`; `Window.isKeyboardGrabSupported()` checks the display |
 | `startDragging()` / `startResizing(edge)` | the same names on `window`; `DragToMoveArea` and `DragToResizeArea` call them for you |
 | `setProgressBar`, `setBadgeLabel`, `setIcon`, `setBrightness` | `Application.instance` — they belong to the app, not to one window |
 | `WindowListener` | `window.addListener((event) { switch (event) { case WindowFocusedEvent(): … } })` for one window, `WindowManager.instance.addListener` for all — also `WindowBlurredEvent`, `WindowMinimizedEvent`, `WindowMaximizedEvent`, `WindowRestoredEvent`, `WindowMovedEvent`, `WindowResizedEvent`, `WindowEnteredFullScreenEvent`, `WindowExitedFullScreenEvent`, `WindowCreatedEvent`, `WindowClosedEvent` |

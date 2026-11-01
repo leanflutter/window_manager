@@ -16,7 +16,7 @@ per-platform plugin code is gone, and one C++ core drives macOS, Windows and Lin
   removed in a later release. The README lists the behaviour differences and maps each
   old call to the native API.
 * **Breaking:** requires Flutter 3.47 / Dart 3.13 and macOS 10.15, and depends on
-  nativeapi and nativeapi_flutter ^0.5.2. CI builds and the publish workflow pin Flutter 3.47.5.
+  nativeapi and nativeapi_flutter ^0.5.4. CI builds and the publish workflow pin Flutter 3.47.5.
 * **No setup of its own on any platform.** The plugin classes, and with them the changes
   `MainFlutterWindow.swift`, `my_application.cc` and the Windows runner used to need, are
   gone.
@@ -32,19 +32,20 @@ per-platform plugin code is gone, and one C++ core drives macOS, Windows and Lin
   `window` changes.
 * Events: `onWindowResized` / `onWindowMoved` arrive together with `onWindowResize` /
   `onWindowMove`; the full-screen pair comes from the window's own full-screen events;
-  `onWindowDocked` / `onWindowUndocked` never fire. The legacy events are those of the
-  app's window alone, not of other windows it opens.
+  docking and undocking report `onWindowDocked` / `onWindowUndocked`. The legacy events
+  are those of the app's window alone, not of other windows it opens.
 * `package:window_manager/windowing.dart` answers the `Window` behind each of Flutter's
   multi-window controllers (`nativeWindowOf(controller)`, `controller.nativeWindow`), so
   every window an app opens that way can be managed.
 * `popUpWindowMenu()` opens the system menu at the cursor on Windows and Linux window
   managers that have one, and `forward:` of `setIgnoreMouseEvents` keeps hover events on
   macOS, Windows and X11.
-* Gone with the platform plugins, but still callable: aero-snap docking (`isDockable`,
-  `isDocked`, `dock`, `undock`) and `grabKeyboard` / `ungrabKeyboard` answer instead of
-  throwing. So do the arguments nothing acts on any more — `maximize(vertically:)`,
-  `animate:` of `setPosition` and `setBounds`, `visibleOnFullScreen:` of
-  `setVisibleOnAllWorkspaces`.
+* Restore the old platform capabilities through core: Windows desktop-toolbar docking
+  reserves and releases monitor work area, `maximize(vertically: true)` changes only
+  height, and top/bottom resize handles support vertical-maximize double-clicks.
+  Linux X11 keyboard grabs work again (Wayland reports unsupported). macOS handles
+  animated position/bounds and `visibleOnFullScreen` independently of all-workspace
+  visibility.
 * `startDragging()` and `startResizing()` are no longer skipped on Windows while the
   window is in full screen: the compatibility layer keeps no `Platform` branch of its
   own, the core library decides.

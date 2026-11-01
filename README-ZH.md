@@ -179,15 +179,18 @@ await windowManager.waitUntilReadyToShow(
   其他原生监听器仍可取消关闭请求。
 - `onWindowResized`、`onWindowMoved` 和 `onWindowResize`、`onWindowMove` 一起到达：
   nativeapi 每次变化只报一个事件，没有"过程中"和"结束时"之分。
-- Aero-snap 贴边没有了：`isDockable()` 返回 false，`isDocked()` 返回 null，`dock()` 什么
-  都不做，`undock()` 返回 false，`onWindowDocked` / `onWindowUndocked` 不会触发。
-  `grabKeyboard()` / `ungrabKeyboard()`（Linux）同理。
+- Windows 的 `isDockable`、`isDocked`、`dock`、`undock` 通过系统 appbar 预留桌面工作区，
+  并触发 `onWindowDocked` / `onWindowUndocked`。取消停靠恢复原来的窗口尺寸和位置，
+  原生窗口销毁时释放预留空间。这个功能独立于 Windows 的贴靠布局。
+- `grabKeyboard()` / `ungrabKeyboard()` 在 Linux X11 上独占和释放键盘；Wayland 和其他平台
+  返回 false。窗口隐藏或销毁时释放独占。
 - `popUpWindowMenu()` 在 Windows 和提供系统菜单的 Linux 窗口管理器上会在光标处弹出系统菜单，
   在 macOS 上什么都不做。
 - `setIgnoreMouseEvents` 的 `forward` 在平台支持时（macOS、Windows、X11）保留鼠标悬停事件；
   其他平台上窗口直接忽略鼠标，不转发。
-- 核心库用不上的参数会被接受但忽略：`maximize` 的 `vertically`、`setPosition` 和
-  `setBounds` 的 `animate`、`setVisibleOnAllWorkspaces` 的 `visibleOnFullScreen`。
+- Windows 支持 `maximize(vertically: true)`，双击上下调整大小边缘会切换垂直最大化。
+  macOS 支持 `setPosition` / `setBounds` 的 `animate`，以及 `setVisibleOnAllWorkspaces` 的
+  `visibleOnFullScreen`。不支持原生窗口动画的平台直接应用几何变化。
 - `getId()` 返回的是 nativeapi 自己的窗口 id，不再是 `NSWindow` number 或 `HWND`。
 - `setAsFrameless()` 只隐藏标题栏和它的按钮，不再去掉窗口边框。
 - `setAlignment` 支持任意 `Alignment`，不再只认那九个常量。
@@ -223,6 +226,11 @@ await windowManager.waitUntilReadyToShow(
 | `setPreventClose(true)` 配合 `onWindowClose` | `window.addListener((event) { if (event is WindowCloseRequestedEvent) event.request.cancel(); })` |
 | `popUpWindowMenu()` | `window.showSystemMenu(position)`——用 `Window.isSystemMenuSupported()` 判断平台是否支持 |
 | `setVisibleOnAllWorkspaces(bool)` | `window.isVisibleOnAllWorkspaces` |
+| `visibleOnFullScreen:` | `window.setVisibleOnFullScreen(bool)`、`window.isVisibleOnFullScreen` |
+| `setBounds(rect, animate: true)` | `window.animateBounds(rect.toNative())`；返回 false 时直接设置 `window.bounds` |
+| `maximize(vertically: true)` | `window.setMaximizedVertically(true)` / `false`、`window.isMaximizedVertically` |
+| `dock(side:, width:)`、`undock()`、`isDocked()` | `window.dock(WindowDockSide.left, width)`、`window.undock()`、`window.dockSide` |
+| `grabKeyboard()`、`ungrabKeyboard()` | `window` 上的同名方法；`Window.isKeyboardGrabSupported()` 查询当前显示服务是否支持 |
 | `startDragging()` / `startResizing(edge)` | `window` 上的同名方法；`DragToMoveArea`、`DragToResizeArea` 已经替你调用了 |
 | `setProgressBar`、`setBadgeLabel`、`setIcon`、`setBrightness` | `Application.instance`——它们属于应用，不属于某一个窗口 |
 | `WindowListener` | 单个窗口用 `window.addListener((event) { switch (event) { case WindowFocusedEvent(): … } })`，所有窗口用 `WindowManager.instance.addListener`——还有 `WindowBlurredEvent`、`WindowMinimizedEvent`、`WindowMaximizedEvent`、`WindowRestoredEvent`、`WindowMovedEvent`、`WindowResizedEvent`、`WindowEnteredFullScreenEvent`、`WindowExitedFullScreenEvent`、`WindowCreatedEvent`、`WindowClosedEvent` |

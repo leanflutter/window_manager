@@ -24,6 +24,8 @@ export 'package:nativeapi/nativeapi.dart'
         WindowCloseRequestedEvent,
         WindowCornerPreference,
         WindowCreatedEvent,
+        WindowDockedEvent,
+        WindowDockSide,
         WindowEnteredFullScreenEvent,
         WindowEvent,
         WindowExitedFullScreenEvent,
@@ -38,7 +40,8 @@ export 'package:nativeapi/nativeapi.dart'
         WindowProperty,
         WindowPropertyChangedEvent,
         WindowResizedEvent,
-        WindowRestoredEvent;
+        WindowRestoredEvent,
+        WindowUndockedEvent;
 export 'package:nativeapi_flutter/nativeapi_flutter.dart'
     show
         ColorToNative,

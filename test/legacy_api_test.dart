@@ -6,6 +6,8 @@
 // ignore_for_file: unused_local_variable, unused_element, deprecated_member_use
 // ignore_for_file: deprecated_member_use_from_same_package
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:window_manager/legacy.dart';
@@ -264,7 +266,10 @@ void main() {
   });
 
   test('what the platform cannot do answers instead of throwing', () async {
-    expect(await windowManager.isDockable(), isFalse);
+    // Windows can report a running shell even in a test without an app window.
+    if (!Platform.isWindows) {
+      expect(await windowManager.isDockable(), isFalse);
+    }
     expect(await windowManager.isDocked(), isNull);
     expect(await windowManager.undock(), isFalse);
     expect(await windowManager.grabKeyboard(), isFalse);

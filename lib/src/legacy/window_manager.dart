@@ -272,14 +272,23 @@ class WindowManager {
     return _target?.isMaximized ?? false;
   }
 
-  /// Maximizes the window. [vertically] is accepted but ignored.
+  /// Maximizes the window, or only its height on Windows with [vertically].
   Future<void> maximize({bool vertically = false}) async {
-    _target?.maximize();
+    final window = _target;
+    if (window == null) return;
+    if (vertically && nativeapi.Window.isVerticalMaximizeSupported()) {
+      window.setMaximizedVertically(true);
+    } else {
+      window.maximize();
+    }
   }
 
   /// Unmaximizes the window.
   Future<void> unmaximize() async {
-    _target?.unmaximize();
+    final window = _target;
+    if (window == null) return;
+    if (window.isMaximizedVertically) window.setMaximizedVertically(false);
+    window.unmaximize();
   }
 
   /// Returns `bool` - Whether the window is minimized.
@@ -308,42 +317,40 @@ class WindowManager {
     _target?.isFullScreen = isFullScreen;
   }
 
-  /// Returns `bool` - Whether the window is dockable or not.
-  ///
-  /// Aero-snap docking has no equivalent in the core library; this always
-  /// answers false.
+  /// Whether the system supports reserving desktop space for a docked window.
   ///
   /// @platforms windows
   Future<bool> isDockable() async {
-    return false;
+    return tryNative(nativeapi.Window.isDockingSupported) ?? false;
   }
 
-  /// Returns `DockSide?` - Which side the window is docked to.
-  ///
-  /// Aero-snap docking has no equivalent in the core library; this always
-  /// answers null.
+  /// Returns the edge reserved by this window, or null when undocked.
   ///
   /// @platforms windows
   Future<DockSide?> isDocked() async {
-    return null;
+    return switch (_target?.dockSide) {
+      nativeapi.WindowDockSide.left => DockSide.left,
+      nativeapi.WindowDockSide.right => DockSide.right,
+      _ => null,
+    };
   }
 
-  /// Docks the window.
-  ///
-  /// Aero-snap docking has no equivalent in the core library; this does
-  /// nothing.
+  /// Reserves [width] logical pixels at the monitor's [side] for this window.
   ///
   /// @platforms windows
-  Future<void> dock({required DockSide side, required int width}) async {}
+  Future<void> dock({required DockSide side, required int width}) async {
+    _wireNativeEvents();
+    _target?.dock(switch (side) {
+      DockSide.left => nativeapi.WindowDockSide.left,
+      DockSide.right => nativeapi.WindowDockSide.right,
+    }, width.toDouble());
+  }
 
-  /// Undocks the window.
-  ///
-  /// Aero-snap docking has no equivalent in the core library; this does
-  /// nothing and answers false.
+  /// Removes the desktop reservation and restores the window's previous bounds.
   ///
   /// @platforms windows
   Future<bool> undock() async {
-    return false;
+    return _target?.undock() ?? false;
   }
 
   /// This will make a window maintain an aspect ratio.
@@ -382,15 +389,18 @@ class WindowManager {
   }) async {
     final window = _target;
     if (window == null) return;
-    if (bounds != null) {
-      window.bounds = bounds.toNative();
-      return;
-    }
-    if (size != null) {
-      window.setSize(size.toNative(), animate);
-    }
-    if (position != null) {
-      window.position = position.toNative();
+    if (bounds == null && position == null && size == null) return;
+    final current = window.bounds.toRect();
+    final target =
+        bounds ??
+        Rect.fromLTWH(
+          position?.dx ?? current.left,
+          position?.dy ?? current.top,
+          size?.width ?? current.width,
+          size?.height ?? current.height,
+        );
+    if (!animate || !window.animateBounds(target.toNative())) {
+      window.bounds = target.toNative();
     }
   }
 
@@ -409,9 +419,9 @@ class WindowManager {
     return _target?.position.toOffset() ?? Offset.zero;
   }
 
-  /// Moves window to position. [animate] is accepted but ignored.
+  /// Moves window to position, with a native animation on macOS if requested.
   Future<void> setPosition(Offset position, {bool animate = false}) async {
-    _target?.position = position.toNative();
+    await setBounds(null, position: position, animate: animate);
   }
 
   /// Sets the minimum size of window to `width` and `height`.
@@ -580,14 +590,17 @@ class WindowManager {
 
   /// Sets whether the window should be visible on all workspaces.
   ///
-  /// [visibleOnFullScreen] is accepted but ignored.
+  /// [visibleOnFullScreen] also allows joining full-screen spaces on macOS.
   ///
   /// @platforms macos
   Future<void> setVisibleOnAllWorkspaces(
     bool visible, {
     bool? visibleOnFullScreen,
   }) async {
-    _target?.isVisibleOnAllWorkspaces = visible;
+    final window = _target;
+    if (window == null) return;
+    window.isVisibleOnAllWorkspaces = visible;
+    window.setVisibleOnFullScreen(visibleOnFullScreen ?? false);
   }
 
   /// Set/unset label on taskbar(dock) app icon
@@ -682,20 +695,20 @@ class WindowManager {
 
   /// Grabs the keyboard.
   ///
-  /// The core library does not grab the keyboard; this answers false.
+  /// Exclusive on Linux X11; returns false on Wayland and other platforms.
   ///
   /// @platforms linux
   Future<bool> grabKeyboard() async {
-    return false;
+    return _target?.grabKeyboard() ?? false;
   }
 
   /// Ungrabs the keyboard.
   ///
-  /// The core library does not grab the keyboard; this answers false.
+  /// Exclusive on Linux X11; returns false on Wayland and other platforms.
   ///
   /// @platforms linux
   Future<bool> ungrabKeyboard() async {
-    return false;
+    return _target?.ungrabKeyboard() ?? false;
   }
 
   // ---------------------------------------------------------------------------
@@ -735,6 +748,10 @@ class WindowManager {
         if (destroying) break;
         if (_isPreventClose) request.cancel();
         _emit(kWindowEventClose);
+      case nativeapi.WindowDockedEvent():
+        _emit(kWindowEventDocked);
+      case nativeapi.WindowUndockedEvent():
+        _emit(kWindowEventUndocked);
       case nativeapi.WindowEnteredFullScreenEvent():
         _setFullScreenState(true);
       case nativeapi.WindowExitedFullScreenEvent():

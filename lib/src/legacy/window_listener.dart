@@ -61,14 +61,14 @@ abstract mixin class WindowListener {
 
   /// Emitted when the window entered a docked state.
   ///
-  /// Never emitted: the core library has no aero-snap docking.
+  /// Forwarded after the core changes this window's desktop toolbar reservation.
   ///
   /// @platforms windows
   void onWindowDocked() {}
 
   /// Emitted when the window leaves a docked state.
   ///
-  /// Never emitted: the core library has no aero-snap docking.
+  /// Forwarded after the core removes this window's desktop toolbar reservation.
   ///
   /// @platforms windows
   void onWindowUndocked() {}
