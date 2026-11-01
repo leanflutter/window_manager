@@ -1,10 +1,7 @@
-## 0.6.1
+## 0.6.0
 
 * Restore frameless client areas, native macOS/Windows `getId()` results, independent macOS zoom policy and Windows fullscreen drag/resize restrictions through core.
 * Require nativeapi and nativeapi_flutter ^0.5.5.
-
-## 0.6.0
-
 * Complete Windows/Linux native caption-group visibility, independent close-button policies and Linux pre-show fullscreen/minimize compatibility through nativeapi.
 
 window_manager is now built on [nativeapi](https://pub.dev/packages/nativeapi): the
@@ -23,7 +20,7 @@ per-platform plugin code is gone, and one C++ core drives macOS, Windows and Lin
   removed in a later release. The README lists the behaviour differences and maps each
   old call to the native API.
 * **Breaking:** requires Flutter 3.47 / Dart 3.13 and macOS 10.15, and depends on
-  nativeapi and nativeapi_flutter ^0.5.4. CI builds and the publish workflow pin Flutter 3.47.5.
+  nativeapi and nativeapi_flutter ^0.5.5. CI builds and the publish workflow pin Flutter 3.47.5.
 * **No setup of its own on any platform.** The plugin classes, and with them the changes
   `MainFlutterWindow.swift`, `my_application.cc` and the Windows runner used to need, are
   gone.
