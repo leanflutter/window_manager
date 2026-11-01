@@ -199,6 +199,12 @@ What differs from 0.5.x:
   resize handles toggles vertical maximization. macOS honours `animate` for
   `setPosition` / `setBounds` and `visibleOnFullScreen` for `setVisibleOnAllWorkspaces`.
   Geometry changes on platforms without native frame animation are immediate.
+- `windowButtonVisibility` controls native caption buttons on Windows and Linux too.
+  Hiding/showing the group preserves individual button policies. On Windows,
+  `setClosable(false)` disables only the close command and retains the other buttons;
+  Linux server-side decorations depend on the window manager.
+- Linux keeps fullscreen/minimize requests made before first show and allows cancelling
+  them; leaving initial fullscreen restores the requested normal width.
 - `getId()` answers nativeapi's own window id, not the `NSWindow` number or the `HWND`.
 - `setAsFrameless()` hides the title bar and its buttons; it no longer removes the
   window's border.

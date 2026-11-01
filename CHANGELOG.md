@@ -1,5 +1,7 @@
 ## 0.6.0
 
+* Complete Windows/Linux native caption-group visibility, independent close-button policies and Linux pre-show fullscreen/minimize compatibility through nativeapi.
+
 window_manager is now built on [nativeapi](https://pub.dev/packages/nativeapi): the
 per-platform plugin code is gone, and one C++ core drives macOS, Windows and Linux.
 

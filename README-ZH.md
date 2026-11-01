@@ -191,6 +191,10 @@ await windowManager.waitUntilReadyToShow(
 - Windows 支持 `maximize(vertically: true)`，双击上下调整大小边缘会切换垂直最大化。
   macOS 支持 `setPosition` / `setBounds` 的 `animate`，以及 `setVisibleOnAllWorkspaces` 的
   `visibleOnFullScreen`。不支持原生窗口动画的平台直接应用几何变化。
+- `windowButtonVisibility` 也控制 Windows 和 Linux 的原生标题栏按钮，隐藏/显示整组按钮时
+  保留各按钮的独立策略。Windows 上 `setClosable(false)` 只禁用关闭命令，保留其他按钮；
+  Linux 服务端装饰是否响应取决于窗口管理器。
+- Linux 保留首次显示前的全屏、最小化请求，并支持取消；退出启动全屏后恢复请求的普通窗口宽度。
 - `getId()` 返回的是 nativeapi 自己的窗口 id，不再是 `NSWindow` number 或 `HWND`。
 - `setAsFrameless()` 只隐藏标题栏和它的按钮，不再去掉窗口边框。
 - `setAlignment` 支持任意 `Alignment`，不再只认那九个常量。
