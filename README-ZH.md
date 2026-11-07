@@ -2,6 +2,8 @@
 > 它是 C++ 核心库 [libnativeapi/nativeapi](https://github.com/libnativeapi/nativeapi) 的 Flutter 绑定，
 > macOS、Windows、Linux 共用同一份实现。从 0.5.x 升级？请看[从 0.5.x 升级](#从-05x-升级)。
 
+> **问题反馈：** 请统一到 [nativeapi issues](https://github.com/libnativeapi/nativeapi/issues) 提交问题和功能需求，并注明包名、版本、操作系统，附上最小复现示例。
+
 # window_manager
 
 [![pub version][pub-image]][pub-url] [![][discord-image]][discord-url] [![All Contributors][all-contributors-image]](#contributors)

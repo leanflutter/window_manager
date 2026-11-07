@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report an issue in nativeapi / 到 nativeapi 提交问题
+    url: https://github.com/libnativeapi/nativeapi/issues/new/choose
+    about: Bugs and feature requests are tracked in nativeapi. Include the affected package or binding, its version, your OS, and a reproduction.
