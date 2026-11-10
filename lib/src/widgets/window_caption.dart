@@ -50,44 +50,72 @@ class WindowCaption extends StatefulWidget {
 }
 
 class _WindowCaptionState extends State<WindowCaption> {
+  // Where [_listenerId] is registered: the given window, or null for the
+  // process-wide window manager when the caption follows the current window.
+  nativeapi.Window? _subscribedWindow;
   nativeapi.ListenerId? _listenerId;
   bool _isMaximized = false;
 
   @override
   void initState() {
     super.initState();
+    _subscribe();
     _isMaximized = _window?.isMaximized ?? false;
-    _listenerId = tryNative(
-      () => nativeapi.WindowManager.instance.addListener((event) {
-        switch (event) {
-          case nativeapi.WindowMaximizedEvent():
-          case nativeapi.WindowRestoredEvent():
-            final isMaximized = _window?.isMaximized ?? false;
-            if (isMaximized != _isMaximized && mounted) {
-              setState(() => _isMaximized = isMaximized);
-            }
-          default:
-            break;
-        }
-      }),
-    );
   }
 
   @override
   void didUpdateWidget(covariant WindowCaption oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.window != widget.window) {
+      _unsubscribe();
+      _subscribe();
       _isMaximized = _window?.isMaximized ?? false;
     }
   }
 
   @override
   void dispose() {
-    final listenerId = _listenerId;
-    if (listenerId != null) {
-      nativeapi.WindowManager.instance.removeListener(listenerId);
-    }
+    _unsubscribe();
     super.dispose();
+  }
+
+  // A caption given its window hears only that window's events, so other
+  // windows of a multi-window app neither wake it nor leak their state into
+  // it. Without a window it keeps following the current one.
+  void _subscribe() {
+    final window = widget.window;
+    _subscribedWindow = window;
+    _listenerId = tryNative(
+      () => window != null
+          ? window.addListener(_onWindowEvent)
+          : nativeapi.WindowManager.instance.addListener(_onWindowEvent),
+    );
+  }
+
+  void _unsubscribe() {
+    final window = _subscribedWindow;
+    final listenerId = _listenerId;
+    _subscribedWindow = null;
+    _listenerId = null;
+    if (listenerId == null) return;
+    tryNative(
+      () => window != null
+          ? window.removeListener(listenerId)
+          : nativeapi.WindowManager.instance.removeListener(listenerId),
+    );
+  }
+
+  void _onWindowEvent(nativeapi.WindowEvent event) {
+    switch (event) {
+      case nativeapi.WindowMaximizedEvent():
+      case nativeapi.WindowRestoredEvent():
+        final isMaximized = _window?.isMaximized ?? false;
+        if (isMaximized != _isMaximized && mounted) {
+          setState(() => _isMaximized = isMaximized);
+        }
+      default:
+        break;
+    }
   }
 
   nativeapi.Window? get _window =>
