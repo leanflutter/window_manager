@@ -1,10 +1,13 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
+import 'dart:developer' as developer;
+import 'dart:ffi' show Pointer, Void;
 import 'dart:io';
 import 'dart:ui' show Brightness, Color, Offset, PlatformDispatcher, Rect, Size;
 
-import 'package:flutter/foundation.dart' show ObserverList, VoidCallback;
+import 'package:flutter/foundation.dart'
+    show ObserverList, VoidCallback, visibleForTesting;
 import 'package:flutter/painting.dart' show Alignment;
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart'
@@ -17,6 +20,7 @@ import 'package:nativeapi_flutter/nativeapi_flutter.dart'
         RectangleToRect,
         SizeToNative;
 import 'package:window_manager/src/legacy/calc_window_position.dart';
+import 'package:window_manager/src/legacy/flutter_host_window_win32.dart';
 import 'package:window_manager/src/legacy/window_listener.dart';
 import 'package:window_manager/src/legacy/window_options.dart';
 import 'package:window_manager/src/native_guard.dart';
@@ -48,9 +52,9 @@ enum DockSide { left, right }
 /// for code that has not moved to the native API yet.
 ///
 /// Every call goes to the window the platform currently considers the app's
-/// own. 0.5.x only ever addressed one window; an app with several of them
-/// should use the native API, where each [nativeapi.Window] is addressed
-/// directly.
+/// own, or to the one passed to [WindowManager.bindWindow]. 0.5.x only ever
+/// addressed one window; an app with several of them should use the native
+/// API, where each [nativeapi.Window] is addressed directly.
 @Deprecated(
   'The 0.5.x compatible API will be removed in a future release. Use the native API from package:window_manager/window_manager.dart.',
 )
@@ -72,12 +76,98 @@ class WindowManager {
   bool _isMinimized = false;
   bool _isFullScreen = false;
 
-  /// The window every call below addresses, resolved once the platform has
-  /// one. Null before the first window exists.
+  // The addressed window is the one passed to [bindWindow], or the platform's
+  // current window once it could be resolved; "no window" is never cached.
+  //
+  // A show() that arrived while no window could be resolved is carried out on
+  // the window that is resolved or bound next. Null when none is pending.
+  bool? _pendingShowInactive;
+  bool _didWarnUnresolvedShow = false;
+
+  /// Replaces how the platform's current window is looked up. For tests of
+  /// this bridge only; null restores the platform lookup.
+  @visibleForTesting
+  nativeapi.Window? Function()? debugCurrentWindowOverride;
+
+  /// Makes every call address [window], or with null goes back to the window
+  /// the platform currently considers the app's own.
+  ///
+  /// By default the window is looked up with nativeapi's
+  /// `WindowManager.getCurrent()`, retried by every call until it answers. On
+  /// Windows that is the active window, so an app that keeps its window hidden
+  /// during startup may have none to address before it is shown. Binding the
+  /// window explicitly removes that dependency:
+  ///
+  /// ```dart
+  /// // hwnd: the HWND of the app's top-level window, from the runner.
+  /// windowManager.bindWindow(
+  ///   nativeapi.Window.createWithNativeWindow(Pointer<Void>.fromAddress(hwnd)),
+  /// );
+  /// ```
+  ///
+  /// Listeners and [setPreventClose] move to the new window: native events
+  /// stop arriving from the previous one. A [show] requested while no window
+  /// could be found is carried out on [window].
+  void bindWindow(nativeapi.Window? window) {
+    _unwireNativeEvents();
+    _window = null;
+    if (window != null) {
+      _adopt(window);
+    } else if (_wantsNativeEvents) {
+      // Resolves the current window, if there is one yet, and wires it.
+      _wireNativeEvents();
+    }
+  }
+
+  bool get _wantsNativeEvents => _listeners.isNotEmpty || _isPreventClose;
+
+  /// The window every call below addresses.
+  ///
+  /// Null while the platform has no current window for the app. Null is not
+  /// remembered: the next call looks again, and the first window found gets
+  /// the listeners and prevent-close that were set up before it existed.
   nativeapi.Window? get _target {
-    return _window ??= tryNative<nativeapi.Window?>(
-      () => nativeapi.WindowManager.instance.getCurrent(),
+    final window = _window;
+    if (window != null) return window;
+    final resolved = _resolveCurrentWindow();
+    if (resolved != null) _adopt(resolved);
+    return resolved;
+  }
+
+  nativeapi.Window? _resolveCurrentWindow() {
+    final override = debugCurrentWindowOverride;
+    if (override != null) return override();
+    return tryNative<nativeapi.Window?>(
+      () =>
+          nativeapi.WindowManager.instance.getCurrent() ??
+          _findHiddenWindowOnWindows(),
     );
+  }
+
+  // Windows reports only the active window as current, so a window kept
+  // hidden until the app is ready would be out of reach until then. Linux and
+  // macOS already fall back to a hidden window of their own.
+  nativeapi.Window? _findHiddenWindowOnWindows() {
+    if (!Platform.isWindows) return null;
+    // An app that designated its primary window has one even while it is
+    // hidden.
+    final primary = nativeapi.Application.instance.getPrimaryWindow();
+    if (primary != null) return primary;
+    final hwnd = findSoleFlutterHostWindow();
+    if (hwnd == 0) return null;
+    return nativeapi.Window.createWithNativeWindow(
+      Pointer<Void>.fromAddress(hwnd),
+    );
+  }
+
+  void _adopt(nativeapi.Window window) {
+    _window = window;
+    if (_wantsNativeEvents) _wireNativeEvents();
+    final inactive = _pendingShowInactive;
+    if (inactive != null) {
+      _pendingShowInactive = null;
+      _showWindow(window, inactive: inactive);
+    }
   }
 
   List<WindowListener> get listeners {
@@ -107,7 +197,7 @@ class WindowManager {
 
   /// Connects listeners registered before the native window was available.
   Future<void> ensureInitialized() async {
-    if (_listeners.isNotEmpty || _isPreventClose) _wireNativeEvents();
+    if (_wantsNativeEvents) _wireNativeEvents();
   }
 
   /// Returns `int` - The ID of the window.
@@ -251,9 +341,32 @@ class WindowManager {
   }
 
   /// Shows and gives focus to the window.
+  ///
+  /// When no window can be found yet (see [bindWindow]), the request is kept
+  /// and carried out on the first window that is found or bound; a later
+  /// [hide] cancels it.
   Future<void> show({bool inactive = false}) async {
     final window = _target;
-    if (window == null) return;
+    if (window == null) {
+      _pendingShowInactive = inactive;
+      assert(() {
+        if (!_didWarnUnresolvedShow) {
+          _didWarnUnresolvedShow = true;
+          developer.log(
+            'show() found no window to show yet; it will be shown once one '
+            'is found. Call windowManager.bindWindow() to address the window '
+            'explicitly.',
+            name: 'window_manager',
+          );
+        }
+        return true;
+      }());
+      return;
+    }
+    _showWindow(window, inactive: inactive);
+  }
+
+  void _showWindow(nativeapi.Window window, {required bool inactive}) {
     if (window.isMinimized) {
       window.restore();
     }
@@ -265,7 +378,10 @@ class WindowManager {
   }
 
   /// Hides the window.
+  ///
+  /// Also cancels a [show] that is waiting for a window to be found.
   Future<void> hide() async {
+    _pendingShowInactive = null;
     _target?.hide();
   }
 
@@ -727,10 +843,14 @@ class WindowManager {
   // A listener on the window itself, not on nativeapi's WindowManager: close
   // requests reach only the window's own listeners, and other windows of the
   // app stay out of the 0.5.x events.
+  //
+  // Without a window yet this is a no-op; the window found later is wired
+  // when it is adopted. Safe to call any number of times.
   void _wireNativeEvents() {
     if (_nativeListenerId != null) return;
     final window = _target;
-    if (window == null) return;
+    // Adopting a newly found window may have wired it already.
+    if (window == null || _nativeListenerId != null) return;
     // State may have changed while there were no listeners, or before the
     // first listener was added. A restored event alone cannot tell us whether
     // the window was minimized or maximized.
