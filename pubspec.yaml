@@ -28,6 +28,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  ffi: ^2.1.0
   nativeapi: ^0.5.5
   nativeapi_flutter: ^0.5.5
 

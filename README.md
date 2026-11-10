@@ -224,6 +224,39 @@ What differs from 0.5.x:
 - New example on `package:flutter/widgets.dart` alone; the full one is nativeapi's
   [window_example](https://github.com/libnativeapi/nativeapi/tree/main/examples/flutter_window_example).
 
+#### Choosing the window `legacy.dart` addresses
+
+By default every call addresses the window the platform currently considers the app's
+own (nativeapi's `WindowManager.getCurrent()`). On Windows the current window is the
+active one, which a window kept hidden during startup is not; there the bridge also
+takes the application's primary window, else this process's top-level window that hosts
+the Flutter view (window class `FLUTTERVIEW`), hidden or not, when exactly one exists.
+Until a window is found the bridge looks again on every call: listeners and
+`setPreventClose(true)` set up earlier are connected to the first window found, and a
+`show()` that found no window is carried out on it. Other calls do nothing until then.
+
+To address a particular window, for example with several Flutter windows in one
+process, bind it explicitly. On Windows,
+`nativeapi.Window.createWithNativeWindow` wraps an `HWND`, for example one the runner
+passes to Dart:
+
+```dart
+import 'dart:ffi';
+
+import 'package:nativeapi/nativeapi.dart' as nativeapi;
+import 'package:window_manager/legacy.dart';
+
+void bindMainWindow(int hwnd) {
+  windowManager.bindWindow(
+    nativeapi.Window.createWithNativeWindow(Pointer<Void>.fromAddress(hwnd)),
+  );
+}
+```
+
+An app on Flutter's multi-window API can bind `controller.nativeWindow` from
+`package:window_manager/windowing.dart` instead. Listeners and prevent-close move to the
+bound window; `bindWindow(null)` goes back to the current window.
+
 #### Moving to the native API
 
 | 0.5.x (`legacy.dart`) | Native API (`window_manager.dart`) |
