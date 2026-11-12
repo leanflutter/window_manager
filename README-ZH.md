@@ -53,7 +53,7 @@
 
 ```yaml
 dependencies:
-  window_manager: ^0.6.0
+  window_manager: ^0.7.0
 ```
 
 或者

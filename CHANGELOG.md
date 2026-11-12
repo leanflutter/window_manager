@@ -1,4 +1,4 @@
-## Unreleased
+## 0.7.0
 
 * **Breaking:** requires Flutter 3.50 / Dart 3.14, nativeapi 0.6.0 and nativeapi_flutter 0.6.0.
 * **Breaking:** the widgets import `package:material_ui` instead of the deprecated `package:flutter/material.dart`. `VirtualWindowFrame` takes its divider color from material_ui's `Theme`, so an app still built on the SDK's `MaterialApp` gets the default color there.
