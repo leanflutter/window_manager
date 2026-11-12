@@ -68,7 +68,7 @@ dependencies:
 
 #### 环境要求
 
-- Flutter 3.47 / Dart 3.13 及以上，macOS 10.15 及以上。
+- Flutter 3.50 / Dart 3.14 及以上，macOS 10.15 及以上。
 - Linux 构建机需要 GTK 3、X11 和 Xi 的开发文件：
 
 ```
@@ -171,7 +171,7 @@ await windowManager.waitUntilReadyToShow(
 
 和 0.5.x 的差别：
 
-- 需要 Flutter 3.47 / Dart 3.13 和 macOS 10.15（0.5.x 是 Flutter 3.3、macOS 10.11），
+- 需要 Flutter 3.50 / Dart 3.14 和 macOS 10.15（0.5.x 是 Flutter 3.3、macOS 10.11），
   但不再需要在 `MainFlutterWindow.swift`、`my_application.cc` 或 Windows runner 里做插件
   自己的接入——已经没有任何平台插件代码了。
 - `close()`、`destroy()`、`setPreventClose()` 的行为和以前一样：设了

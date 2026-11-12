@@ -69,7 +69,7 @@ dependencies:
 
 #### Requirements
 
-- Flutter 3.47 / Dart 3.13 or later, macOS 10.15 or later.
+- Flutter 3.50 / Dart 3.14 or later, macOS 10.15 or later.
 - Linux build machines need GTK 3, X11 and Xi development files:
 
 ```
@@ -175,7 +175,7 @@ await windowManager.waitUntilReadyToShow(
 
 What differs from 0.5.x:
 
-- Builds need Flutter 3.47 / Dart 3.13 and macOS 10.15 (0.5.x: Flutter 3.3, macOS 10.11),
+- Builds need Flutter 3.50 / Dart 3.14 and macOS 10.15 (0.5.x: Flutter 3.3, macOS 10.11),
   and no longer need the plugin's own setup in `MainFlutterWindow.swift`, `my_application.cc`
   or the Windows runner — there is no platform plugin code left.
 - `close()`, `destroy()` and `setPreventClose()` behave as before: with
