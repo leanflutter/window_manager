@@ -104,7 +104,12 @@ class _WindowCaptionState extends State<WindowCaption> {
               () => nativeapi.Window.isCloseSupported() && window.close(),
             ) ??
             false);
-    if (!closed) {
+    // Window.close() returns true once the request is made; a veto arrives
+    // asynchronously, so false means the request could not be made. Only a
+    // caption that follows the current window may then quit the app: a
+    // caption given its window must not end the whole application, which may
+    // have other windows.
+    if (!closed && widget.window == null) {
       tryNative(() => nativeapi.Application.instance.quit(0));
     }
   }
