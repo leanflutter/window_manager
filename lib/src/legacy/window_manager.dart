@@ -4,7 +4,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' show Brightness, Color, Offset, PlatformDispatcher, Rect, Size;
 
-import 'package:flutter/foundation.dart' show ObserverList, VoidCallback;
+import 'package:flutter/foundation.dart'
+    show ObserverList, VoidCallback, visibleForTesting;
 import 'package:flutter/painting.dart' show Alignment;
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart'
@@ -65,6 +66,15 @@ class WindowManager {
 
   nativeapi.Window? _window;
   nativeapi.ListenerId? _nativeListenerId;
+
+  /// Addresses [window] instead of the platform's current window, or goes
+  /// back to the current window with null. For tests of this bridge only.
+  @visibleForTesting
+  void debugBindWindow(nativeapi.Window? window) {
+    _unwireNativeEvents();
+    _window = window;
+    if (_listeners.isNotEmpty || _isPreventClose) _wireNativeEvents();
+  }
 
   bool _isPreventClose = false;
   bool _isDestroying = false;
@@ -569,11 +579,33 @@ class WindowManager {
     _target?.isVisibleInTaskbar = !isSkipTaskbar;
   }
 
+  /// Replaces [nativeapi.Application.instance]. For tests of this bridge only.
+  @visibleForTesting
+  nativeapi.Application? debugApplicationOverride;
+
+  nativeapi.Application get _application =>
+      debugApplicationOverride ?? nativeapi.Application.instance;
+
   /// Sets progress value in progress bar. Valid range is [0, 1.0].
   ///
   /// @platforms macos,windows
   Future<void> setProgressBar(double progress) async {
-    tryNative(() => nativeapi.Application.instance.setProgressBar(progress));
+    final window = _target;
+    tryNative(() {
+      _designatePrimaryWindow(window);
+      _application.setProgressBar(progress);
+    });
+  }
+
+  // The taskbar progress and badge belong to the application's primary
+  // window. Without one, Windows falls back to the first visible titled
+  // top-level window on the desktop, which need not be this app's. Designate
+  // the addressed window unless the app chose a primary window itself.
+  void _designatePrimaryWindow(nativeapi.Window? window) {
+    if (window == null) return;
+    final application = _application;
+    if (application.getPrimaryWindow() != null) return;
+    application.setPrimaryWindow(window);
   }
 
   /// Sets window/taskbar icon.
@@ -620,7 +652,11 @@ class WindowManager {
   ///
   /// @platforms macos
   Future<void> setBadgeLabel([String? label]) async {
-    tryNative(() => nativeapi.Application.instance.setBadgeLabel(label ?? ''));
+    final window = _target;
+    tryNative(() {
+      _designatePrimaryWindow(window);
+      _application.setBadgeLabel(label ?? '');
+    });
   }
 
   /// Returns `bool` - Whether the window has a shadow. On Windows, always
