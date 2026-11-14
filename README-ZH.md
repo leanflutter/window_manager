@@ -211,6 +211,27 @@ await windowManager.waitUntilReadyToShow(
 - 新示例只用 `package:flutter/widgets.dart`；完整示例是 nativeapi 的
   [window_example](https://github.com/libnativeapi/nativeapi/tree/main/examples/flutter_window_example)。
 
+**Linux X11/XWayland：隐藏标题栏时的透明阴影**
+
+GTK 窗口必须使用 RGBA visual 才能绘制透明的客户端阴影。KDE 下，默认 Flutter runner
+可能在 Dart 启动前就创建了 24 位 RGB 窗口，CSS 无法让这个原生表面透明。要启用完整阴影，
+请在 `linux/runner/my_application.cc` 的 `gtk_application_window_new` 之后立即加入以下代码，
+必须早于窗口及 Flutter view 的 show / realize：
+
+```cpp
+GdkScreen* screen = gtk_window_get_screen(window);
+GdkVisual* visual = gdk_screen_get_rgba_visual(screen);
+if (visual != nullptr && gdk_screen_is_composited(screen)) {
+  gtk_widget_set_visual(GTK_WIDGET(window), visual);
+}
+```
+
+这是宿主窗口的前置条件，不是插件注册。nativeapi core 对
+[#594](https://github.com/leanflutter/window_manager/issues/594) 的修复会在已有表面不能透明时，
+跳过客户端阴影及其预留边距，保留内容尺寸和 `hasShadow` 的请求值，不重建 Flutter view。
+nativeapi 0.6.0 尚未包含此降级处理；上面的 runner 设置也适用于该版本，其已有的阴影背景修复
+无需额外添加透明窗口 CSS。
+
 #### 迁移到原生 API
 
 | 0.5.x（`legacy.dart`） | 原生 API（`window_manager.dart`） |

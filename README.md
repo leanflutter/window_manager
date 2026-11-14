@@ -224,6 +224,31 @@ What differs from 0.5.x:
 - New example on `package:flutter/widgets.dart` alone; the full one is nativeapi's
   [window_example](https://github.com/libnativeapi/nativeapi/tree/main/examples/flutter_window_example).
 
+**Linux X11/XWayland: transparent shadows with a hidden title bar**
+
+The GTK window must use an RGBA visual to draw a transparent client-side shadow.
+On KDE, a stock Flutter runner can create a 24-bit RGB window before Dart starts.
+CSS cannot make that native surface transparent. To enable the full shadow, add
+this immediately after `gtk_application_window_new` in
+`linux/runner/my_application.cc`, before showing or realizing the window or its
+Flutter view:
+
+```cpp
+GdkScreen* screen = gtk_window_get_screen(window);
+GdkVisual* visual = gdk_screen_get_rgba_visual(screen);
+if (visual != nullptr && gdk_screen_is_composited(screen)) {
+  gtk_widget_set_visual(GTK_WIDGET(window), visual);
+}
+```
+
+This is a host-window requirement, not plugin registration. The nativeapi core
+fix for [#594](https://github.com/leanflutter/window_manager/issues/594) falls back
+to no client-side shadow or reserved shadow margin when the existing surface cannot
+be transparent. It preserves the content size and the requested `hasShadow` policy,
+without recreating the Flutter view. That fallback is not included in nativeapi
+0.6.0; the runner setup above also works with that release. Additional transparent
+window CSS is unnecessary with its existing shadow-background fix.
+
 #### Moving to the native API
 
 | 0.5.x (`legacy.dart`) | Native API (`window_manager.dart`) |

@@ -25,6 +25,16 @@ static void my_application_activate(GApplication* application) {
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
+  // Hidden-title-bar shadows need an alpha-capable surface on X11/XWayland.
+  // Select it before the Flutter view realizes its parent window (#594).
+  {
+    GdkScreen* screen = gtk_window_get_screen(window);
+    GdkVisual* visual = gdk_screen_get_rgba_visual(screen);
+    if (visual != nullptr && gdk_screen_is_composited(screen)) {
+      gtk_widget_set_visual(GTK_WIDGET(window), visual);
+    }
+  }
+
   // Use a header bar when running in GNOME as this is the common style used
   // by applications and is the setup most users will be using (e.g. Ubuntu
   // desktop).
