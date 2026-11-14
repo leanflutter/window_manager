@@ -4,7 +4,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' show Brightness, Color, Offset, PlatformDispatcher, Rect, Size;
 
-import 'package:flutter/foundation.dart' show ObserverList, VoidCallback;
+import 'package:flutter/foundation.dart'
+    show ObserverList, VoidCallback, visibleForTesting;
 import 'package:flutter/painting.dart' show Alignment;
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart'
@@ -65,6 +66,15 @@ class WindowManager {
 
   nativeapi.Window? _window;
   nativeapi.ListenerId? _nativeListenerId;
+
+  /// Addresses [window] instead of the platform's current window, or goes
+  /// back to the current window with null. For tests of this bridge only.
+  @visibleForTesting
+  void debugBindWindow(nativeapi.Window? window) {
+    _unwireNativeEvents();
+    _window = window;
+    if (_listeners.isNotEmpty || _isPreventClose) _wireNativeEvents();
+  }
 
   bool _isPreventClose = false;
   bool _isDestroying = false;
@@ -791,10 +801,10 @@ class WindowManager {
       case nativeapi.WindowMovedEvent():
         _emit(kWindowEventMove);
         _emit(kWindowEventMoved);
-      case nativeapi.WindowCreatedEvent():
-      case nativeapi.WindowClosedEvent():
-      case nativeapi.WindowPropertyChangedEvent():
-      case nativeapi.WindowOcclusionChangedEvent():
+      // Created, closed, property and occlusion changes have no 0.5.x
+      // counterpart. A default rather than a list keeps this switch compiling
+      // when a nativeapi 0.5.x release adds a WindowEvent subclass.
+      default:
         break;
     }
   }
