@@ -4,7 +4,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' show Brightness, Color, Offset, PlatformDispatcher, Rect, Size;
 
-import 'package:flutter/foundation.dart' show ObserverList, VoidCallback;
+import 'package:flutter/foundation.dart'
+    show ObserverList, VoidCallback, visibleForTesting;
 import 'package:flutter/painting.dart' show Alignment;
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart'
@@ -65,6 +66,15 @@ class WindowManager {
 
   nativeapi.Window? _window;
   nativeapi.ListenerId? _nativeListenerId;
+
+  /// Addresses [window] instead of the platform's current window, or goes
+  /// back to the current window with null. For tests of this bridge only.
+  @visibleForTesting
+  void debugBindWindow(nativeapi.Window? window) {
+    _unwireNativeEvents();
+    _window = window;
+    if (_listeners.isNotEmpty || _isPreventClose) _wireNativeEvents();
+  }
 
   bool _isPreventClose = false;
   bool _isDestroying = false;
@@ -397,15 +407,20 @@ class WindowManager {
     final window = _target;
     if (window == null) return;
     if (bounds == null && position == null && size == null) return;
-    final current = window.bounds.toRect();
-    final target =
-        bounds ??
-        Rect.fromLTWH(
-          position?.dx ?? current.left,
-          position?.dy ?? current.top,
-          size?.width ?? current.width,
-          size?.height ?? current.height,
-        );
+    // Full bounds are already known: reading them again through nativeapi
+    // performs an unnecessary synchronous FFI call on every restore/move.
+    Rect target;
+    if (bounds != null) {
+      target = bounds;
+    } else {
+      final current = window.bounds.toRect();
+      target = Rect.fromLTWH(
+        position?.dx ?? current.left,
+        position?.dy ?? current.top,
+        size?.width ?? current.width,
+        size?.height ?? current.height,
+      );
+    }
     if (!animate || !window.animateBounds(target.toNative())) {
       window.bounds = target.toNative();
     }
