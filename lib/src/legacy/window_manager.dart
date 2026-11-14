@@ -63,6 +63,10 @@ class WindowManager {
   final ObserverList<WindowListener> _listeners =
       ObserverList<WindowListener>();
 
+  // Move/resize events are frequent; only rebuild the immutable iteration
+  // snapshot when subscriptions change.
+  List<WindowListener> _listenerSnapshot = const <WindowListener>[];
+
   nativeapi.Window? _window;
   nativeapi.ListenerId? _nativeListenerId;
 
@@ -81,7 +85,7 @@ class WindowManager {
   }
 
   List<WindowListener> get listeners {
-    return List<WindowListener>.from(_listeners);
+    return List<WindowListener>.from(_listenerSnapshot);
   }
 
   bool get hasListeners {
@@ -90,11 +94,13 @@ class WindowManager {
 
   void addListener(WindowListener listener) {
     _listeners.add(listener);
+    _listenerSnapshot = List<WindowListener>.of(_listeners);
     _wireNativeEvents();
   }
 
   void removeListener(WindowListener listener) {
     _listeners.remove(listener);
+    _listenerSnapshot = List<WindowListener>.of(_listeners);
     if (_listeners.isEmpty && !_isPreventClose) {
       _unwireNativeEvents();
     }
@@ -808,29 +814,46 @@ class WindowManager {
   }
 
   void _emit(String eventName) {
-    for (final listener in listeners) {
-      if (!_listeners.contains(listener)) {
-        continue;
-      }
+    if (_listeners.isEmpty) return;
+    // Existing listeners receive this event. Callbacks may subscribe others,
+    // which join only on the next event rather than this iteration.
+    for (final listener in _listenerSnapshot) {
+      if (!_listeners.contains(listener)) continue;
       listener.onWindowEvent(eventName);
-      final Map<String, void Function()> funcMap = {
-        kWindowEventClose: listener.onWindowClose,
-        kWindowEventFocus: listener.onWindowFocus,
-        kWindowEventBlur: listener.onWindowBlur,
-        kWindowEventMaximize: listener.onWindowMaximize,
-        kWindowEventUnmaximize: listener.onWindowUnmaximize,
-        kWindowEventMinimize: listener.onWindowMinimize,
-        kWindowEventRestore: listener.onWindowRestore,
-        kWindowEventResize: listener.onWindowResize,
-        kWindowEventResized: listener.onWindowResized,
-        kWindowEventMove: listener.onWindowMove,
-        kWindowEventMoved: listener.onWindowMoved,
-        kWindowEventEnterFullScreen: listener.onWindowEnterFullScreen,
-        kWindowEventLeaveFullScreen: listener.onWindowLeaveFullScreen,
-        kWindowEventDocked: listener.onWindowDocked,
-        kWindowEventUndocked: listener.onWindowUndocked,
-      };
-      funcMap[eventName]?.call();
+      // A switch, not a map of tear-offs per listener: move and resize arrive
+      // many times per second while the user drags the window.
+      switch (eventName) {
+        case kWindowEventClose:
+          listener.onWindowClose();
+        case kWindowEventFocus:
+          listener.onWindowFocus();
+        case kWindowEventBlur:
+          listener.onWindowBlur();
+        case kWindowEventMaximize:
+          listener.onWindowMaximize();
+        case kWindowEventUnmaximize:
+          listener.onWindowUnmaximize();
+        case kWindowEventMinimize:
+          listener.onWindowMinimize();
+        case kWindowEventRestore:
+          listener.onWindowRestore();
+        case kWindowEventResize:
+          listener.onWindowResize();
+        case kWindowEventResized:
+          listener.onWindowResized();
+        case kWindowEventMove:
+          listener.onWindowMove();
+        case kWindowEventMoved:
+          listener.onWindowMoved();
+        case kWindowEventEnterFullScreen:
+          listener.onWindowEnterFullScreen();
+        case kWindowEventLeaveFullScreen:
+          listener.onWindowLeaveFullScreen();
+        case kWindowEventDocked:
+          listener.onWindowDocked();
+        case kWindowEventUndocked:
+          listener.onWindowUndocked();
+      }
     }
   }
 }
