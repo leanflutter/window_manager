@@ -277,6 +277,8 @@ class WindowCaptionButton extends StatefulWidget {
     super.key,
     this.brightness,
     this.icon,
+    this.hovered = false,
+    this.pressed = false,
     this.iconName,
     required this.onPressed,
   });
@@ -285,6 +287,8 @@ class WindowCaptionButton extends StatefulWidget {
     super.key,
     this.brightness,
     this.icon,
+    this.hovered = false,
+    this.pressed = false,
     this.onPressed,
   }) : iconName = _kIconChromeMinimize;
 
@@ -292,6 +296,8 @@ class WindowCaptionButton extends StatefulWidget {
     super.key,
     this.brightness,
     this.icon,
+    this.hovered = false,
+    this.pressed = false,
     this.onPressed,
   }) : iconName = _kIconChromeMaximize;
 
@@ -299,6 +305,8 @@ class WindowCaptionButton extends StatefulWidget {
     super.key,
     this.brightness,
     this.icon,
+    this.hovered = false,
+    this.pressed = false,
     this.onPressed,
   }) : iconName = _kIconChromeUnmaximize;
 
@@ -306,6 +314,8 @@ class WindowCaptionButton extends StatefulWidget {
     super.key,
     this.brightness,
     this.icon,
+    this.hovered = false,
+    this.pressed = false,
     this.onPressed,
   }) : iconName = _kIconChromeClose,
        _lightButtonBgColorScheme = _ButtonBgColorScheme(
@@ -335,6 +345,16 @@ class WindowCaptionButton extends StatefulWidget {
   final Widget? icon;
   final String? iconName;
   final VoidCallback? onPressed;
+
+  /// Shows the hovered look even when Flutter does not see the pointer.
+  ///
+  /// For input the platform handles over the button, such as a Windows 11
+  /// maximize button that reports `HTMAXBUTTON` to open Snap Layouts.
+  final bool hovered;
+
+  /// Shows the pressed look even when Flutter does not see the pointer.
+  /// See [hovered].
+  final bool pressed;
 
   _ButtonBgColorScheme _lightButtonBgColorScheme = _ButtonBgColorScheme(
     normal: Colors.transparent,
@@ -389,11 +409,11 @@ class _WindowCaptionButtonState extends State<WindowCaptionButton> {
     Color bgColor = widget.buttonBgColorScheme.normal;
     Color iconColor = widget.buttonIconColorScheme.normal;
 
-    if (_isHovering) {
+    if (_isHovering || widget.hovered) {
       bgColor = widget.buttonBgColorScheme.hovered;
       iconColor = widget.buttonIconColorScheme.hovered;
     }
-    if (_isPressed) {
+    if (_isPressed || widget.pressed) {
       bgColor = widget.buttonBgColorScheme.pressed;
       iconColor = widget.buttonIconColorScheme.pressed;
     }
