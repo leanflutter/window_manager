@@ -4,7 +4,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' show Brightness, Color, Offset, PlatformDispatcher, Rect, Size;
 
-import 'package:flutter/foundation.dart' show ObserverList, VoidCallback;
+import 'package:flutter/foundation.dart'
+    show ObserverList, VoidCallback, visibleForTesting;
 import 'package:flutter/painting.dart' show Alignment;
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart'
@@ -79,6 +80,11 @@ class WindowManager {
       () => nativeapi.WindowManager.instance.getCurrent(),
     );
   }
+
+  /// Replaces the window that every call addresses. Tests use it to run the
+  /// calls without the native library. Pass null to resolve the window again.
+  @visibleForTesting
+  set debugTarget(nativeapi.Window? window) => _window = window;
 
   List<WindowListener> get listeners {
     return List<WindowListener>.from(_listeners);
@@ -428,6 +434,15 @@ class WindowManager {
 
   /// Moves window to position, with a native animation on macOS if requested.
   Future<void> setPosition(Offset position, {bool animate = false}) async {
+    final window = _target;
+    if (window == null) return;
+    if (!animate) {
+      // Move only. `setBounds` reads the current size and writes it back with
+      // the new position, which cancels a `setSize` that the window manager has
+      // not applied yet.
+      window.position = position.toNative();
+      return;
+    }
     await setBounds(null, position: position, animate: animate);
   }
 

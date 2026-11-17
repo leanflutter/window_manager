@@ -2,6 +2,10 @@
 
 * Document the RGBA visual required for transparent hidden-title-bar shadows on
   Linux X11/XWayland and select it in the example runner before realization (#594).
+* Fix the legacy `setPosition`, and with it `setAlignment` and `center`, on Linux X11.
+  A move right after `setSize` no longer cancels the new size: `setPosition` does not
+  write the old window size back with the new position. When `animate` is false, it
+  now moves only the position ([libnativeapi/nativeapi#37](https://github.com/libnativeapi/nativeapi/issues/37)).
 
 ## 0.7.0
 
