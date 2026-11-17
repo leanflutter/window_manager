@@ -428,6 +428,15 @@ class WindowManager {
 
   /// Moves window to position, with a native animation on macOS if requested.
   Future<void> setPosition(Offset position, {bool animate = false}) async {
+    final window = _target;
+    if (window == null) return;
+    if (!animate) {
+      // Move only. `setBounds` reads the current size and writes it back with
+      // the new position, which cancels a `setSize` that the window manager has
+      // not applied yet.
+      window.position = position.toNative();
+      return;
+    }
     await setBounds(null, position: position, animate: animate);
   }
 
