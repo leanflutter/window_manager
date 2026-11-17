@@ -77,11 +77,11 @@ void main() {
 
   setUp(() {
     window = _FakeWindow();
-    windowManager.debugTarget = window;
+    windowManager.debugBindWindow(window);
   });
 
   tearDown(() {
-    windowManager.debugTarget = null;
+    windowManager.debugBindWindow(null);
   });
 
   group('WindowManager.setPosition', () {

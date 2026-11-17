@@ -4,8 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' show Brightness, Color, Offset, PlatformDispatcher, Rect, Size;
 
-import 'package:flutter/foundation.dart'
-    show ObserverList, VoidCallback, visibleForTesting;
+import 'package:flutter/foundation.dart' show ObserverList, VoidCallback;
 import 'package:flutter/painting.dart' show Alignment;
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart'
@@ -80,11 +79,6 @@ class WindowManager {
       () => nativeapi.WindowManager.instance.getCurrent(),
     );
   }
-
-  /// Replaces the window that every call addresses. Tests use it to run the
-  /// calls without the native library. Pass null to resolve the window again.
-  @visibleForTesting
-  set debugTarget(nativeapi.Window? window) => _window = window;
 
   List<WindowListener> get listeners {
     return List<WindowListener>.from(_listeners);
