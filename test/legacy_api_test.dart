@@ -10,6 +10,7 @@ import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:window_manager/legacy.dart';
 
 class _Mixed with WindowListener {}
@@ -278,4 +279,113 @@ void main() {
     await windowManager.popUpWindowMenu();
     await windowManager.ensureInitialized();
   });
+
+  group('geometry updates do not clobber pending state', () {
+    late _FakeWindow fakeWindow;
+
+    setUp(() {
+      fakeWindow = _FakeWindow();
+      windowManager.debugTarget = fakeWindow;
+    });
+
+    tearDown(() {
+      windowManager.debugTarget = null;
+    });
+
+    test('setPosition does not write back stale size from bounds', () async {
+      await windowManager.setSize(const Size(1920, 1080));
+      // Simulate X11 where window.bounds still returns the old size.
+      await windowManager.setPosition(const Offset(100, 200));
+
+      expect(fakeWindow.calls, [
+        'setSize(1920.0, 1080.0, false)',
+        'position=(100.0, 200.0)',
+      ]);
+    });
+
+    test('setPosition(animate: true) falls back to position when animateBounds returns false', () async {
+      fakeWindow.animateBoundsResult = false;
+      await windowManager.setPosition(const Offset(50, 60), animate: true);
+
+      expect(fakeWindow.calls, [
+        'bounds',
+        'animateBounds(50.0, 60.0, 1280.0, 720.0)',
+        'position=(50.0, 60.0)',
+      ]);
+    });
+
+    test(
+      'setPosition(animate: true) stops after animateBounds succeeds',
+      () async {
+        fakeWindow.animateBoundsResult = true;
+        await windowManager.setPosition(const Offset(50, 60), animate: true);
+
+        expect(fakeWindow.calls, [
+          'bounds',
+          'animateBounds(50.0, 60.0, 1280.0, 720.0)',
+        ]);
+      },
+    );
+
+    test('setBounds with only size calls setSize directly', () async {
+      await windowManager.setBounds(
+        null,
+        size: const Size(1024, 768),
+        animate: true,
+      );
+
+      expect(fakeWindow.calls, ['setSize(1024.0, 768.0, true)']);
+    });
+
+    test('setBounds with full rect sets bounds', () async {
+      await windowManager.setBounds(const Rect.fromLTWH(10, 20, 800, 600));
+
+      expect(fakeWindow.calls, ['bounds=(10.0, 20.0, 800.0, 600.0)']);
+    });
+  });
+}
+
+class _FakeWindow implements nativeapi.Window {
+  final List<String> calls = <String>[];
+  bool animateBoundsResult = false;
+  nativeapi.Rectangle currentBounds = const nativeapi.Rectangle(
+    x: 0,
+    y: 0,
+    width: 1280,
+    height: 720,
+  );
+
+  @override
+  nativeapi.Rectangle get bounds {
+    calls.add('bounds');
+    return currentBounds;
+  }
+
+  @override
+  set bounds(nativeapi.Rectangle value) {
+    calls.add(
+      'bounds=(${value.x}, ${value.y}, ${value.width}, ${value.height})',
+    );
+  }
+
+  @override
+  set position(nativeapi.Point value) {
+    calls.add('position=(${value.x}, ${value.y})');
+  }
+
+  @override
+  void setSize(nativeapi.Size size, [bool animate = false]) {
+    calls.add('setSize(${size.width}, ${size.height}, $animate)');
+  }
+
+  @override
+  bool animateBounds(nativeapi.Rectangle bounds) {
+    calls.add(
+      'animateBounds(${bounds.x}, ${bounds.y}, ${bounds.width}, ${bounds.height})',
+    );
+    return animateBoundsResult;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
