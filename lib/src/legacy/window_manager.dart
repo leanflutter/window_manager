@@ -257,7 +257,17 @@ class WindowManager {
     if (await isMinimized()) await restore();
 
     if (options?.size != null) await setSize(options!.size!);
-    if (options?.center == true) await setAlignment(Alignment.center);
+    if (options?.center == true) {
+      if (options?.size != null) {
+        final position = await calcWindowPosition(
+          options!.size!,
+          Alignment.center,
+        );
+        await setPosition(position);
+      } else {
+        await setAlignment(Alignment.center);
+      }
+    }
     if (options?.minimumSize != null) {
       await setMinimumSize(options!.minimumSize!);
     }
@@ -541,20 +551,30 @@ class WindowManager {
     final window = _target;
     if (window == null) return;
     if (bounds == null && position == null && size == null) return;
-    // Full bounds are already known: reading them again through nativeapi
-    // performs an unnecessary synchronous FFI call on every restore/move.
-    Rect target;
-    if (bounds != null) {
-      target = bounds;
-    } else {
-      final current = window.bounds.toRect();
-      target = Rect.fromLTWH(
-        position?.dx ?? current.left,
-        position?.dy ?? current.top,
-        size?.width ?? current.width,
-        size?.height ?? current.height,
-      );
+    // Write only the requested component for partial updates: asynchronous
+    // window managers (such as X11) can still report the old bounds after a
+    // recent resize or move, and writing back a full frame would clobber it.
+    if (bounds == null && position == null && size != null) {
+      window.setSize(size.toNative(), animate);
+      return;
     }
+    if (bounds == null && size == null && position != null) {
+      if (animate) {
+        final current = window.bounds.toRect();
+        final target = Rect.fromLTWH(
+          position.dx,
+          position.dy,
+          current.width,
+          current.height,
+        );
+        if (window.animateBounds(target.toNative())) return;
+      }
+      window.position = position.toNative();
+      return;
+    }
+    final target =
+        bounds ??
+        Rect.fromLTWH(position!.dx, position.dy, size!.width, size.height);
     if (!animate || !window.animateBounds(target.toNative())) {
       window.bounds = target.toNative();
     }

@@ -1,5 +1,9 @@
 ## Unreleased
 
+* Avoid overwriting pending window geometry in legacy `setPosition`, `setBounds`,
+  and `waitUntilReadyToShow` when updating only position or size, and compute
+  centered startup placement from `options.size` directly
+  ([libnativeapi/nativeapi#37](https://github.com/libnativeapi/nativeapi/issues/37)).
 * Document the RGBA visual required for transparent hidden-title-bar shadows on
   Linux X11/XWayland and select it in the example runner before realization (#594).
 
