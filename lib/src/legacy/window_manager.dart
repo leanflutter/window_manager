@@ -4,7 +4,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' show Brightness, Color, Offset, PlatformDispatcher, Rect, Size;
 
-import 'package:flutter/foundation.dart' show ObserverList, VoidCallback;
+import 'package:flutter/foundation.dart'
+    show ObserverList, VoidCallback, visibleForTesting;
 import 'package:flutter/painting.dart' show Alignment;
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart'
@@ -80,6 +81,10 @@ class WindowManager {
     );
   }
 
+  /// Overrides the target window in unit tests.
+  @visibleForTesting
+  set debugTarget(nativeapi.Window? window) => _window = window;
+
   List<WindowListener> get listeners {
     return List<WindowListener>.from(_listeners);
   }
@@ -152,7 +157,17 @@ class WindowManager {
     if (await isMinimized()) await restore();
 
     if (options?.size != null) await setSize(options!.size!);
-    if (options?.center == true) await setAlignment(Alignment.center);
+    if (options?.center == true) {
+      if (options?.size != null) {
+        final position = await calcWindowPosition(
+          options!.size!,
+          Alignment.center,
+        );
+        await setPosition(position);
+      } else {
+        await setAlignment(Alignment.center);
+      }
+    }
     if (options?.minimumSize != null) {
       await setMinimumSize(options!.minimumSize!);
     }
@@ -397,15 +412,27 @@ class WindowManager {
     final window = _target;
     if (window == null) return;
     if (bounds == null && position == null && size == null) return;
-    final current = window.bounds.toRect();
+    if (bounds == null && position == null && size != null) {
+      window.setSize(size.toNative(), animate);
+      return;
+    }
+    if (bounds == null && size == null && position != null) {
+      if (animate) {
+        final current = window.bounds.toRect();
+        final target = Rect.fromLTWH(
+          position.dx,
+          position.dy,
+          current.width,
+          current.height,
+        );
+        if (window.animateBounds(target.toNative())) return;
+      }
+      window.position = position.toNative();
+      return;
+    }
     final target =
         bounds ??
-        Rect.fromLTWH(
-          position?.dx ?? current.left,
-          position?.dy ?? current.top,
-          size?.width ?? current.width,
-          size?.height ?? current.height,
-        );
+        Rect.fromLTWH(position!.dx, position.dy, size!.width, size.height);
     if (!animate || !window.animateBounds(target.toNative())) {
       window.bounds = target.toNative();
     }
