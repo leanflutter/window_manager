@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Preserve pending geometry changes when legacy position-only or size-only calls
+  follow them, including when native frame animation is unavailable.
 * Document the RGBA visual required for transparent hidden-title-bar shadows on
   Linux X11/XWayland and select it in the example runner before realization (#594).
 
