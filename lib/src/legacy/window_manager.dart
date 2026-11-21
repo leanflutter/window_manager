@@ -4,7 +4,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' show Brightness, Color, Offset, PlatformDispatcher, Rect, Size;
 
-import 'package:flutter/foundation.dart' show ObserverList, VoidCallback;
+import 'package:flutter/foundation.dart'
+    show ObserverList, VoidCallback, visibleForTesting;
 import 'package:flutter/painting.dart' show Alignment;
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart'
@@ -78,6 +79,13 @@ class WindowManager {
     return _window ??= tryNative<nativeapi.Window?>(
       () => nativeapi.WindowManager.instance.getCurrent(),
     );
+  }
+
+  @visibleForTesting
+  void debugBindWindow(nativeapi.Window? window) {
+    _unwireNativeEvents();
+    _window = window;
+    if (_listeners.isNotEmpty || _isPreventClose) _wireNativeEvents();
   }
 
   List<WindowListener> get listeners {
@@ -397,17 +405,29 @@ class WindowManager {
     final window = _target;
     if (window == null) return;
     if (bounds == null && position == null && size == null) return;
-    final current = window.bounds.toRect();
-    final target =
-        bounds ??
-        Rect.fromLTWH(
-          position?.dx ?? current.left,
-          position?.dy ?? current.top,
-          size?.width ?? current.width,
-          size?.height ?? current.height,
-        );
-    if (!animate || !window.animateBounds(target.toNative())) {
-      window.bounds = target.toNative();
+    if (animate) {
+      final current = window.bounds.toRect();
+      final target =
+          bounds ??
+          Rect.fromLTWH(
+            position?.dx ?? current.left,
+            position?.dy ?? current.top,
+            size?.width ?? current.width,
+            size?.height ?? current.height,
+          );
+      if (window.animateBounds(target.toNative())) return;
+    }
+    // The window manager can apply geometry asynchronously. Writing a whole
+    // frame for a partial update would undo a pending resize or move with the
+    // stale values returned by window.bounds, including animation fallbacks.
+    if (bounds != null) {
+      window.bounds = bounds.toNative();
+    } else if (position != null && size != null) {
+      window.bounds = (position & size).toNative();
+    } else if (position != null) {
+      window.position = position.toNative();
+    } else if (size != null) {
+      window.setSize(size.toNative(), false);
     }
   }
 
