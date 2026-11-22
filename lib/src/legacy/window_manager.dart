@@ -541,15 +541,20 @@ class WindowManager {
     final window = _target;
     if (window == null) return;
     if (bounds == null && position == null && size == null) return;
-    final current = window.bounds.toRect();
-    final target =
-        bounds ??
-        Rect.fromLTWH(
-          position?.dx ?? current.left,
-          position?.dy ?? current.top,
-          size?.width ?? current.width,
-          size?.height ?? current.height,
-        );
+    // Full bounds are already known: reading them again through nativeapi
+    // performs an unnecessary synchronous FFI call on every restore/move.
+    Rect target;
+    if (bounds != null) {
+      target = bounds;
+    } else {
+      final current = window.bounds.toRect();
+      target = Rect.fromLTWH(
+        position?.dx ?? current.left,
+        position?.dy ?? current.top,
+        size?.width ?? current.width,
+        size?.height ?? current.height,
+      );
+    }
     if (!animate || !window.animateBounds(target.toNative())) {
       window.bounds = target.toNative();
     }
