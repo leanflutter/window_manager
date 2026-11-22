@@ -1,5 +1,16 @@
-## Unreleased
+## 0.7.1
 
+* Require nativeapi and nativeapi_flutter 0.6.2 or later.
+* Let the legacy window manager resolve a hidden startup window or bind
+  explicitly via `bindWindow()`, preserving pending show and close handling.
+* Emit legacy show and hide events, track restore and unmaximize correctly,
+  and target taskbar progress and badges at the correct Windows window.
+* Let the platform drive caption-button hover and press state for Windows 11
+  Snap Layouts. Render custom icons and update disabled and hover visuals.
+* Scope caption and frame listeners to their assigned window, cache caption
+  glyph paths, and prevent secondary captions from quitting the application.
+* Reduce allocations in legacy event dispatch and skip the native bounds
+  read when `setBounds()` receives a full rectangle.
 * Stop querying window focus/maximize/fullscreen state on ordinary resize events
   in `VirtualWindowFrame`, and coalesce geometry-only refreshes in the example
   controller (#596).
