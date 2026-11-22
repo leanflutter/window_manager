@@ -29,6 +29,26 @@ class _FakeNativeWindow extends nativeapi.Window {
     currentBounds = value;
   }
 
+  @override
+  set position(nativeapi.Point value) {
+    currentBounds = nativeapi.Rectangle(
+      x: value.x,
+      y: value.y,
+      width: currentBounds.width,
+      height: currentBounds.height,
+    );
+  }
+
+  @override
+  void setSize(nativeapi.Size value, [bool animate = false]) {
+    currentBounds = nativeapi.Rectangle(
+      x: currentBounds.x,
+      y: currentBounds.y,
+      width: value.width,
+      height: value.height,
+    );
+  }
+
   // Simulates a platform without native bounds animation (Windows/Linux).
   final List<nativeapi.Rectangle> animateRequests = [];
 
@@ -58,21 +78,24 @@ void main() {
     );
   });
 
-  test('partial updates still read the omitted dimensions', () async {
-    await windowManager.setBounds(null, position: const Offset(25, 35));
-    expect(native.boundsReads, 1);
-    expect(
-      native.currentBounds,
-      const nativeapi.Rectangle(x: 25, y: 35, width: 300, height: 200),
-    );
+  test(
+    'partial updates write only the requested component without reading bounds',
+    () async {
+      await windowManager.setBounds(null, position: const Offset(25, 35));
+      expect(native.boundsReads, 0);
+      expect(
+        native.currentBounds,
+        const nativeapi.Rectangle(x: 25, y: 35, width: 300, height: 200),
+      );
 
-    await windowManager.setBounds(null, size: const Size(640, 480));
-    expect(native.boundsReads, 2);
-    expect(
-      native.currentBounds,
-      const nativeapi.Rectangle(x: 25, y: 35, width: 640, height: 480),
-    );
-  });
+      await windowManager.setBounds(null, size: const Size(640, 480));
+      expect(native.boundsReads, 0);
+      expect(
+        native.currentBounds,
+        const nativeapi.Rectangle(x: 25, y: 35, width: 640, height: 480),
+      );
+    },
+  );
 
   test('full bounds win over position and size', () async {
     await windowManager.setBounds(
