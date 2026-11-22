@@ -831,10 +831,10 @@ class WindowManager {
       case nativeapi.WindowMovedEvent():
         _emit(kWindowEventMove);
         _emit(kWindowEventMoved);
-      case nativeapi.WindowCreatedEvent():
-      case nativeapi.WindowClosedEvent():
-      case nativeapi.WindowPropertyChangedEvent():
-      case nativeapi.WindowOcclusionChangedEvent():
+      // Created, closed, property and occlusion changes have no 0.5.x
+      // counterpart. A default rather than a list keeps this switch compiling
+      // when a nativeapi 0.5.x release adds a WindowEvent subclass.
+      default:
         break;
     }
   }
