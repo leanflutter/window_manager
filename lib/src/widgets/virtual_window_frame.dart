@@ -26,6 +26,9 @@ class VirtualWindowFrame extends StatefulWidget {
 }
 
 class _VirtualWindowFrameState extends State<VirtualWindowFrame> {
+  // Where [_listenerId] is registered: the given window, or null for the
+  // process-wide window manager when the frame follows the current window.
+  nativeapi.Window? _subscribedWindow;
   nativeapi.ListenerId? _listenerId;
   bool _isFocused = true;
   bool _isMaximized = false;
@@ -34,38 +37,65 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame> {
   @override
   void initState() {
     super.initState();
-    _readState();
-    _listenerId = tryNative(
-      () => nativeapi.WindowManager.instance.addListener((event) {
-        switch (event) {
-          case nativeapi.WindowFocusedEvent():
-          case nativeapi.WindowBlurredEvent():
-          case nativeapi.WindowMaximizedEvent():
-          case nativeapi.WindowRestoredEvent():
-          case nativeapi.WindowResizedEvent():
-          case nativeapi.WindowEnteredFullScreenEvent():
-          case nativeapi.WindowExitedFullScreenEvent():
-            _readState();
-          default:
-            break;
-        }
-      }),
-    );
+    _subscribe();
+    _readState(notify: false);
   }
 
   @override
   void didUpdateWidget(covariant VirtualWindowFrame oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.window != widget.window) _readState();
+    if (oldWidget.window != widget.window) {
+      _unsubscribe();
+      _subscribe();
+      _readState(notify: false);
+    }
   }
 
   @override
   void dispose() {
-    final listenerId = _listenerId;
-    if (listenerId != null) {
-      nativeapi.WindowManager.instance.removeListener(listenerId);
-    }
+    _unsubscribe();
     super.dispose();
+  }
+
+  // A frame given its window hears only that window's events, so resizing or
+  // focusing another window of a multi-window app does not make every frame
+  // query its own window. Without a window it keeps following the current one.
+  void _subscribe() {
+    final window = widget.window;
+    _subscribedWindow = window;
+    _listenerId = tryNative(
+      () => window != null
+          ? window.addListener(_onWindowEvent)
+          : nativeapi.WindowManager.instance.addListener(_onWindowEvent),
+    );
+  }
+
+  void _unsubscribe() {
+    final window = _subscribedWindow;
+    final listenerId = _listenerId;
+    _subscribedWindow = null;
+    _listenerId = null;
+    if (listenerId == null) return;
+    tryNative(
+      () => window != null
+          ? window.removeListener(listenerId)
+          : nativeapi.WindowManager.instance.removeListener(listenerId),
+    );
+  }
+
+  void _onWindowEvent(nativeapi.WindowEvent event) {
+    switch (event) {
+      case nativeapi.WindowFocusedEvent():
+      case nativeapi.WindowBlurredEvent():
+      case nativeapi.WindowMaximizedEvent():
+      case nativeapi.WindowRestoredEvent():
+      case nativeapi.WindowResizedEvent():
+      case nativeapi.WindowEnteredFullScreenEvent():
+      case nativeapi.WindowExitedFullScreenEvent():
+        _readState();
+      default:
+        break;
+    }
   }
 
   nativeapi.Window? get _window =>
@@ -74,7 +104,9 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame> {
         () => nativeapi.WindowManager.instance.getCurrent(),
       );
 
-  void _readState() {
+  // [notify] is false while the framework is about to build anyway, as in
+  // initState, where setState is not allowed.
+  void _readState({bool notify = true}) {
     final window = _window;
     if (window == null) return;
     final isFocused = window.isFocused;
@@ -83,6 +115,12 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame> {
     if (isFocused == _isFocused &&
         isMaximized == _isMaximized &&
         isFullScreen == _isFullScreen) {
+      return;
+    }
+    if (!notify) {
+      _isFocused = isFocused;
+      _isMaximized = isMaximized;
+      _isFullScreen = isFullScreen;
       return;
     }
     if (!mounted) return;
