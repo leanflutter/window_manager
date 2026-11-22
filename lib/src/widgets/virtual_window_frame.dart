@@ -89,7 +89,6 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame> {
       case nativeapi.WindowBlurredEvent():
       case nativeapi.WindowMaximizedEvent():
       case nativeapi.WindowRestoredEvent():
-      case nativeapi.WindowResizedEvent():
       case nativeapi.WindowEnteredFullScreenEvent():
       case nativeapi.WindowExitedFullScreenEvent():
         _readState();

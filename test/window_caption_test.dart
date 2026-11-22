@@ -187,6 +187,14 @@ void main() {
     await b.emit(const WindowMaximizedEvent(windowId: 2));
     expect(b.stateReads, readsOfB + 3);
 
+    // Ordinary resizes do not change focus, maximize or full-screen state, so
+    // they must not trigger synchronous FFI reads while the user drags an edge.
+    final readsAfterMaximize = b.stateReads;
+    await b.emit(
+      WindowResizedEvent(windowId: 2, newSize: const Size(640, 480).toNative()),
+    );
+    expect(b.stateReads, readsAfterMaximize);
+
     await tester.pumpWidget(const SizedBox.shrink());
     expect(b.listenerCount, 0);
   });

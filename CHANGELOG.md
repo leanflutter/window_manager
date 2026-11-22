@@ -1,5 +1,8 @@
 ## Unreleased
 
+* Stop querying window focus/maximize/fullscreen state on ordinary resize events
+  in `VirtualWindowFrame`, and coalesce geometry-only refreshes in the example
+  controller (#596).
 * Avoid overwriting pending window geometry in legacy `setPosition`, `setBounds`,
   and `waitUntilReadyToShow` when updating only position or size, and compute
   centered startup placement from `options.size` directly

@@ -44,8 +44,15 @@ class WindowController extends ChangeNotifier with WindowListener {
   String lastEvent = 'no event yet';
   final List<String> log = <String>[];
 
+  bool _disposed = false;
+  bool _isRefreshing = false;
+  bool _refreshPending = false;
+  bool _isRefreshingBounds = false;
+  bool _boundsRefreshPending = false;
+
   @override
   void dispose() {
+    _disposed = true;
     windowManager.removeListener(this);
     super.dispose();
   }
@@ -55,26 +62,55 @@ class WindowController extends ChangeNotifier with WindowListener {
   // ---------------------------------------------------------------------------
 
   Future<void> refresh() async {
-    bounds = await windowManager.getBounds();
-    titleBarHeight = await windowManager.getTitleBarHeight();
-    isVisible = await windowManager.isVisible();
-    isFocused = await windowManager.isFocused();
-    isMaximized = await windowManager.isMaximized();
-    isMinimized = await windowManager.isMinimized();
-    isFullScreen = await windowManager.isFullScreen();
-    isResizable = await windowManager.isResizable();
-    isMovable = await windowManager.isMovable();
-    isMinimizable = await windowManager.isMinimizable();
-    isMaximizable = await windowManager.isMaximizable();
-    isClosable = await windowManager.isClosable();
-    isAlwaysOnTop = await windowManager.isAlwaysOnTop();
-    isAlwaysOnBottom = await windowManager.isAlwaysOnBottom();
-    isSkipTaskbar = await windowManager.isSkipTaskbar();
-    hasShadow = await windowManager.hasShadow();
-    opacity = await windowManager.getOpacity();
-    title = await windowManager.getTitle();
-    isPreventClose = await windowManager.isPreventClose();
-    notifyListeners();
+    if (_isRefreshing) {
+      _refreshPending = true;
+      return;
+    }
+    _isRefreshing = true;
+    try {
+      do {
+        _refreshPending = false;
+        bounds = await windowManager.getBounds();
+        titleBarHeight = await windowManager.getTitleBarHeight();
+        isVisible = await windowManager.isVisible();
+        isFocused = await windowManager.isFocused();
+        isMaximized = await windowManager.isMaximized();
+        isMinimized = await windowManager.isMinimized();
+        isFullScreen = await windowManager.isFullScreen();
+        isResizable = await windowManager.isResizable();
+        isMovable = await windowManager.isMovable();
+        isMinimizable = await windowManager.isMinimizable();
+        isMaximizable = await windowManager.isMaximizable();
+        isClosable = await windowManager.isClosable();
+        isAlwaysOnTop = await windowManager.isAlwaysOnTop();
+        isAlwaysOnBottom = await windowManager.isAlwaysOnBottom();
+        isSkipTaskbar = await windowManager.isSkipTaskbar();
+        hasShadow = await windowManager.hasShadow();
+        opacity = await windowManager.getOpacity();
+        title = await windowManager.getTitle();
+        isPreventClose = await windowManager.isPreventClose();
+        if (!_disposed) notifyListeners();
+      } while (_refreshPending && !_disposed);
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+
+  Future<void> _refreshBounds() async {
+    if (_isRefreshingBounds) {
+      _boundsRefreshPending = true;
+      return;
+    }
+    _isRefreshingBounds = true;
+    try {
+      do {
+        _boundsRefreshPending = false;
+        bounds = await windowManager.getBounds();
+        if (!_disposed) notifyListeners();
+      } while (_boundsRefreshPending && !_disposed);
+    } finally {
+      _isRefreshingBounds = false;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -289,8 +325,20 @@ class WindowController extends ChangeNotifier with WindowListener {
 
   @override
   void onWindowEvent(String eventName) {
-    record('onWindowEvent  $eventName');
-    refresh();
+    _appendLog('onWindowEvent  $eventName');
+    // Legacy events always pair resize+resized and move+moved synchronously.
+    // Reading only bounds once per geometry event avoids hammering all 19
+    // window getters and rebuilding the full tree repeatedly while dragging.
+    switch (eventName) {
+      case kWindowEventResize:
+      case kWindowEventMove:
+        return;
+      case kWindowEventResized:
+      case kWindowEventMoved:
+        _refreshBounds();
+      default:
+        refresh();
+    }
   }
 
   @override
@@ -301,11 +349,15 @@ class WindowController extends ChangeNotifier with WindowListener {
     windowManager.destroy();
   }
 
-  void record(String event) {
+  void _appendLog(String event) {
     lastEvent = event;
     log.insert(0, event);
     if (log.length > 40) log.removeLast();
-    notifyListeners();
+  }
+
+  void record(String event) {
+    _appendLog(event);
+    if (!_disposed) notifyListeners();
   }
 
   void clearLog() {
