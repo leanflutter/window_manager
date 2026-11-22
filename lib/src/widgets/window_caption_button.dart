@@ -44,7 +44,8 @@ class _IconChromeMinimizePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return oldDelegate is! _IconChromeMinimizePainter ||
+        oldDelegate.color != color;
   }
 }
 
@@ -109,7 +110,8 @@ class _IconChromeMaximizePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return oldDelegate is! _IconChromeMaximizePainter ||
+        oldDelegate.color != color;
   }
 }
 
@@ -197,7 +199,8 @@ class _IconChromeUnmaximizePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return oldDelegate is! _IconChromeUnmaximizePainter ||
+        oldDelegate.color != color;
   }
 }
 
@@ -251,7 +254,8 @@ class _IconChromeClosePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return oldDelegate is! _IconChromeClosePainter ||
+        oldDelegate.color != color;
   }
 }
 
@@ -328,7 +332,7 @@ class WindowCaptionButton extends StatefulWidget {
          normal: Colors.white,
          hovered: Colors.white,
          pressed: Colors.white.withValues(alpha: 0.786),
-         disabled: Colors.black.withValues(alpha: 0.3628),
+         disabled: Colors.white.withValues(alpha: 0.3628),
        );
 
   final Brightness? brightness;
@@ -356,7 +360,7 @@ class WindowCaptionButton extends StatefulWidget {
     normal: Colors.white,
     hovered: Colors.white,
     pressed: Colors.white.withValues(alpha: 0.786),
-    disabled: Colors.black.withValues(alpha: 0.3628),
+    disabled: Colors.white.withValues(alpha: 0.3628),
   );
 
   _ButtonBgColorScheme get buttonBgColorScheme => brightness != Brightness.dark
@@ -373,61 +377,94 @@ class WindowCaptionButton extends StatefulWidget {
 }
 
 class _WindowCaptionButtonState extends State<WindowCaptionButton> {
+  // Whether a mouse pointer is over the button. Tracked even while the button
+  // is disabled so that re-enabling it under a resting pointer shows the hover
+  // state immediately.
   bool _isHovering = false;
   bool _isPressed = false;
 
-  void _onEntered({required bool hovered}) {
-    setState(() => _isHovering = hovered);
+  bool get _enabled => widget.onPressed != null;
+
+  void _setHovering(bool hovering) {
+    if (_isHovering == hovering) return;
+    setState(() => _isHovering = hovering);
   }
 
-  void _onActive({required bool pressed}) {
+  void _setPressed(bool pressed) {
+    if (_isPressed == pressed) return;
     setState(() => _isPressed = pressed);
   }
 
   @override
+  void didUpdateWidget(covariant WindowCaptionButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A press in progress cannot complete once the button is disabled.
+    if (!_enabled) _isPressed = false;
+  }
+
+  Widget _buildIcon(Color iconColor) {
+    final customIcon = widget.icon;
+    if (customIcon != null) {
+      // Let Icon-based custom icons follow the button's state colors.
+      return IconTheme.merge(
+        data: IconThemeData(color: iconColor, size: 16),
+        child: customIcon,
+      );
+    }
+    return WindowCaptionButtonIcon(
+      color: iconColor,
+      createPainter: (color) {
+        switch (widget.iconName) {
+          case _kIconChromeMinimize:
+            return _IconChromeMinimizePainter(color!);
+          case _kIconChromeMaximize:
+            return _IconChromeMaximizePainter(color!);
+          case _kIconChromeUnmaximize:
+            return _IconChromeUnmaximizePainter(color!);
+          case _kIconChromeClose:
+          default:
+            return _IconChromeClosePainter(color!);
+        }
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Color bgColor = widget.buttonBgColorScheme.normal;
-    Color iconColor = widget.buttonIconColorScheme.normal;
+    final enabled = _enabled;
+    final bgScheme = widget.buttonBgColorScheme;
+    final iconScheme = widget.buttonIconColorScheme;
 
-    if (_isHovering) {
-      bgColor = widget.buttonBgColorScheme.hovered;
-      iconColor = widget.buttonIconColorScheme.hovered;
-    }
-    if (_isPressed) {
-      bgColor = widget.buttonBgColorScheme.pressed;
-      iconColor = widget.buttonIconColorScheme.pressed;
+    Color bgColor = bgScheme.normal;
+    Color iconColor = iconScheme.normal;
+    if (!enabled) {
+      iconColor = iconScheme.disabled;
+    } else if (_isPressed) {
+      bgColor = bgScheme.pressed;
+      iconColor = iconScheme.pressed;
+    } else if (_isHovering) {
+      bgColor = bgScheme.hovered;
+      iconColor = iconScheme.hovered;
     }
 
-    return MouseRegion(
-      onExit: (value) => _onEntered(hovered: false),
-      onHover: (value) => _onEntered(hovered: true),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => _onActive(pressed: true),
-        onTapCancel: () => _onActive(pressed: false),
-        onTapUp: (_) => _onActive(pressed: false),
-        onTap: widget.onPressed,
-        child: Container(
-          constraints: const BoxConstraints(minWidth: 46, minHeight: 32),
-          decoration: BoxDecoration(color: bgColor),
-          child: Center(
-            child: WindowCaptionButtonIcon(
-              color: iconColor,
-              createPainter: (color) {
-                switch (widget.iconName) {
-                  case _kIconChromeMinimize:
-                    return _IconChromeMinimizePainter(color!);
-                  case _kIconChromeMaximize:
-                    return _IconChromeMaximizePainter(color!);
-                  case _kIconChromeUnmaximize:
-                    return _IconChromeUnmaximizePainter(color!);
-                  case _kIconChromeClose:
-                    return _IconChromeClosePainter(color!);
-                  default:
-                    return _IconChromeClosePainter(color!);
-                }
-              },
-            ),
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      child: MouseRegion(
+        // onEnter/onExit fire only on boundary crossings, unlike onHover which
+        // fires for every pointer movement inside the button.
+        onEnter: (_) => _setHovering(true),
+        onExit: (_) => _setHovering(false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: enabled ? (_) => _setPressed(true) : null,
+          onTapCancel: enabled ? () => _setPressed(false) : null,
+          onTapUp: enabled ? (_) => _setPressed(false) : null,
+          onTap: widget.onPressed,
+          child: Container(
+            constraints: const BoxConstraints(minWidth: 46, minHeight: 32),
+            decoration: BoxDecoration(color: bgColor),
+            child: Center(child: _buildIcon(iconColor)),
           ),
         ),
       ),
