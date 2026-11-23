@@ -1,6 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:window_manager/src/widgets/colors.dart';
 
 const _kIconChromeClose = 'icon_chrome_close';
 const _kIconChromeMaximize = 'icon_chrome_maximize';
@@ -331,26 +332,26 @@ class WindowCaptionButton extends StatefulWidget {
     this.onPressed,
   }) : iconName = _kIconChromeClose,
        _lightButtonBgColorScheme = _ButtonBgColorScheme(
-         normal: Colors.transparent,
+         normal: kTransparent,
          hovered: const Color(0xffC42B1C),
          pressed: const Color(0xffC42B1C).withValues(alpha: 0.9),
        ),
        _lightButtonIconColorScheme = _ButtonIconColorScheme(
-         normal: Colors.black.withValues(alpha: 0.8956),
-         hovered: Colors.white,
-         pressed: Colors.white.withValues(alpha: 0.7),
-         disabled: Colors.black.withValues(alpha: 0.3614),
+         normal: kBlack.withValues(alpha: 0.8956),
+         hovered: kWhite,
+         pressed: kWhite.withValues(alpha: 0.7),
+         disabled: kBlack.withValues(alpha: 0.3614),
        ),
        _darkButtonBgColorScheme = _ButtonBgColorScheme(
-         normal: Colors.transparent,
+         normal: kTransparent,
          hovered: const Color(0xffC42B1C),
          pressed: const Color(0xffC42B1C).withValues(alpha: 0.9),
        ),
        _darkButtonIconColorScheme = _ButtonIconColorScheme(
-         normal: Colors.white,
-         hovered: Colors.white,
-         pressed: Colors.white.withValues(alpha: 0.786),
-         disabled: Colors.white.withValues(alpha: 0.3628),
+         normal: kWhite,
+         hovered: kWhite,
+         pressed: kWhite.withValues(alpha: 0.786),
+         disabled: kWhite.withValues(alpha: 0.3628),
        );
 
   final Brightness? brightness;
@@ -369,26 +370,26 @@ class WindowCaptionButton extends StatefulWidget {
   final bool pressed;
 
   _ButtonBgColorScheme _lightButtonBgColorScheme = _ButtonBgColorScheme(
-    normal: Colors.transparent,
-    hovered: Colors.black.withValues(alpha: 0.0373),
-    pressed: Colors.black.withValues(alpha: 0.0241),
+    normal: kTransparent,
+    hovered: kBlack.withValues(alpha: 0.0373),
+    pressed: kBlack.withValues(alpha: 0.0241),
   );
   _ButtonIconColorScheme _lightButtonIconColorScheme = _ButtonIconColorScheme(
-    normal: Colors.black.withValues(alpha: 0.8956),
-    hovered: Colors.black.withValues(alpha: 0.8956),
-    pressed: Colors.black.withValues(alpha: 0.6063),
-    disabled: Colors.black.withValues(alpha: 0.3614),
+    normal: kBlack.withValues(alpha: 0.8956),
+    hovered: kBlack.withValues(alpha: 0.8956),
+    pressed: kBlack.withValues(alpha: 0.6063),
+    disabled: kBlack.withValues(alpha: 0.3614),
   );
   _ButtonBgColorScheme _darkButtonBgColorScheme = _ButtonBgColorScheme(
-    normal: Colors.transparent,
-    hovered: Colors.white.withValues(alpha: 0.0605),
-    pressed: Colors.white.withValues(alpha: 0.0419),
+    normal: kTransparent,
+    hovered: kWhite.withValues(alpha: 0.0605),
+    pressed: kWhite.withValues(alpha: 0.0419),
   );
   _ButtonIconColorScheme _darkButtonIconColorScheme = _ButtonIconColorScheme(
-    normal: Colors.white,
-    hovered: Colors.white,
-    pressed: Colors.white.withValues(alpha: 0.786),
-    disabled: Colors.white.withValues(alpha: 0.3628),
+    normal: kWhite,
+    hovered: kWhite,
+    pressed: kWhite.withValues(alpha: 0.786),
+    disabled: kWhite.withValues(alpha: 0.3628),
   );
 
   _ButtonBgColorScheme get buttonBgColorScheme => brightness != Brightness.dark
