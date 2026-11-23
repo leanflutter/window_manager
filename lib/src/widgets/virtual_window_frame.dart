@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:window_manager/src/widgets/colors.dart';
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart' show DragToResizeArea;
 import 'package:window_manager/src/native_guard.dart';
@@ -12,10 +13,18 @@ final _kIsWindows = !kIsWeb && Platform.isWindows;
 /// Draws the border and shadow of a frameless window, and puts native resize
 /// handles along its edges.
 class VirtualWindowFrame extends StatefulWidget {
-  const VirtualWindowFrame({super.key, required this.child, this.window});
+  const VirtualWindowFrame({
+    super.key,
+    required this.child,
+    this.window,
+    this.borderColor,
+  });
 
   /// The [child] contained by the VirtualWindowFrame.
   final Widget child;
+
+  /// The window border color. Defaults to one matching the platform brightness.
+  final Color? borderColor;
 
   /// The window the resize handles act on. When omitted, resolves the current
   /// window on interaction.
@@ -134,16 +143,20 @@ class _VirtualWindowFrameState extends State<VirtualWindowFrame> {
     final isFilling = _isMaximized || _isFullScreen;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.transparent,
+        color: kTransparent,
         border: Border.all(
-          color: Theme.of(context).dividerColor,
+          color:
+              widget.borderColor ??
+              (MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark
+                  ? kFrameBorderDark
+                  : kFrameBorderLight),
           width: isFilling ? 0 : 1,
         ),
         borderRadius: BorderRadius.circular(isFilling ? 0 : 6),
         boxShadow: <BoxShadow>[
           if (!isFilling)
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: kBlack.withValues(alpha: 0.1),
               offset: Offset(0.0, _isFocused ? 4 : 2),
               blurRadius: 6,
             ),

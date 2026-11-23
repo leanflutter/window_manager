@@ -1,4 +1,5 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:window_manager/src/widgets/colors.dart';
 import 'package:nativeapi/nativeapi.dart' as nativeapi;
 import 'package:nativeapi_flutter/nativeapi_flutter.dart'
     show DragToMoveArea, MaximizeButtonArea;
@@ -150,7 +151,7 @@ class _WindowCaptionState extends State<WindowCaption> {
             widget.backgroundColor ??
             (widget.brightness == Brightness.dark
                 ? const Color(0xff1C1C1C)
-                : Colors.transparent),
+                : kTransparent),
       ),
       child: Row(
         children: [
@@ -166,8 +167,8 @@ class _WindowCaptionState extends State<WindowCaption> {
                       child: DefaultTextStyle(
                         style: TextStyle(
                           color: widget.brightness == Brightness.light
-                              ? Colors.black.withValues(alpha: 0.8956)
-                              : Colors.white,
+                              ? kBlack.withValues(alpha: 0.8956)
+                              : kWhite,
                           fontSize: 14,
                         ),
                         child: widget.title ?? Container(),
